@@ -1,0 +1,13 @@
+{
+	"env": [
+        {
+            "MATLIB": "G:/Git/MatLib"
+        },
+        {
+            "HOUDINI_OTLSCAN_PATH": "$MATLIB/otls"
+        }
+	],
+	"path": [
+        "$MATLIB"
+    ]
+}

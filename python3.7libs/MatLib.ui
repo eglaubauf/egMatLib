@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1119</width>
+    <height>836</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>500</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="hlayout_center">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
+      <item>
+       <widget class="QListView" name="list_treeview">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="vlayout_right">
+        <item>
+         <widget class="QLineEdit" name="line_filter">
+          <property name="placeholderText">
+           <string>Filter</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listw_matview">
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="resizeMode">
+           <enum>QListView::Adjust</enum>
+          </property>
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="gridSize">
+           <size>
+            <width>200</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="hlayout_edit">
+          <item>
+           <widget class="QPushButton" name="btn_delete">
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_import">
+            <property name="text">
+             <string>Import</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_update">
+            <property name="text">
+             <string>Update</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1119</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="title">
+     <string>Library</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="action_openLibrary"/>
+    <addaction name="action_updateAll"/>
+    <addaction name="action_setDefault"/>
+    <addaction name="separator"/>
+    <addaction name="action_prefs"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_HIP">
+   <property name="text">
+    <string>$HIP</string>
+   </property>
+  </action>
+  <action name="action_HOME">
+   <property name="text">
+    <string>$HOME</string>
+   </property>
+  </action>
+  <action name="actionCreate_Thumbs_for_Directory">
+   <property name="text">
+    <string>Recursively Create Thumbs for this Folder (slow)</string>
+   </property>
+  </action>
+  <action name="actionRefresh_Current_Dir">
+   <property name="text">
+    <string>Recreate Thumbs for this Folder</string>
+   </property>
+  </action>
+  <action name="actionClear_Thumb_Database">
+   <property name="text">
+    <string>Clear All Materials</string>
+   </property>
+  </action>
+  <action name="action50">
+   <property name="text">
+    <string>50</string>
+   </property>
+  </action>
+  <action name="actionAddFavourite">
+   <property name="text">
+    <string>Add Current Folder to Favourites</string>
+   </property>
+  </action>
+  <action name="actionStartup">
+   <property name="text">
+    <string>Set Current Library as Default</string>
+   </property>
+  </action>
+  <action name="actionRemFavourite">
+   <property name="text">
+    <string>Remove Current Folder from Favourites</string>
+   </property>
+  </action>
+  <action name="action_updateAll">
+   <property name="text">
+    <string>Update All Materials</string>
+   </property>
+  </action>
+  <action name="action_setDefault">
+   <property name="text">
+    <string>Set Current Library as Default</string>
+   </property>
+  </action>
+  <action name="action_openLibrary">
+   <property name="text">
+    <string>Open Library</string>
+   </property>
+  </action>
+  <action name="action_prefs">
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
