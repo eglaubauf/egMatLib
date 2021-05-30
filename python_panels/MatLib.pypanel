@@ -7,13 +7,14 @@
  in a single file. -->
   <interface name="MatLib" label="MatLib" icon="MISC_python" showNetworkNavigationBar="false" help_url="">
     <script><![CDATA[import sys
-import importlib    
-      
-def createInterface():             
-    import egMatLib            
-    importlib.reload(egMatLib)     
-    return egMatLib.egMatLibPanel()               
-                      ]]></script>
+import importlib      
+
+def createInterface():
+    import egMatLib
+    importlib.reload(egMatLib)
+    return egMatLib.egMatLibPanel() 
+    
+     ]]></script>
     <includeInPaneTabMenu menu_position="99" create_separator="true"/>
     <includeInToolbarMenu menu_position="415" create_separator="false"/>
     <help><![CDATA[]]></help>

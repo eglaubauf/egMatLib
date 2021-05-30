@@ -20,8 +20,11 @@ class egMatLibPanel(QWidget):
         # Config
         self.thumbSize = 150
         self.extension = ".rsmat"
-        self.img_extension = ".png"
+        self.img_extension = ".png"  # TODO: Make EXRs work at some point, needs convertion for PixMap to 8 Bit
         self.lib = os.path.dirname("G:/Git/egMatLib/lib/")
+        self.done_file = "/done.txt"
+
+        self.create_default_icon()
 
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
@@ -57,12 +60,11 @@ class egMatLibPanel(QWidget):
 
         self.setLayout(mainLayout)
         self.create_default_icon()
-        self.loadMaterials()
+        self.updateLib()
 
 
-    def loadMaterials(self):
+    def updateLib(self):
         # TODO: Load from Settings.json
-
         self.files = []
         for f in os.listdir(self.lib):
             curr = os.path.join(self.lib,f)
@@ -119,9 +121,10 @@ class egMatLibPanel(QWidget):
         item = self.get_selected_material_from_lib()
         if not item:
             return
-
         builder = self.import_material()
         self.save_node(builder)
+        builder.destroy()
+
         return
 
     def set_category(self):
@@ -143,7 +146,7 @@ class egMatLibPanel(QWidget):
         if os.path.exists(file_path + self.img_extension ):
             os.remove(file_path + self.img_extension)
 
-        self.loadMaterials()
+        self.updateLib()
         hou.ui.displayMessage("Material deleted")
         return
 
@@ -178,7 +181,6 @@ class egMatLibPanel(QWidget):
             hou.ui.displayMessage("No Material selected")
             return None
         return item
-
 
     #  Saves a Node to the Library
     def save_material(self):
@@ -220,28 +222,33 @@ class egMatLibPanel(QWidget):
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
+
+        # Make sure there is no done file
+        if os.path.exists(self.lib + self.done_file):
+            os.remove(self.lib + self.done_file)
+
+        #Render Frame
         thumb.parm("render").pressButton()
 
         # Wait until Render is finished
         self.waitForRender(path)
-        # while not imghdr.what(path):
-        #     self.waitForRender(path)  # Check if file is valid
-
-        # CleanUp
-        thumb.destroy()
 
         # Reload Library
-        self.loadMaterials()
+        self.updateLib()
 
         # OK, bye
         msg = "Material " + name + " created"
         hou.ui.displayMessage(msg)
+
+        # CleanUp
+        thumb.destroy()
         return
 
     def waitForRender(self, path):
         mustend = time.time() + 60.0
         while time.time() < mustend:
-            if os.path.exists(path):
-               return True
+            if os.path.exists(self.lib + self.done_file):
+                os.remove(self.lib + self.done_file)
+                return True
             time.sleep(0.5)
         return False
