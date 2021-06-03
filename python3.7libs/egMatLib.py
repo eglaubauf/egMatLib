@@ -3,6 +3,8 @@ import os
 import hou
 import time
 import imghdr
+import json
+import uuid
 
 # PySide2
 from PySide2.QtGui import *
@@ -15,20 +17,82 @@ class egMatLibPanel(QWidget):
     def __init__(self):
         super(egMatLibPanel, self).__init__()
         self.load_settings()
-        scriptpath = os.path.dirname(os.path.realpath(__file__))
+        self.script_path = os.path.dirname(os.path.realpath(__file__))
+
+        #Initialize
+        self.lib = "G:/Git/egMatLib/lib/"
 
         # Config
-        self.thumbSize = 150
-        self.extension = ".rsmat"
-        self.img_extension = ".png"  # TODO: Make EXRs work at some point, needs convertion for PixMap to 8 Bit
-        self.lib = os.path.dirname("G:/Git/egMatLib/lib/")
-        self.done_file = "/done.txt"
+        self.config = self.load_library()
+        #Load Settings
+        self.thumbSize = self.config["settings"][0]["thumbsize"]
+        self.extension = self.config["settings"][0]["extension"]
+        self.img_extension = self.config["settings"][0]["img_extension"]  # TODO: Make EXRs work at some point, needs convertion for PixMap to 8 Bit
+        self.done_file = self.config["settings"][0]["done_file"]
 
-        self.create_default_icon()
+        self.materials = self.config["materials"]
+        self.categories = self.config["categories"]
+        self.tags = self.config["tags"]
+        self.selected_cat = None
+
+        self.createView()
+        self.update_view()
+
+    def add_category(self):
+        pass
+
+    def remove_category(self):
+        pass
+
+    def add_tag(self):
+        pass
+
+    def remove_tag(self):
+        pass
+
+    def removeMaterial(self):
+        #self.config['materials'].append(mat)
+        pass
+
+    def addMaterial(self):
+        #self.config['materials'].append(mat)
+        pass
+
+    def filter_view(self):
+        pass
+
+    def load_settings(self):
+        pass
+
+    def filter_materials():
+        pass
+
+    def update_missing_materials(self):
+        pass
+
+    def update_all_materials(self):
+        pass
+
+    def load_library(self):
+        with open(self.lib+("/library.json")) as lib_json:
+            return json.load(lib_json)
+
+    def save_library(self):
+        # Update actual config data
+        self.config["materials"] = self.materials
+        self.config["categories"] = self.categories
+        self.config["tags"] = self.tags
+
+        with open(self.lib+("/library.json"), "w") as lib_json:
+            return json.dump(self.config, lib_json, indent=4)
+
+    #### VIEW #####
+
+    def createView(self):
 
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
-        file = QFile(scriptpath + '/MatLib.ui')
+        file = QFile(self.script_path + '/MatLib.ui')
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -54,46 +118,93 @@ class egMatLibPanel(QWidget):
         self.thumblist.setIconSize(QSize(self.thumbSize, self.thumbSize))
         self.thumblist.doubleClicked.connect(self.import_material)
 
+        self.cat_list = self.ui.findChild(QListWidget, 'list_treeview')
+        self.cat_list.clicked.connect(self.update_selected_cat)
+
+
+        # Default icon for rendering
+        self.create_default_icon()
+
         # set main layout and attach to widget
         mainLayout = QVBoxLayout()
         mainLayout.addWidget(self.ui)
 
+        self.update_cat_view()
         self.setLayout(mainLayout)
-        self.create_default_icon()
-        self.updateLib()
 
 
-    def updateLib(self):
-        # TODO: Load from Settings.json
-        self.files = []
-        for f in os.listdir(self.lib):
-            curr = os.path.join(self.lib,f)
-            if os.path.isfile(curr):
-                curr = self.lib + '/' + f
-                if curr.endswith(self.extension):
-                    self.files.append(curr)
 
-        #  Now get all images for our Materials and List add them to the thumblist
-        #  Dirty Empty for now
-        self.thumblist.clear()  # TODO: Make nice and fast in the future by only changing new ones
-        for f in self.files:
-            img = f.replace(self.extension, self.img_extension)
-
-            # Check if Thumb Exists and attach
-            if os.path.isfile(img):
-                pixmap = QPixmap.fromImage(QImage(img)).scaled(self.thumbSize, self.thumbSize, aspectMode=Qt.KeepAspectRatio)
-                icon = QIcon(pixmap)
+    def update_selected_cat(self):
+        self.selected_cat = None
+        items = self.cat_list.selectedItems()
+        # Only one item selected
+        if len(items) == 1:
+            if items[0].text() == "All":
+                self.selected_cat = None
+                self.update_view()
+                return
             else:
-                icon = self.default_icon
+                self.selected_cat = items[0].text()
+                self.update_view()
+                return
+        # Multiple items selected
+        for i in items:
+            if i.text() == "All":
+                self.selected_cat = None
+                self.update_view()
+                return
+            self.selected_cat.append(i.text())
+        self.update_view()
+        return
 
-            # Create entry in Thumblist
-            img_name = img.rsplit('/', 1)[1][:-4]
-            item = QListWidgetItem(icon, img_name)
-            #item.addRoleName()
-            #item.setData(Qt.UserRole, f)  # add Filepath to Item
-            item.setTextAlignment(Qt.AlignHCenter | Qt.AlignBottom)
-            self.thumblist.addItem(item)
-            self.thumblist.sortItems()
+
+    def update_cat_view(self):
+
+        self.cat_list.clear()
+        for cat in self.categories:
+            item = QListWidgetItem(cat)
+            self.cat_list.addItem(item)
+
+        self.thumblist.sortItems()
+
+        return
+
+
+    def filter_view_category(self):
+        # Filter Thumbnail View
+        draw_mats = []
+        for mat in self.materials:
+            if self.selected_cat in mat['categories']:
+                draw_mats.append(mat)
+                return draw_mats
+        if not self.selected_cat:
+            return self.materials
+        return None
+
+
+    def update_view(self):
+        # Cleanup UI
+        self.thumblist.clear()
+
+        draw_mats = self.filter_view_category() # Filter View by Category
+        if draw_mats:
+            for mat in draw_mats:
+                img = self.lib + mat["name"] + self.img_extension
+
+                # Check if Thumb Exists and attach
+                if os.path.isfile(img):
+                    pixmap = QPixmap.fromImage(QImage(img)).scaled(self.thumbSize, self.thumbSize, aspectMode=Qt.KeepAspectRatio)
+                    icon = QIcon(pixmap)
+                else:
+                    icon = self.default_icon
+
+                # Create entry in Thumblist
+                img_name = img.rsplit('/', 1)[1][:-4]
+                item = QListWidgetItem(icon, img_name)
+                item.setTextAlignment(Qt.AlignHCenter | Qt.AlignBottom)
+                item.setData(Qt.UserRole, mat["id"])  # Store ID with Thumb
+                self.thumblist.addItem(item)
+                self.thumblist.sortItems()
 
 
     def create_default_icon(self):
@@ -103,53 +214,41 @@ class egMatLibPanel(QWidget):
         pixmap = QPixmap.fromImage(default_img).scaled(self.thumbSize, self.thumbSize, aspectMode=Qt.KeepAspectRatio)
         self.default_icon = QIcon(pixmap)
 
-    #  Load Settings from Disk
-    def load_settings(self):
-        pass
-
-    def filter_materials():
-        pass
-
-    def update_missing_materials(self):
-        pass
-
-    def update_all_materials(self):
-        pass
-
     def update_single_material(self):
-
         item = self.get_selected_material_from_lib()
         if not item:
             return
         builder = self.import_material()
         self.save_node(builder)
         builder.destroy()
-
         return
 
-    def set_category(self):
-        pass
-
-
     def delete_material(self):
-
-        if not hou.ui.displayConfirmation('This will delete the selected Material from Disk. Are you sure?'):
-            return
+        # if not hou.ui.displayConfirmation('This will delete the selected Material from Disk. Are you sure?'):
+        #     return
 
         item = self.get_selected_material_from_lib()
         if not item:
             return
+        id = item.data(Qt.UserRole)
 
-        file_path = self.lib + "/" + item.text()
-        if os.path.exists(file_path + self.extension ):
-            os.remove(file_path + self.extension)
-        if os.path.exists(file_path + self.img_extension ):
-            os.remove(file_path + self.img_extension)
+        for mat in self.materials:
+            if mat["id"] == id:
+                # Remove files from Library
+                self.materials.remove(mat)
+                self.save_library()
 
-        self.updateLib()
-        hou.ui.displayMessage("Material deleted")
+                # Remove Files from Disk
+                file_path = self.lib + item.text()
+                if os.path.exists(file_path + self.extension ):
+                    os.remove(file_path + self.extension)
+                if os.path.exists(file_path + self.img_extension ):
+                    os.remove(file_path + self.img_extension)
+
+                # Update View
+                self.update_view()
+
         return
-
 
     #  Import Material to Scene
     def import_material(self):
@@ -159,7 +258,7 @@ class egMatLibPanel(QWidget):
             hou.ui.displayMessage("No Material selected")
             return
 
-        file_name = self.lib + "/" + item.text() + self.extension
+        file_name = self.lib + item.text() + self.extension
 
         # CreateBuilder
         builder = hou.node('/mat').createNode('redshift_vopnet')
@@ -174,7 +273,6 @@ class egMatLibPanel(QWidget):
         builder.moveToGoodPosition()
         return builder
 
-
     def get_selected_material_from_lib(self):
         item = self.thumblist.selectedItems()[0]
         if not item:
@@ -182,40 +280,75 @@ class egMatLibPanel(QWidget):
             return None
         return item
 
-    #  Saves a Node to the Library
-    def save_material(self):
+    # Check if Category already exits in Library
+    def check_add_category(self, cat):
+        if not cat in self.categories:
+            self.categories.append(cat)
+        return
 
+    # Check if Tags already exits in Library
+    def check_add_tags(self, tag):
+        if not tag in self.tags:
+            self.tags.append(tag)
+        return
+
+    #  Saves a Material to the Library
+    def save_material(self):
+        # Get Selected from Network View
         sel = hou.selectedNodes()
         # Check selection
         if not sel:
             hou.ui.displayMessage('No Material selected')
             return
-        self.save_node(sel[0])
+        # Get Category from User
+        choice, cat = hou.ui.readInput("Add Object to Categories (Comma Separated")
+        if choice:
+            return
+        self.check_add_category(cat)
+
+        # Get Category from User
+        choice, tag = hou.ui.readInput("Add Object to Tags (Comma Separated)")
+        if choice:
+            return
+        self.check_add_tags(tag)
+
+        # Add Fav Yes/No
+        fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
+
+        # Add Material to disk
+        if self.save_node(sel[0]):
+            # Format
+            id = uuid.uuid1().time
+            name = sel[0].name()
+            cats = cat.split(",")
+            tags = tag.split(",")
+
+            material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav}
+            self.materials.append(material)
+            self.save_library()
+            self.update_view()
         return
 
-    #  Saves a Node to the Library
+
+    #  Saves Image & node-tree to disk
     def save_node(self, node):
-
         # Check against NodeType
-
         if node.type().name() != "redshift_vopnet":
             hou.ui.displayMessage('Selected Node is not a Material Builder')
-            return
+            return False
 
         # Filepath where to save stuff
-        name = node.name()
-        file_name = self.lib + "/" + name + self.extension
+        file_name = self.lib + node.name() + self.extension
 
         children = node.children()
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
         thumb = hou.node("/obj").createNode("eg_thumbnail")
-
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.lib + '/' + name + self.img_extension
+        path = self.lib + node.name() + self.img_extension
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path)
         exclude = "* ^" + thumb.name()
@@ -227,22 +360,16 @@ class egMatLibPanel(QWidget):
         if os.path.exists(self.lib + self.done_file):
             os.remove(self.lib + self.done_file)
 
-        #Render Frame
+        # Render Frame
         thumb.parm("render").pressButton()
 
         # Wait until Render is finished
         self.waitForRender(path)
 
-        # Reload Library
-        self.updateLib()
-
-        # OK, bye
-        msg = "Material " + name + " created"
-        hou.ui.displayMessage(msg)
-
         # CleanUp
         thumb.destroy()
-        return
+
+        return True
 
     def waitForRender(self, path):
         mustend = time.time() + 60.0
