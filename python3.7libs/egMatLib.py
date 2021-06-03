@@ -16,14 +16,14 @@ from PySide2 import QtUiTools
 class egMatLibPanel(QWidget):
     def __init__(self):
         super(egMatLibPanel, self).__init__()
-        self.load_settings()
         self.script_path = os.path.dirname(os.path.realpath(__file__))
-
         #Initialize
-        self.lib = "G:/Git/egMatLib/lib/"
+        self.lib = self.script_path[:-14] + "/lib/"
+        self.lib = self.lib.replace("\\", "/")
 
         # Config
         self.config = self.load_library()
+
         #Load Settings
         self.thumbSize = self.config["settings"][0]["thumbsize"]
         self.extension = self.config["settings"][0]["extension"]
@@ -34,59 +34,16 @@ class egMatLibPanel(QWidget):
         self.categories = self.config["categories"]
         self.tags = self.config["tags"]
         self.selected_cat = None
+        self.filter = ""
+        self.draw_mats = self.materials
 
         self.createView()
         self.update_view()
 
-    def add_category(self):
-        pass
 
-    def remove_category(self):
-        pass
-
-    def add_tag(self):
-        pass
-
-    def remove_tag(self):
-        pass
-
-    def removeMaterial(self):
-        #self.config['materials'].append(mat)
-        pass
-
-    def addMaterial(self):
-        #self.config['materials'].append(mat)
-        pass
-
-    def filter_view(self):
-        pass
-
-    def load_settings(self):
-        pass
-
-    def filter_materials():
-        pass
-
-    def update_missing_materials(self):
-        pass
-
-    def update_all_materials(self):
-        pass
-
-    def load_library(self):
-        with open(self.lib+("/library.json")) as lib_json:
-            return json.load(lib_json)
-
-    def save_library(self):
-        # Update actual config data
-        self.config["materials"] = self.materials
-        self.config["categories"] = self.categories
-        self.config["tags"] = self.tags
-
-        with open(self.lib+("/library.json"), "w") as lib_json:
-            return json.dump(self.config, lib_json, indent=4)
-
-    #### VIEW #####
+    ###################################
+    ########### VIEW STUFF ############
+    ###################################
 
     def createView(self):
 
@@ -118,9 +75,22 @@ class egMatLibPanel(QWidget):
         self.thumblist.setIconSize(QSize(self.thumbSize, self.thumbSize))
         self.thumblist.doubleClicked.connect(self.import_material)
 
-        self.cat_list = self.ui.findChild(QListWidget, 'list_treeview')
+        # Category UI
+        self.cat_list = self.ui.findChild(QListWidget, 'listw_catview')
         self.cat_list.clicked.connect(self.update_selected_cat)
 
+        self.btn_add_cat = self.ui.findChild(QPushButton, 'btn_add_cat')
+        self.btn_add_cat.clicked.connect(self.add_category_user)
+
+        self.btn_rmv_cat = self.ui.findChild(QPushButton, 'btn_rmv_cat')
+        self.btn_rmv_cat.clicked.connect(self.rmv_category_user)
+
+        # FILTER UI
+        self.line_filter = self.ui.findChild(QLineEdit, 'line_filter')
+        self.line_filter.textChanged.connect(self.filter_thumb_view_user)
+
+        # Details UI
+        self.details = self.ui.findChild(QTableWidget, 'widget_detail')
 
         # Default icon for rendering
         self.create_default_icon()
@@ -133,7 +103,71 @@ class egMatLibPanel(QWidget):
         self.setLayout(mainLayout)
 
 
+    ###################################
+    ########### JSON STUFF ############
+    ###################################
 
+    # Load Library from JSON
+    def load_library(self):
+        with open(self.lib+("/library.json")) as lib_json:
+            return json.load(lib_json)
+
+
+    # Save Library to JSON
+    def save_library(self):
+        # Update actual config data
+        self.config["materials"] = self.materials
+        self.config["categories"] = self.categories
+        self.config["tags"] = self.tags
+
+        with open(self.lib+("/library.json"), "w") as lib_json:
+            return json.dump(self.config, lib_json, indent=4)
+
+
+    ###################################
+    ########### USER STUFF ############
+    ###################################
+
+    # User Adds Category with Button
+    def add_category_user(self):
+        choice, cat = hou.ui.readInput("Please enter the new category name:")
+        if choice:
+            print("Yes")
+            return
+        self.check_add_category(cat)
+        self.save_library()
+        self.update_cat_view()
+        self.update_view()
+        return
+
+    # User Removes Category with Button
+    def rmv_category_user(self):
+        rmv_item = self.cat_list.selectedItems()
+        self.categories.remove(rmv_item[0].text())
+
+        #check materials against category and remove there also:
+        for mat in self.materials:
+            if rmv_item[0].text() in mat["categories"]:
+                mat["categories"].remove(rmv_item[0].text())
+
+        self.save_library()
+        self.update_cat_view()
+        self.update_view()
+        return
+
+    # Get Filter Text from User
+    def filter_thumb_view_user(self):
+        self.filter = self.line_filter.text()
+        self.update_view()
+        return
+
+    ###################################
+    ########## UPDATE VIEWS ###########
+    ###################################
+
+
+
+    # Update the Views when selection changes
     def update_selected_cat(self):
         self.selected_cat = None
         items = self.cat_list.selectedItems()
@@ -148,16 +182,17 @@ class egMatLibPanel(QWidget):
                 self.update_view()
                 return
         # Multiple items selected
-        for i in items:
-            if i.text() == "All":
-                self.selected_cat = None
-                self.update_view()
-                return
-            self.selected_cat.append(i.text())
-        self.update_view()
+        # for i in items:
+        #     if i.text() == "All":
+        #         self.selected_cat = None
+        #         self.update_view()
+        #         return
+        #     self.selected_cat.append(i.text())
+        # self.update_view()
         return
 
 
+    # Update Category View
     def update_cat_view(self):
 
         self.cat_list.clear()
@@ -170,25 +205,41 @@ class egMatLibPanel(QWidget):
         return
 
 
+    # Filter Materials in Thumblist for Category
     def filter_view_category(self):
         # Filter Thumbnail View
-        draw_mats = []
+        self.draw_mats = []
         for mat in self.materials:
             if self.selected_cat in mat['categories']:
-                draw_mats.append(mat)
-                return draw_mats
+                self.draw_mats.append(mat)
         if not self.selected_cat:
-            return self.materials
-        return None
+            self.draw_mats = self.materials
+        return
 
 
+    # Filter Materials in Thumblist for Category
+    def filter_view_filter(self):
+        # Filter Thumbnail View
+
+        if self.filter is "":
+            return
+        tmp = []
+        for mat in self.draw_mats:
+            if self.filter in mat["name"]:
+                tmp.append(mat)
+        self.draw_mats = tmp
+        return
+
+
+    # Update Thumbnail View
     def update_view(self):
         # Cleanup UI
         self.thumblist.clear()
 
-        draw_mats = self.filter_view_category() # Filter View by Category
-        if draw_mats:
-            for mat in draw_mats:
+        self.filter_view_category()  # Filter View by Category
+        self.filter_view_filter()  # Filter View by Line Filter
+        if self.draw_mats:
+            for mat in self.draw_mats:
                 img = self.lib + mat["name"] + self.img_extension
 
                 # Check if Thumb Exists and attach
@@ -207,6 +258,8 @@ class egMatLibPanel(QWidget):
                 self.thumblist.sortItems()
 
 
+
+    # Create PlaceHolder Icon in case something goes wrong
     def create_default_icon(self):
         #Generate Default Icon
         default_img = QImage(150, 150, QImage.Format_RGB16)
@@ -214,18 +267,29 @@ class egMatLibPanel(QWidget):
         pixmap = QPixmap.fromImage(default_img).scaled(self.thumbSize, self.thumbSize, aspectMode=Qt.KeepAspectRatio)
         self.default_icon = QIcon(pixmap)
 
+
+    # Rerender Selected Material
     def update_single_material(self):
         item = self.get_selected_material_from_lib()
         if not item:
             return
+
         builder = self.import_material()
         self.save_node(builder)
         builder.destroy()
         return
 
+
+
+    ###################################
+    ######### LIBRARY STUFF ###########
+    ###################################
+
+
+    # Delete Material from Library
     def delete_material(self):
-        # if not hou.ui.displayConfirmation('This will delete the selected Material from Disk. Are you sure?'):
-        #     return
+        if not hou.ui.displayConfirmation('This will delete the selected Material from Disk. Are you sure?'):
+            return
 
         item = self.get_selected_material_from_lib()
         if not item:
@@ -247,32 +311,10 @@ class egMatLibPanel(QWidget):
 
                 # Update View
                 self.update_view()
-
         return
 
-    #  Import Material to Scene
-    def import_material(self):
 
-        item = self.thumblist.selectedItems()[0]
-        if not item:
-            hou.ui.displayMessage("No Material selected")
-            return
-
-        file_name = self.lib + item.text() + self.extension
-
-        # CreateBuilder
-        builder = hou.node('/mat').createNode('redshift_vopnet')
-        builder.setName(item.text(), unique_name=True)
-
-        # Delete Default children in RS-VopNet
-        for node in builder.children():
-            node.destroy()
-        # Load File
-        builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
-        # MakeFancyPos
-        builder.moveToGoodPosition()
-        return builder
-
+    # Get the selected Material from Library
     def get_selected_material_from_lib(self):
         item = self.thumblist.selectedItems()[0]
         if not item:
@@ -280,17 +322,20 @@ class egMatLibPanel(QWidget):
             return None
         return item
 
+
     # Check if Category already exits in Library
     def check_add_category(self, cat):
         if not cat in self.categories:
             self.categories.append(cat)
         return
 
+
     # Check if Tags already exits in Library
     def check_add_tags(self, tag):
         if not tag in self.tags:
             self.tags.append(tag)
         return
+
 
     #  Saves a Material to the Library
     def save_material(self):
@@ -315,7 +360,7 @@ class egMatLibPanel(QWidget):
         # Add Fav Yes/No
         fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
 
-        # Add Material to disk
+        # Add Material to Library
         if self.save_node(sel[0]):
             # Format
             id = uuid.uuid1().time
@@ -330,7 +375,14 @@ class egMatLibPanel(QWidget):
         return
 
 
-    #  Saves Image & node-tree to disk
+
+    ###################################
+    ########### DISK STUFF ############
+    ###################################
+
+
+
+    #  Render Image & Node-tree to disk
     def save_node(self, node):
         # Check against NodeType
         if node.type().name() != "redshift_vopnet":
@@ -371,6 +423,7 @@ class egMatLibPanel(QWidget):
 
         return True
 
+    # Wait until Background Rendering is finished
     def waitForRender(self, path):
         mustend = time.time() + 60.0
         while time.time() < mustend:
@@ -379,3 +432,27 @@ class egMatLibPanel(QWidget):
                 return True
             time.sleep(0.5)
         return False
+
+
+    #  Import Material to Scene
+    def import_material(self):
+
+        item = self.thumblist.selectedItems()[0]
+        if not item:
+            hou.ui.displayMessage("No Material selected")
+            return
+
+        file_name = self.lib + item.text() + self.extension
+
+        # CreateBuilder
+        builder = hou.node('/mat').createNode('redshift_vopnet')
+        builder.setName(item.text(), unique_name=True)
+
+        # Delete Default children in RS-VopNet
+        for node in builder.children():
+            node.destroy()
+        # Load File
+        builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
+        # MakeFancyPos
+        builder.moveToGoodPosition()
+        return builder
