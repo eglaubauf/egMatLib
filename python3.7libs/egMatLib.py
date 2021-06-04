@@ -74,6 +74,8 @@ class egMatLibPanel(QWidget):
         self.thumblist = self.ui.findChild(QListWidget, 'listw_matview')
         self.thumblist.setIconSize(QSize(self.thumbSize, self.thumbSize))
         self.thumblist.doubleClicked.connect(self.import_material)
+        self.thumblist.itemPressed.connect(self.update_details_view)
+        self.thumblist.setGridSize(QSize(self.thumbSize+10, self.thumbSize+40))
 
         # Category UI
         self.cat_list = self.ui.findChild(QListWidget, 'listw_catview')
@@ -91,15 +93,22 @@ class egMatLibPanel(QWidget):
 
         # Details UI
         self.details = self.ui.findChild(QTableWidget, 'widget_detail')
+        self.details.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.details.setColumnWidth(0,120)
+        self.details.setColumnWidth(1,200)
+        #self.details.itemChanged.connect(self.listen_entry_from_detail)
+
+        #self.details.itemClicked.connect(self.listen_entry_from_detail)
 
         # Default icon for rendering
         self.create_default_icon()
 
+        self.update_cat_view()
         # set main layout and attach to widget
         mainLayout = QVBoxLayout()
         mainLayout.addWidget(self.ui)
+        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
 
-        self.update_cat_view()
         self.setLayout(mainLayout)
 
 
@@ -161,17 +170,53 @@ class egMatLibPanel(QWidget):
         self.update_view()
         return
 
+    def listen_entry_from_detail(self, item):
+        # now in entry mode
+        print("yay")
+        if self.details.itemChanged:
+            self.update_entry_from_detail(item)
+            #self.user_change_detail = False
+        return
+
+    def update_entry_from_detail(self, item):
+
+
+        pass
+
     ###################################
     ########## UPDATE VIEWS ###########
     ###################################
 
+    # Update Details view
+    def update_details_view(self, item):
+        id = item.data(Qt.UserRole)
+
+        for mat in self.materials:
+            if mat["id"] == id:
+                # set name
+                table_item = self.details.item(0,1)
+                table_item.setText(mat["name"])
+                # set name
+                table_item = self.details.item(1,1)
+                table_item.setText(", ".join(mat["categories"]))
+                # set name
+                table_item = self.details.item(2,1)
+                table_item.setText(", ".join(mat["tags"]))
+                # set name
+                table_item = self.details.item(3,1)
+                table_item.setText(str(mat["favorite"]))
+
+        #Resize
+        self.details.resizeColumnToContents(1)
+        if self.details.columnWidth(1) < 200:
+            self.details.setColumnWidth(1,200)
+        return
 
 
     # Update the Views when selection changes
     def update_selected_cat(self):
         self.selected_cat = None
         items = self.cat_list.selectedItems()
-        # Only one item selected
         if len(items) == 1:
             if items[0].text() == "All":
                 self.selected_cat = None
@@ -181,14 +226,6 @@ class egMatLibPanel(QWidget):
                 self.selected_cat = items[0].text()
                 self.update_view()
                 return
-        # Multiple items selected
-        # for i in items:
-        #     if i.text() == "All":
-        #         self.selected_cat = None
-        #         self.update_view()
-        #         return
-        #     self.selected_cat.append(i.text())
-        # self.update_view()
         return
 
 
@@ -325,15 +362,22 @@ class egMatLibPanel(QWidget):
 
     # Check if Category already exits in Library
     def check_add_category(self, cat):
-        if not cat in self.categories:
-            self.categories.append(cat)
+        cats = cat.split(",")
+        for c in cats:
+            c = c.replace(" ", "")
+            if not c in self.categories:
+                self.categories.append(c)
         return
 
 
     # Check if Tags already exits in Library
     def check_add_tags(self, tag):
-        if not tag in self.tags:
-            self.tags.append(tag)
+        tags = tag.split(",")
+        for t in tags:
+            t = t.replace(" ", "")
+            if not t in self.tags:
+                self.tags.append(t)
+
         return
 
 
@@ -366,12 +410,16 @@ class egMatLibPanel(QWidget):
             id = uuid.uuid1().time
             name = sel[0].name()
             cats = cat.split(",")
+            cats = cats.replace(" ", "")
             tags = tag.split(",")
+            tags = tags.replace(" ", "")
 
             material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav}
             self.materials.append(material)
             self.save_library()
             self.update_view()
+
+        self.update_cat_view()
         return
 
 
