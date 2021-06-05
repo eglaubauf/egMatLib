@@ -1,10 +1,10 @@
-import sys
+import imghdr
 import os
 import hou
 import time
-import imghdr
 import json
 import uuid
+import imghdr
 
 # PySide2
 from PySide2.QtGui import *
@@ -20,6 +20,8 @@ class egMatLibPanel(QWidget):
         #Initialize
         self.lib = self.script_path[:-14] + "/lib/"
         self.lib = self.lib.replace("\\", "/")
+        self.mat_dir = "mat/"
+        self.img_dir = "img/"
 
         # Config
         self.config = self.load_library()
@@ -54,6 +56,8 @@ class egMatLibPanel(QWidget):
         self.ui = loader.load(file)
         file.close()
 
+        self.active = False
+
         # Load Ui Element so self
         self.menu = self.ui.findChild(QMenuBar, 'menubar')
 
@@ -76,6 +80,7 @@ class egMatLibPanel(QWidget):
         self.thumblist.doubleClicked.connect(self.import_material)
         self.thumblist.itemPressed.connect(self.update_details_view)
         self.thumblist.setGridSize(QSize(self.thumbSize+10, self.thumbSize+40))
+        self.thumblist.setSortingEnabled(True)
 
         # Category UI
         self.cat_list = self.ui.findChild(QListWidget, 'listw_catview')
@@ -96,9 +101,11 @@ class egMatLibPanel(QWidget):
         self.details.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.details.setColumnWidth(0,120)
         self.details.setColumnWidth(1,200)
-        #self.details.itemChanged.connect(self.listen_entry_from_detail)
+        self.details.setRowHidden(4, True)
+        self.details.setRowHidden(3, True) # TODO: Implement Favs, for now just hidden
 
-        #self.details.itemClicked.connect(self.listen_entry_from_detail)
+        self.details.itemChanged.connect(self.update_entry_from_detail)
+        self.details.itemDoubleClicked.connect(self.listen_entry_from_detail)
 
         # Default icon for rendering
         self.create_default_icon()
@@ -140,8 +147,7 @@ class egMatLibPanel(QWidget):
     # User Adds Category with Button
     def add_category_user(self):
         choice, cat = hou.ui.readInput("Please enter the new category name:")
-        if choice:
-            print("Yes")
+        if choice: # Return if no
             return
         self.check_add_category(cat)
         self.save_library()
@@ -152,6 +158,11 @@ class egMatLibPanel(QWidget):
     # User Removes Category with Button
     def rmv_category_user(self):
         rmv_item = self.cat_list.selectedItems()
+        # Prevent Deletion of "All" - Category
+        if rmv_item[0].text() == "All":
+            return
+
+
         self.categories.remove(rmv_item[0].text())
 
         #check materials against category and remove there also:
@@ -172,16 +183,70 @@ class egMatLibPanel(QWidget):
 
     def listen_entry_from_detail(self, item):
         # now in entry mode
-        print("yay")
-        if self.details.itemChanged:
-            self.update_entry_from_detail(item)
-            #self.user_change_detail = False
+        self.active = True
+        self.active_item = item
         return
 
     def update_entry_from_detail(self, item):
+        if self.active and self.active_item is item:
+            curr_id = self.details.item(4,1).text()
+            if item.row() == 0:
+                #Change Name
+                mat = self.get_material_by_id(curr_id)
+                self.set_name_for_mat(mat, item.text())
+            elif item.row() == 1:
+                # Change Categories to Library
+                self.check_add_category(item.text())
+                # Update Category to active Material
+                mat = self.get_material_by_id(curr_id)
+                 # Also Update Material
+                self.set_cats_for_mat(mat, item.text())
+            elif item.row() == 2:
+                # Change Tags to Library
+                self.check_add_tags(item.text())
+                # Update Category to active Material
+                mat = self.get_material_by_id(curr_id)
+                 # Also Update Material
+                self.set_tags_for_mat(mat, item.text())
+            elif item.row() == 3:
+                #Change Fav
+                # if item.CheckState() is Qt.Checked:
+                #     item.setCheckState(Qt.Unchecked)
+                # else:
+                #     item.setCheckState(Qt.Checked)
+                pass
+            # Update All
+            self.save_library()
+            self.update_view()
+            self.update_cat_view()
 
+            self.active = False
+        return
 
-        pass
+    def get_material_by_id(self, id):
+        for mat in self.materials:
+            if int(id) == mat["id"]:
+                return mat
+        return None
+
+    def set_name_for_mat(self, mat, name):
+        mat["name"] = name
+        return
+
+    def set_cats_for_mat(self, mat, cat):
+        cats = cat.split(",")
+        for c in cats:
+            c = c.replace(" ", "")
+        mat["categories"] = cats
+        return
+
+    def set_tags_for_mat(self, mat, tag):
+        tags = tag.split(",")
+        for t in tags:
+            t = t.replace(" ", "")
+        mat["tags"] = tags
+        return
+
 
     ###################################
     ########## UPDATE VIEWS ###########
@@ -189,7 +254,8 @@ class egMatLibPanel(QWidget):
 
     # Update Details view
     def update_details_view(self, item):
-        id = item.data(Qt.UserRole)
+
+        id = self.get_id_from_thumblist(item)
 
         for mat in self.materials:
             if mat["id"] == id:
@@ -204,14 +270,23 @@ class egMatLibPanel(QWidget):
                 table_item.setText(", ".join(mat["tags"]))
                 # set name
                 table_item = self.details.item(3,1)
-                table_item.setText(str(mat["favorite"]))
+                if mat["favorite"] == 1:
+                    table_item.setCheckState(Qt.Checked)
+                else:
+                    table_item.setCheckState(Qt.Unchecked)
+                #table_item.setText(mat["favorite"]))
 
+                # set id
+                table_item = self.details.item(4,1)
+                table_item.setText(str(mat["id"]))
+                # set Renderer
+                table_item = self.details.item(5,1)
+                table_item.setText(mat["renderer"])
         #Resize
         self.details.resizeColumnToContents(1)
         if self.details.columnWidth(1) < 200:
             self.details.setColumnWidth(1,200)
         return
-
 
     # Update the Views when selection changes
     def update_selected_cat(self):
@@ -228,19 +303,21 @@ class egMatLibPanel(QWidget):
                 return
         return
 
-
     # Update Category View
     def update_cat_view(self):
-
         self.cat_list.clear()
         for cat in self.categories:
             item = QListWidgetItem(cat)
             self.cat_list.addItem(item)
 
+        begin = self.cat_list.findItems("All", Qt.MatchExactly)[0]
+
+        begin.setText("___All")
+        self.cat_list.sortItems()
+        begin.setText("All")
         self.thumblist.sortItems()
 
         return
-
 
     # Filter Materials in Thumblist for Category
     def filter_view_category(self):
@@ -277,7 +354,7 @@ class egMatLibPanel(QWidget):
         self.filter_view_filter()  # Filter View by Line Filter
         if self.draw_mats:
             for mat in self.draw_mats:
-                img = self.lib + mat["name"] + self.img_extension
+                img = self.lib + self.img_dir + str(mat["id"]) + self.img_extension
 
                 # Check if Thumb Exists and attach
                 if os.path.isfile(img):
@@ -287,13 +364,12 @@ class egMatLibPanel(QWidget):
                     icon = self.default_icon
 
                 # Create entry in Thumblist
-                img_name = img.rsplit('/', 1)[1][:-4]
-                item = QListWidgetItem(icon, img_name)
+                #img_name = self.get_material_by_id(mat["id"])
+                item = QListWidgetItem(icon, mat["name"])
                 item.setTextAlignment(Qt.AlignHCenter | Qt.AlignBottom)
                 item.setData(Qt.UserRole, mat["id"])  # Store ID with Thumb
                 self.thumblist.addItem(item)
                 self.thumblist.sortItems()
-
 
 
     # Create PlaceHolder Icon in case something goes wrong
@@ -310,17 +386,18 @@ class egMatLibPanel(QWidget):
         item = self.get_selected_material_from_lib()
         if not item:
             return
-
         builder = self.import_material()
         self.save_node(builder)
         builder.destroy()
         return
 
 
-
     ###################################
     ######### LIBRARY STUFF ###########
     ###################################
+
+    def get_id_from_thumblist(self, item):
+        return item.data(Qt.UserRole)
 
 
     # Delete Material from Library
@@ -331,7 +408,7 @@ class egMatLibPanel(QWidget):
         item = self.get_selected_material_from_lib()
         if not item:
             return
-        id = item.data(Qt.UserRole)
+        id = self.get_id_from_thumblist(item)
 
         for mat in self.materials:
             if mat["id"] == id:
@@ -340,11 +417,11 @@ class egMatLibPanel(QWidget):
                 self.save_library()
 
                 # Remove Files from Disk
-                file_path = self.lib + item.text()
-                if os.path.exists(file_path + self.extension ):
-                    os.remove(file_path + self.extension)
-                if os.path.exists(file_path + self.img_extension ):
-                    os.remove(file_path + self.img_extension)
+                file_path = self.lib + str(id)
+                if os.path.exists(file_path + self.mat_dir + self.extension ):
+                    os.remove(file_path  + self.mat_dir +  self.extension)
+                if os.path.exists(file_path + self.img_dir + self.img_extension ):
+                    os.remove(file_path + self.img_dir + self.img_extension)
 
                 # Update View
                 self.update_view()
@@ -365,8 +442,9 @@ class egMatLibPanel(QWidget):
         cats = cat.split(",")
         for c in cats:
             c = c.replace(" ", "")
-            if not c in self.categories:
-                self.categories.append(c)
+            if c != "":
+                if not c in self.categories:
+                    self.categories.append(c)
         return
 
 
@@ -389,7 +467,36 @@ class egMatLibPanel(QWidget):
         if not sel:
             hou.ui.displayMessage('No Material selected')
             return
-        # Get Category from User
+        self.get_material_info_user(sel[0])
+
+        # Add Material to Library
+        id = uuid.uuid1().time
+        if self.save_node(sel[0], id):
+            # Format
+            name = sel[0].name()
+            cats = cat.split(",")
+            for c in cats:
+                c.replace(" ", "")
+
+            tags = tag.split(",")
+            for t in tags:
+                t.replace(" ", "")
+
+            material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav, "renderer": "Redshift"}
+            self.materials.append(material)
+            self.save_library()
+            self.update_view()
+
+        self.update_cat_view()
+        return
+
+
+    def get_material_info_user(self, material):
+
+
+        hou.ui.createDialog()
+
+             # Get Category from User
         choice, cat = hou.ui.readInput("Add Object to Categories (Comma Separated")
         if choice:
             return
@@ -404,41 +511,23 @@ class egMatLibPanel(QWidget):
         # Add Fav Yes/No
         fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
 
-        # Add Material to Library
-        if self.save_node(sel[0]):
-            # Format
-            id = uuid.uuid1().time
-            name = sel[0].name()
-            cats = cat.split(",")
-            cats = cats.replace(" ", "")
-            tags = tag.split(",")
-            tags = tags.replace(" ", "")
 
-            material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav}
-            self.materials.append(material)
-            self.save_library()
-            self.update_view()
-
-        self.update_cat_view()
-        return
-
-
+        pass
 
     ###################################
     ########### DISK STUFF ############
     ###################################
 
 
-
     #  Render Image & Node-tree to disk
-    def save_node(self, node):
+    def save_node(self, node, id):
         # Check against NodeType
         if node.type().name() != "redshift_vopnet":
             hou.ui.displayMessage('Selected Node is not a Material Builder')
             return False
 
         # Filepath where to save stuff
-        file_name = self.lib + node.name() + self.extension
+        file_name = self.lib  + self.mat_dir + str(id) + self.extension
 
         children = node.children()
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
@@ -448,7 +537,7 @@ class egMatLibPanel(QWidget):
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.lib + node.name() + self.img_extension
+        path = self.lib + self.img_dir + str(id) + self.img_extension
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path)
         exclude = "* ^" + thumb.name()
@@ -490,7 +579,7 @@ class egMatLibPanel(QWidget):
             hou.ui.displayMessage("No Material selected")
             return
 
-        file_name = self.lib + item.text() + self.extension
+        file_name = self.lib + self.mat_dir + str(self.get_id_from_thumblist(item)) + self.extension
 
         # CreateBuilder
         builder = hou.node('/mat').createNode('redshift_vopnet')
@@ -500,7 +589,11 @@ class egMatLibPanel(QWidget):
         for node in builder.children():
             node.destroy()
         # Load File
-        builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
+        try:
+            builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
+        except:
+            hou.ui.displayMessage("File not Found on Disk")
+            return
         # MakeFancyPos
         builder.moveToGoodPosition()
         return builder
