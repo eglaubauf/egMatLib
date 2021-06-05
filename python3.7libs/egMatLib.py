@@ -467,7 +467,38 @@ class egMatLibPanel(QWidget):
         if not sel:
             hou.ui.displayMessage('No Material selected')
             return
-        self.get_material_info_user(sel[0])
+        self.get_material_info_user(sel)
+
+        return
+
+
+    def get_material_info_user(self, sel):
+
+        # categories = ""
+        # tags = ""
+        # favorite = False
+        # self.dialog = materialDialog(categories, tags, favorite)
+        # self.dialog.show()
+
+        # print(categories)
+        # pass
+
+        #hou.ui.createDialog()
+
+             # Get Category from User
+        choice, cat = hou.ui.readInput("Add Object to Categories (Comma Separated")
+        if choice:
+            return
+        self.check_add_category(cat)
+
+        # Get Category from User
+        choice, tag = hou.ui.readInput("Add Object to Tags (Comma Separated)")
+        if choice:
+            return
+        self.check_add_tags(tag)
+
+        # Add Fav Yes/No
+        fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
 
         # Add Material to Library
         id = uuid.uuid1().time
@@ -490,29 +521,6 @@ class egMatLibPanel(QWidget):
         self.update_cat_view()
         return
 
-
-    def get_material_info_user(self, material):
-
-
-        hou.ui.createDialog()
-
-             # Get Category from User
-        choice, cat = hou.ui.readInput("Add Object to Categories (Comma Separated")
-        if choice:
-            return
-        self.check_add_category(cat)
-
-        # Get Category from User
-        choice, tag = hou.ui.readInput("Add Object to Tags (Comma Separated)")
-        if choice:
-            return
-        self.check_add_tags(tag)
-
-        # Add Fav Yes/No
-        fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
-
-
-        pass
 
     ###################################
     ########### DISK STUFF ############
@@ -597,3 +605,46 @@ class egMatLibPanel(QWidget):
         # MakeFancyPos
         builder.moveToGoodPosition()
         return builder
+
+
+class materialDialog(QWidget):
+    def __init__(self, categories, tags, favorite):
+        super(materialDialog, self).__init__()
+        self.script_path = os.path.dirname(os.path.realpath(__file__))
+
+        # Set Vars
+        self.categories = categories
+
+        ## LOAD UI
+        ## Load UI from ui.file
+        loader = QtUiTools.QUiLoader()
+        file = QFile(self.script_path + '/Dialog.ui')
+        file.open(QFile.ReadOnly)
+        self.ui = loader.load(file)
+        file.close()
+
+        # set main layout and attach to widget
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(self.ui)
+        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
+
+        self.setLayout(mainLayout)
+
+        # Link Slots & Signals
+        # FILTER UI
+        self.line_cats = self.ui.findChild(QLineEdit, 'line_categories')
+        self.line_tags = self.ui.findChild(QLineEdit, 'line_tags')
+        self.cb_fav = self.ui.findChild(QCheckBox, "cb_fav")
+
+        self.buttons = self.ui.findChild(QDialogButtonBox, "buttonBox")
+        self.buttons.accepted.connect(self.confirm)
+        self.buttons.rejected.connect(self.destroy)
+
+
+    def confirm(self):
+        #print("Confirm")
+        self.categories = "Test"
+        self.close()
+
+    def destroy(self):
+        self.close()
