@@ -12,8 +12,8 @@ import importlib
 def createInterface():   
     import egMatLib  
     importlib.reload(egMatLib)
-    return egMatLib.egMatLibPanel()    
-              ]]></script>
+    return egMatLib.egMatLibPanel()     
+                                                   ]]></script>
     <includeInPaneTabMenu menu_position="99" create_separator="true"/>
     <includeInToolbarMenu menu_position="415" create_separator="false"/>
     <help><![CDATA[]]></help>

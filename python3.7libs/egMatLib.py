@@ -1,10 +1,8 @@
-import imghdr
 import os
 import hou
 import time
 import json
 import uuid
-import imghdr
 
 # PySide2
 from PySide2.QtGui import *
@@ -29,7 +27,7 @@ class egMatLibPanel(QWidget):
         #Load Settings
         self.thumbSize = self.config["settings"][0]["thumbsize"]
         self.extension = self.config["settings"][0]["extension"]
-        self.img_extension = self.config["settings"][0]["img_extension"]  # TODO: Make EXRs work at some point, needs convertion for PixMap to 8 Bit
+        self.img_extension = self.config["settings"][0]["img_extension"]
         self.done_file = self.config["settings"][0]["done_file"]
 
         self.materials = self.config["materials"]
@@ -387,7 +385,9 @@ class egMatLibPanel(QWidget):
         if not item:
             return
         builder = self.import_material()
-        self.save_node(builder)
+        id = self.get_id_from_thumblist(item)
+        self.save_node(builder, id)
+        self.update_view()
         builder.destroy()
         return
 
@@ -474,42 +474,35 @@ class egMatLibPanel(QWidget):
 
     def get_material_info_user(self, sel):
 
-        # categories = ""
-        # tags = ""
-        # favorite = False
-        # self.dialog = materialDialog(categories, tags, favorite)
-        # self.dialog.show()
-
-        # print(categories)
-        # pass
-
-        #hou.ui.createDialog()
-
-             # Get Category from User
-        choice, cat = hou.ui.readInput("Add Object to Categories (Comma Separated")
-        if choice:
+        # Get Stuff from User
+        dialog = materialDialog()
+        dialog.exec_()
+        #self.dialog.show()
+        if dialog.canceled:
             return
-        self.check_add_category(cat)
 
-        # Get Category from User
-        choice, tag = hou.ui.readInput("Add Object to Tags (Comma Separated)")
-        if choice:
-            return
-        self.check_add_tags(tag)
+        if dialog.categories:
+            self.check_add_category(dialog.categories)
+        if dialog.tags:
+            self.check_add_tags(dialog.tags)
+        # if dialog.fav:
+        #     fav = dialog.fav
+        # TODO: Implement Fav
+        fav = dialog.fav
 
-        # Add Fav Yes/No
-        fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
+        # TODO: Implement Favs
+        # fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
 
         # Add Material to Library
         id = uuid.uuid1().time
         if self.save_node(sel[0], id):
             # Format
             name = sel[0].name()
-            cats = cat.split(",")
+            cats = dialog.categories.split(",")
             for c in cats:
                 c.replace(" ", "")
 
-            tags = tag.split(",")
+            tags = dialog.tags.split(",")
             for t in tags:
                 t.replace(" ", "")
 
@@ -518,7 +511,6 @@ class egMatLibPanel(QWidget):
             self.save_library()
             self.update_view()
 
-        self.update_cat_view()
         return
 
 
@@ -607,13 +599,16 @@ class egMatLibPanel(QWidget):
         return builder
 
 
-class materialDialog(QWidget):
-    def __init__(self, categories, tags, favorite):
+class materialDialog(QDialog):
+    def __init__(self):
         super(materialDialog, self).__init__()
         self.script_path = os.path.dirname(os.path.realpath(__file__))
 
         # Set Vars
-        self.categories = categories
+        self.categories = None
+        self.tags = None
+        self.fav = False
+        self.canceled = False
 
         ## LOAD UI
         ## Load UI from ui.file
@@ -643,8 +638,11 @@ class materialDialog(QWidget):
 
     def confirm(self):
         #print("Confirm")
-        self.categories = "Test"
-        self.close()
+        self.categories = self.line_cats.text()
+        self.tags = self.line_tags.text()
+        self.fav = self.cb_fav.isChecked()
+        self.accept()
 
     def destroy(self):
+        self.canceled = True
         self.close()
