@@ -51,6 +51,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
@@ -93,6 +96,9 @@
         </item>
         <item>
          <widget class="QListWidget" name="listw_matview">
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
           <property name="editTriggers">
            <set>QAbstractItemView::CurrentChanged|QAbstractItemView::DoubleClicked|QAbstractItemView::SelectedClicked</set>
           </property>
@@ -100,7 +106,7 @@
            <bool>false</bool>
           </property>
           <property name="dragDropMode">
-           <enum>QAbstractItemView::NoDragDrop</enum>
+           <enum>QAbstractItemView::DragDrop</enum>
           </property>
           <property name="defaultDropAction">
            <enum>Qt::IgnoreAction</enum>
@@ -140,21 +146,21 @@
           <item>
            <widget class="QPushButton" name="btn_import">
             <property name="text">
-             <string>Import</string>
+             <string>Import to Scene</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btn_update">
             <property name="text">
-             <string>Update</string>
+             <string>Update Thumbnail</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btn_save">
             <property name="text">
-             <string>Save Selected</string>
+             <string>Save Selected to Library</string>
             </property>
            </widget>
           </item>
@@ -426,7 +432,7 @@
      <bold>false</bold>
     </font>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menu_file">
     <property name="font">
      <font>
       <pointsize>9</pointsize>
@@ -438,66 +444,15 @@
     <addaction name="separator"/>
     <addaction name="action_openLibrary"/>
     <addaction name="action_updateAll"/>
-    <addaction name="action_setDefault"/>
     <addaction name="separator"/>
     <addaction name="action_prefs"/>
    </widget>
-   <addaction name="menuFile"/>
+   <addaction name="menu_file"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action_HIP">
-   <property name="text">
-    <string>$HIP</string>
-   </property>
-  </action>
-  <action name="action_HOME">
-   <property name="text">
-    <string>$HOME</string>
-   </property>
-  </action>
-  <action name="actionCreate_Thumbs_for_Directory">
-   <property name="text">
-    <string>Recursively Create Thumbs for this Folder (slow)</string>
-   </property>
-  </action>
-  <action name="actionRefresh_Current_Dir">
-   <property name="text">
-    <string>Recreate Thumbs for this Folder</string>
-   </property>
-  </action>
-  <action name="actionClear_Thumb_Database">
-   <property name="text">
-    <string>Clear All Materials</string>
-   </property>
-  </action>
-  <action name="action50">
-   <property name="text">
-    <string>50</string>
-   </property>
-  </action>
-  <action name="actionAddFavourite">
-   <property name="text">
-    <string>Add Current Folder to Favourites</string>
-   </property>
-  </action>
-  <action name="actionStartup">
-   <property name="text">
-    <string>Set Current Library as Default</string>
-   </property>
-  </action>
-  <action name="actionRemFavourite">
-   <property name="text">
-    <string>Remove Current Folder from Favourites</string>
-   </property>
-  </action>
   <action name="action_updateAll">
    <property name="text">
     <string>Update All Materials</string>
-   </property>
-  </action>
-  <action name="action_setDefault">
-   <property name="text">
-    <string>Set Current Library as Default</string>
    </property>
   </action>
   <action name="action_openLibrary">
@@ -508,6 +463,11 @@
   <action name="action_prefs">
    <property name="text">
     <string>Preferences</string>
+   </property>
+  </action>
+  <action name="action_deleteMaterial">
+   <property name="text">
+    <string>_deleteMaterial</string>
    </property>
   </action>
  </widget>

@@ -10,6 +10,67 @@ from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2 import QtUiTools
 
+# This holds the global settings
+class prefs():
+    def __init__(self):
+        # TODO: Replace with HOU ENV
+        self.path = "G:/Git/egMatLib"
+        self.data = {}
+        self.load()
+
+    def save(self):
+
+        self.data["directory"] = self.directory
+        self.data["showButtons"] = self.show_buttons
+        self.data["extension"] = self.ext
+        self.data["img_extension"] = self.img_ext
+        self.data["done_file"] = self.done_file
+        self.data["mat_dir"] = self.mat_dir
+        self.data["img_dir"] = self.img_dir
+
+        with open(self.path+("/settings.json"), "w") as lib_json:
+            json.dump(self.data, lib_json, indent=4)
+
+    def load(self):
+        with open(self.path+("/settings.json")) as lib_json:
+            data = json.load(lib_json)
+
+            self.directory = data["directory"]
+            self.show_buttons = data["showButtons"]
+            self.ext = data["extension"]
+            self.img_ext = data["img_extension"]
+            self.done_file = data["done_file"]
+            self.mat_dir = data["mat_dir"]
+            self.img_dir = data["img_dir"]
+        return
+
+    def get_dir(self):
+        return self.directory
+
+    def get_img_dir(self):
+        return self.img_dir
+
+    def get_mat_dir(self):
+        return self.mat_dir
+
+    def get_img_ext(self):
+        return self.img_ext
+
+    def get_ext(self):
+        return self.ext
+
+    def get_done_file(self):
+        return self.done_file
+
+    def get_btns(self):
+        return self.show_buttons
+
+    def set_btns(self, val):
+        self.show_buttons = val
+
+    def set_dir(self, val):
+        self.directory = val
+
 
 # This holds a Library
 class eg_library():
@@ -20,7 +81,7 @@ class eg_library():
         self.settings = None
         self.path = None
 
-    def load(self, path):
+    def load(self, path, prefs):
         self.path = path
         with open(self.path+("/library.json")) as lib_json:
             self.data = json.load(lib_json)
@@ -28,7 +89,9 @@ class eg_library():
             self.materials = self.data["materials"]
             self.categories = self.data["categories"]
             self.tags = self.data["tags"]
-            self.settings = self.data["settings"]
+            self.thumbsize = self.data["thumbsize"]
+            self.rendersize = self.data["rendersize"]
+        self.settings = prefs
         return
 
     def save(self):
@@ -36,26 +99,12 @@ class eg_library():
         self.data["materials"] = self.materials
         self.data["categories"] = self.categories
         self.data["tags"] = self.tags
-        self.data["settings"] = self.settings
+        self.data["thumbsize"] = self.thumbsize
+        self.data["rendersize"] = self.rendersize
 
         with open(self.path+("/library.json"), "w") as lib_json:
             json.dump(self.data, lib_json, indent=4)
         return
-
-    def get_img_dir(self):
-        return self.settings[0]["img_dir"]
-
-    def get_mat_dir(self):
-        return self.settings[0]["mat_dir"]
-
-    def get_img_ext(self):
-        return self.settings[0]["img_extension"]
-
-    def get_ext(self):
-        return self.settings[0]["extension"]
-
-    def get_done_file(self):
-        return self.settings[0]["done_file"]
 
     def get_path(self):
         return self.path
@@ -70,7 +119,16 @@ class eg_library():
         return self.tags
 
     def get_thumbSize(self):
-        return self.settings[0]["thumbsize"]
+        return self.thumbsize
+
+    def set_thumbSize(self, val):
+        self.thumbsize = val
+
+    def set_renderSize(self, val):
+        self.rendersize = val
+
+    def get_renderSize(self):
+        return self.rendersize
 
     def remove_material(self, id):
         for mat in self.materials:
@@ -79,10 +137,10 @@ class eg_library():
 
                 # Remove Files from Disk
                 file_path = self.path + str(id)
-                if os.path.exists(file_path + self.get_mat_dir() + self.get_ext()):
-                    os.remove(file_path + self.get_mat_dir() + self.get_ext())
-                if os.path.exists(file_path + self.get_img_dir() + self.get_img_ext()):
-                    os.remove(file_path + self.get_img_dir() + self.get_img_ext())
+                if os.path.exists(file_path + self.settings.get_mat_dir() + self.settings.get_ext()):
+                    os.remove(file_path + self.settings.get_mat_dir() + self.settings.get_ext())
+                if os.path.exists(file_path + self.settings.get_img_dir() + self.settings.get_img_ext()):
+                    os.remove(file_path + self.settings.get_img_dir() + self.settings.get_img_ext())
                 self.save()
                 return
 
@@ -130,7 +188,7 @@ class eg_library():
 
     def import_material(self, id):
 
-        file_name = self.get_path() + self.get_mat_dir() + str(id) + self.get_ext()
+        file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
 
         mat = self.get_material_by_id(id)
 
@@ -160,7 +218,7 @@ class eg_library():
             return False
 
         # Filepath where to save stuff
-        file_name = self.get_path()  + self.get_mat_dir() + str(id) + self.get_ext()
+        file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
 
         children = node.children()
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
@@ -170,7 +228,7 @@ class eg_library():
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.get_path()  + self.get_img_dir() + str(id) + self.get_img_ext()
+        path = self.get_path()  + self.settings.get_img_dir() + str(id) + self.settings.get_img_ext()
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path)
@@ -180,8 +238,8 @@ class eg_library():
         thumb.parm("lights").set(lights)
 
         # Make sure there is no done file
-        if os.path.exists(self.get_path() + self.get_done_file()):
-            os.remove(self.get_path() + self.get_done_file())
+        if os.path.exists(self.get_path() + self.settings.get_done_file()):
+            os.remove(self.get_path() + self.settings.get_done_file())
 
         # Render Frame
         thumb.parm("render").pressButton()
@@ -198,8 +256,8 @@ class eg_library():
     def waitForRender(self, path):
         mustend = time.time() + 60.0
         while time.time() < mustend:
-            if os.path.exists(self.get_path() + self.get_done_file()):
-                os.remove(self.get_path() + self.get_done_file())
+            if os.path.exists(self.get_path() + self.settings.get_done_file()):
+                os.remove(self.get_path() + self.settings.get_done_file())
                 return True
             time.sleep(0.5)
         return False
@@ -212,6 +270,20 @@ class eg_library():
         for mat in self.materials:
             if cat in mat["categories"]:
                 mat["categories"].remove(cat)
+        return
+
+    def rename_category(self, old, new):
+        # Update Categories with that name
+        for count, current in enumerate(self.categories):
+            if current == old:
+                self.categories[count] = new
+        # Update all Categories with that name in all Materials
+        for j, mat in enumerate(self.materials):
+            if old in mat["categories"]:
+                for i, c in enumerate(mat["categories"]):
+                    if c == old:
+                        self.materials[j]["categories"][i] = new
+
         return
 
     # Set Material Name for Material with given ID
@@ -228,8 +300,8 @@ class eg_library():
 
     # Set Material Category for Material with given ID
     def set_material_cat(self, id, cat):
-        mat = self.check_add_category(cat)
-        self.get_material_by_id(id)
+        self.check_add_category(cat)
+        mat = self.get_material_by_id(id)
 
         cats = cat.split(",")
         for c in cats:
@@ -257,8 +329,11 @@ class egMatLibPanel(QWidget):
         path = path.replace("\\", "/")
 
         # Config
+        self.prefs = prefs()
+
+        # Create Library
         self.library = eg_library()
-        self.library.load(path)
+        self.library.load(path, self.prefs)
 
         self.selected_cat = None
         self.filter = ""
@@ -291,6 +366,9 @@ class egMatLibPanel(QWidget):
 
         # Load Ui Element so self
         self.menu = self.ui.findChild(QMenuBar, 'menubar')
+        self.menuGoto = self.ui.findChild(QMenu, 'menu_file')
+        self.action_prefs = self.ui.findChild(QAction, 'action_prefs')
+        self.action_prefs.triggered.connect(self.show_prefs)
 
         # Link Buttons
         self.btn_update = self.ui.findChild(QPushButton, 'btn_update')
@@ -338,6 +416,11 @@ class egMatLibPanel(QWidget):
         self.details.itemChanged.connect(self.update_entry_from_detail)
         self.details.itemDoubleClicked.connect(self.listen_entry_from_detail)
 
+
+        # RC Menus
+        self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
+        self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
+
         # Default icon for rendering
         self.create_default_icon()
 
@@ -348,9 +431,80 @@ class egMatLibPanel(QWidget):
 
         self.setLayout(mainLayout)
 
+
+    ###################################
+    ############ RC MENUS #############
+    ###################################
+
+    def thumblist_rc_menu(self):
+        cmenu = QMenu(self)
+
+        delAct = cmenu.addAction("Delete Entry")
+        renderAct = cmenu.addAction("Rerender Thumbnail")
+        importAct = cmenu.addAction("Import to Scene")
+        renderAllAct = cmenu.addAction("Render All Thumbnails")
+        action = cmenu.exec_(QCursor.pos())
+
+        #print(self)
+        if action == delAct:
+            self.delete_material()
+        elif action == renderAct:
+            self.update_single_material()
+        elif action == importAct:
+            self.import_material()
+        elif action == renderAllAct:
+            self.update_all_materials()
+        return
+
+
+    def catlist_rc_menu(self):
+        cmenu = QMenu(self)
+
+        removeAct = cmenu.addAction("Remove Category")
+        renameAct = cmenu.addAction("Rename Entry")
+        addAct = cmenu.addAction("Add Category")
+        action = cmenu.exec_(QCursor.pos())
+
+        #print(self)
+        if action == removeAct:
+            self.rmv_category_user()
+            pass
+        elif action == renameAct:
+            self.rename_category_user()
+            pass
+        elif action == addAct:
+            self.add_category_user()
+        return
+
+
     ###################################
     ########### USER STUFF ############
     ###################################
+
+
+    def show_prefs(self):
+
+        prefs = PrefsDialog(self.library, self.prefs)
+        prefs.exec_()
+
+        if prefs.canceled:
+            return
+
+        #if dialog.categories:
+            #self.library.check_add_category(dialog.categories)
+        #if dialog.tags:
+            #self.library.check_add_tags(dialog.tags)
+        # if dialog.fav:
+        #     fav = dialog.fav
+        # TODO: Implement Favs
+        # fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
+
+        #self.library.add_material(sel[0] ,dialog.categories, dialog.categories, dialog.fav)
+        self.update_views()
+        return
+
+
+        pass
 
     # User Adds Category with Button
     def add_category_user(self):
@@ -374,6 +528,28 @@ class egMatLibPanel(QWidget):
         self.library.save()
         self.update_views()
         return
+
+
+    def rename_category_user(self):
+
+        choice, cat = hou.ui.readInput("Please enter the new category name:")
+        if choice: # Return if no
+            return
+        # TODO: Check if Cat allready exists
+        # if cat == "All":
+        #     return
+
+        rnm_item = self.cat_list.selectedItems()
+        # Prevent Deletion of "All" - Category
+        if rnm_item[0].text() == "All":
+            return
+
+        self.library.rename_category(rnm_item[0].text(), cat)
+
+        self.library.save()
+        self.update_views()
+        return
+
 
     # Get Filter Text from User
     def filter_thumb_view_user(self):
@@ -517,7 +693,7 @@ class egMatLibPanel(QWidget):
 
         if self.draw_mats:
             for mat in self.draw_mats:
-                img = self.library.get_path() + self.library.get_img_dir() + str(mat["id"]) + self.library.get_img_ext()
+                img = self.library.get_path() + self.prefs.get_img_dir() + str(mat["id"]) + self.prefs.get_img_ext()
 
                 # Check if Thumb Exists and attach
                 if os.path.isfile(img):
@@ -538,11 +714,28 @@ class egMatLibPanel(QWidget):
     # Create PlaceHolder Icon in case something goes wrong
     def create_default_icon(self):
         #Generate Default Icon
-        default_img = QImage(150, 150, QImage.Format_RGB16)
+        default_img = QImage(self.library.get_thumbSize(), self.library.get_thumbSize(), QImage.Format_RGB16)
         default_img.fill(QColor(0, 0, 0))
         pixmap = QPixmap.fromImage(default_img).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
         self.default_icon = QIcon(pixmap)
 
+
+    # Rerender All Visible Materials
+    def update_all_materials(self):
+        if not hou.ui.displayConfirmation('This can take a long time to render. Houdini will not be responsive during that time. Do you want continue rendering all visible Materials?'):
+            return
+
+        for i in range(self.thumblist.count()):
+            item = self.thumblist.item(i)
+
+            id = self.get_id_from_thumblist(item)
+            builder = self.import_material(item)
+
+            self.library.save_node(builder, id)
+            builder.destroy()
+        self.update_thumb_view()
+        hou.ui.displayMessage("Rendering finished")
+        return
 
     # Rerender Selected Material
     def update_single_material(self):
@@ -551,9 +744,10 @@ class egMatLibPanel(QWidget):
             return
         builder = self.import_material()
         id = self.get_id_from_thumblist(item)
-        self.save_node(builder, id)
+        self.library.save_node(builder, id)
         self.update_thumb_view()
         builder.destroy()
+        hou.ui.displayMessage("Thumbnail updated")
         return
 
 
@@ -604,7 +798,7 @@ class egMatLibPanel(QWidget):
         # Get Stuff from User
         dialog = materialDialog()
         dialog.exec_()
-        #self.dialog.show()
+
         if dialog.canceled:
             return
 
@@ -617,7 +811,7 @@ class egMatLibPanel(QWidget):
         # TODO: Implement Favs
         # fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
 
-        self.library.add_material(sel[0] ,dialog.categories, dialog.categories, dialog.fav)
+        self.library.add_material(sel[0] ,dialog.categories, dialog.tags, dialog.fav)
         self.update_views()
         return
 
@@ -627,17 +821,19 @@ class egMatLibPanel(QWidget):
     ###################################
 
     #  Import Material to Scene
-    def import_material(self):
+    def import_material(self, sel=None):
 
-        item = self.thumblist.selectedItems()[0]
+        if not sel:
+            item = self.thumblist.selectedItems()[0]
+        else:
+            item = sel
+
         if not item:
             hou.ui.displayMessage("No Material selected")
             return
 
         id = self.get_id_from_thumblist(item)
-        self.library.import_material(id)
-
-        return
+        return self.library.import_material(id)
 
 
 class materialDialog(QDialog):
@@ -686,3 +882,75 @@ class materialDialog(QDialog):
     def destroy(self):
         self.canceled = True
         self.close()
+
+
+class PrefsDialog(QDialog):
+    def __init__(self, library, prefs):
+        super(PrefsDialog, self).__init__()
+        self.script_path = os.path.dirname(os.path.realpath(__file__))
+
+        self.library = library
+        self.prefs = prefs
+        self.canceled = False
+        ## LOAD UI
+        ## Load UI from ui.file
+        loader = QtUiTools.QUiLoader()
+        file = QFile(self.script_path + '/Prefs.ui')
+        file.open(QFile.ReadOnly)
+        self.ui = loader.load(file)
+        file.close()
+
+        # UI
+        self.line_workdir = self.ui.findChild(QLineEdit, 'line_workdir')
+        self.line_thumbsize = self.ui.findChild(QLineEdit, 'line_thumbsize')
+        self.line_rendersize = self.ui.findChild(QLineEdit, 'line_rendersize')
+        self.cb_buttons = self.ui.findChild(QCheckBox, "cb_buttons")
+
+        self.buttons = self.ui.findChild(QDialogButtonBox, "buttonBox")
+        self.buttons.accepted.connect(self.confirm)
+        self.buttons.rejected.connect(self.destroy)
+
+        # Load Config from settings
+        self.fill_values()
+
+        # set main layout and attach to widget
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(self.ui)
+        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
+
+        self.setLayout(mainLayout)
+
+
+    def confirm(self):
+        self.prefs.set_dir(self.line_workdir.text())
+        self.prefs.set_btns(int(self.cb_buttons.isChecked()))
+        self.prefs.save()
+
+        self.library.set_renderSize(int(self.line_rendersize.text()))
+        self.thumbsize = self.library.set_thumbSize(int(self.line_thumbsize.text()))
+        self.library.save()
+
+        self.accept()
+
+
+    def destroy(self):
+        self.canceled = True
+        self.close()
+
+
+    def fill_values(self):
+
+        self.directory = self.prefs.get_dir()
+        self.show_buttons =  self.prefs.get_btns()
+
+        self.rendersize = self.library.get_renderSize()
+        self.thumbsize = self.library.get_thumbSize()
+
+        self.line_workdir.setText(self.directory)
+        self.line_rendersize.setText(str(self.rendersize))
+        self.line_thumbsize.setText(str(self.thumbsize))
+        if self.show_buttons:
+            self.cb_buttons.setCheckState(Qt.Checked)
+        else:
+            self.cb_buttons.setCheckState(Qt.Unchecked)
+        return

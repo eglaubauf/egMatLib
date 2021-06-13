@@ -1,4 +1,9 @@
 {
-	"Directory": "G:/Git/MatLib/lib",
-    "Extension": ".mat",
+    "directory": "G:/Git/egMatLib/lib",
+    "showButtons": 1,
+    "extension": ".mat",
+    "img_extension": ".png",
+    "done_file": "/done.txt",
+    "mat_dir": "mat/",
+    "img_dir": "img/"
 }
