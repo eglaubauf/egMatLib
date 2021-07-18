@@ -3,6 +3,8 @@ import hou
 import time
 import json
 import uuid
+import shutil
+import datetime
 
 # PySide2
 from PySide2.QtGui import *
@@ -10,16 +12,55 @@ from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2 import QtUiTools
 
+#TODO: Make nice - this is quite hacky atm
+def saveMaterial(node):
+    #Initialize
+    pref = prefs()
+    path = pref.get_dir() + "/"
+    path = path.replace("\\", "/")
+
+
+    # Create Library
+    library = eg_library()
+    library.load(path, pref)
+    get_material_info_user(library, node)
+    library.save()
+
+    for pane_tab in hou.ui.currentPaneTabs():
+        if pane_tab.type() == hou.paneTabType.PythonPanel:
+            if pane_tab.label() == "MatLib":
+                pane_tab.reloadActiveInterface()
+                return
+
+    # hou.ui.displayMessage("Open a MatLib Panel first")
+    return
+
+
+def get_material_info_user(library, sel):
+        # Get Stuff from User
+        dialog = materialDialog()
+        dialog.exec_()
+
+        if dialog.canceled:
+            return
+        if dialog.categories:
+            library.check_add_category(dialog.categories)
+        if dialog.tags:
+            library.check_add_tags(dialog.tags)
+
+        library.add_material(sel, dialog.categories, dialog.tags, dialog.fav)
+        return
+
+
 # This holds the global settings
 class prefs():
     def __init__(self):
         # TODO: Replace with HOU ENV
-        self.path = "G:/Git/egMatLib"
+        self.path = hou.getenv("EGMATLIB")
         self.data = {}
         self.load()
 
     def save(self):
-
         self.data["directory"] = self.directory
         self.data["showButtons"] = self.show_buttons
         self.data["extension"] = self.ext
@@ -106,6 +147,13 @@ class eg_library():
             json.dump(self.data, lib_json, indent=4)
         return
 
+
+    def update_from_disk(self):
+        with open(self.path+("/library.json")) as lib_json:
+            self.data = json.load(lib_json)
+        self.thumbsize = self.data["thumbsize"]
+        self.rendersize = self.data["rendersize"]
+
     def get_path(self):
         return self.path
 
@@ -181,7 +229,10 @@ class eg_library():
             for t in tags:
                 t.replace(" ", "")
 
-            material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav, "renderer": "Redshift"}
+            date = str(datetime.datetime.now())
+            date = date[:-7]
+
+            material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav, "renderer": "Redshift", "date": date}
             self.materials.append(material)
             self.save()
         return
@@ -203,8 +254,9 @@ class eg_library():
         try:
             builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
         except:
-            hou.ui.displayMessage("File not Found on Disk")
+            hou.ui.displayMessage("File not found on Disk")
             return
+
         # MakeFancyPos
         builder.moveToGoodPosition()
         return builder
@@ -224,7 +276,7 @@ class eg_library():
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode("eg_thumbnail")
+        thumb = hou.node("/obj").createNode("eg_thumbnail::1.1")
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -236,6 +288,8 @@ class eg_library():
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
+        thumb.parm("render_resx").set(self.rendersize)
+        thumb.parm("render_resy").set(self.rendersize)
 
         # Make sure there is no done file
         if os.path.exists(self.get_path() + self.settings.get_done_file()):
@@ -325,11 +379,17 @@ class egMatLibPanel(QWidget):
 
         #Initialize
         self.script_path = os.path.dirname(os.path.realpath(__file__))
-        path = self.script_path[:-14] + "/lib/"
+        self.prefs = prefs()
+        path = self.prefs.get_dir() + "/"
         path = path.replace("\\", "/")
 
-        # Config
-        self.prefs = prefs()
+        if not os.path.exists(path+"/library.json"):
+            oldpath = hou.getenv("EGMATLIB")+"/def/library.json"
+            shutil.copy(oldpath, path+"/library.json")
+        if not os.path.exists(path+self.prefs.get_mat_dir()):
+            os.mkdir(path+self.prefs.get_mat_dir())
+        if not os.path.exists(path+self.prefs.get_img_dir()):
+            os.mkdir(path+self.prefs.get_img_dir())
 
         # Create Library
         self.library = eg_library()
@@ -389,6 +449,10 @@ class egMatLibPanel(QWidget):
         self.thumblist.doubleClicked.connect(self.import_material)
         self.thumblist.itemPressed.connect(self.update_details_view)
         self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
+
+        #self.thumblist.viewportSizeHint(QSize(self.library.get_thumbSize()*4),QSize(self.library.get_thumbSize()*8))
+        self.thumblist.setContentsMargins(0,0,0,0)
+
         self.thumblist.setSortingEnabled(True)
 
         # Category UI
@@ -410,12 +474,9 @@ class egMatLibPanel(QWidget):
         self.details.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.details.setColumnWidth(0,120)
         self.details.setColumnWidth(1,200)
-        self.details.setRowHidden(4, True)
-        self.details.setRowHidden(3, True) # TODO: Implement Favs, for now just hidden
 
         self.details.itemChanged.connect(self.update_entry_from_detail)
         self.details.itemDoubleClicked.connect(self.listen_entry_from_detail)
-
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
@@ -445,7 +506,6 @@ class egMatLibPanel(QWidget):
         renderAllAct = cmenu.addAction("Render All Thumbnails")
         action = cmenu.exec_(QCursor.pos())
 
-        #print(self)
         if action == delAct:
             self.delete_material()
         elif action == renderAct:
@@ -500,11 +560,14 @@ class egMatLibPanel(QWidget):
         # fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
 
         #self.library.add_material(sel[0] ,dialog.categories, dialog.categories, dialog.fav)
+        #self.library.update_from_disk()
+
+        #Update Thumblist Grid
+        self.thumblist.setIconSize(QSize(self.library.get_thumbSize(), self.library.get_thumbSize()))
+        self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
+
         self.update_views()
         return
-
-
-        pass
 
     # User Adds Category with Button
     def add_category_user(self):
@@ -623,6 +686,13 @@ class egMatLibPanel(QWidget):
                 # set Renderer
                 table_item = self.details.item(5,1)
                 table_item.setText(mat["renderer"])
+                # set Date
+                table_item = self.details.item(6,1)
+                try:
+                    table_item.setText(mat["date"])
+                except:
+                    table_item.setText("Not saved yet")
+
         #Resize
         self.details.resizeColumnToContents(1)
         if self.details.columnWidth(1) < 200:
@@ -693,6 +763,9 @@ class egMatLibPanel(QWidget):
 
         if self.draw_mats:
             for mat in self.draw_mats:
+                # Pass Empty Default Material
+                if mat["id"] == -1:
+                    continue
                 img = self.library.get_path() + self.prefs.get_img_dir() + str(mat["id"]) + self.prefs.get_img_ext()
 
                 # Check if Thumb Exists and attach
@@ -705,10 +778,12 @@ class egMatLibPanel(QWidget):
                 # Create entry in Thumblist
                 #img_name = self.get_material_by_id(mat["id"])
                 item = QListWidgetItem(icon, mat["name"])
+
                 item.setTextAlignment(Qt.AlignHCenter | Qt.AlignBottom)
                 item.setData(Qt.UserRole, mat["id"])  # Store ID with Thumb
                 self.thumblist.addItem(item)
                 self.thumblist.sortItems()
+
 
 
     # Create PlaceHolder Icon in case something goes wrong
@@ -773,7 +848,6 @@ class egMatLibPanel(QWidget):
         # Update View
         self.update_thumb_view()
         return
-
 
     # Get the selected Material from Library
     def get_selected_material_from_thumblist(self):
@@ -927,9 +1001,8 @@ class PrefsDialog(QDialog):
         self.prefs.save()
 
         self.library.set_renderSize(int(self.line_rendersize.text()))
-        self.thumbsize = self.library.set_thumbSize(int(self.line_thumbsize.text()))
+        self.library.set_thumbSize(int(self.line_thumbsize.text()))
         self.library.save()
-
         self.accept()
 
 

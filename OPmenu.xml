@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menuDocument>
+     <menu>
+            <!--***********************************-->
+            <scriptItem id="saveMatToEgLib">
+                <context>
+                    <expression>
+<![CDATA[
+n = kwargs.get("node", None)
+if n.type().name() != "redshift_vopnet":
+    return False
+return True ]]>
+                    </expression>
+                </context>
+                <labelExpression>
+<![CDATA[
+n = kwargs.get("node", None)
+if n.type().name() != "redshift_vopnet":
+    return "Unavailable in this Context"
+else:
+    return "Save Material to egMatLib"
+]]>
+                </labelExpression>
+                <scriptCode>
+<![CDATA[
+n = kwargs.get("node", None)
+if n.type().name() != "redshift_vopnet":
+    hou.ui.displayMessage('Please select Material Builder Nodes to save Material')
+else:
+    import egMatLib
+    egMatLib.saveMaterial(n)
+]]>
+                </scriptCode>
+            </scriptItem>
+                            <!--***********************************-->
+    </menu>
+</menuDocument>

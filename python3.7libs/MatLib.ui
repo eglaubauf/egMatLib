@@ -41,15 +41,21 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="sizeConstraint">
-         <enum>QLayout::SetMinimumSize</enum>
+         <enum>QLayout::SetMaximumSize</enum>
         </property>
         <item>
          <widget class="QListWidget" name="listw_catview">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
           </property>
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
@@ -84,8 +90,14 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="vlayout_right">
+        <property name="spacing">
+         <number>4</number>
+        </property>
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
         </property>
         <item>
          <widget class="QLineEdit" name="line_filter">
@@ -98,6 +110,9 @@
          <widget class="QListWidget" name="listw_matview">
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="autoScrollMargin">
+           <number>16</number>
           </property>
           <property name="editTriggers">
            <set>QAbstractItemView::CurrentChanged|QAbstractItemView::DoubleClicked|QAbstractItemView::SelectedClicked</set>
@@ -114,16 +129,22 @@
           <property name="flow">
            <enum>QListView::LeftToRight</enum>
           </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
           <property name="resizeMode">
            <enum>QListView::Adjust</enum>
           </property>
+          <property name="layoutMode">
+           <enum>QListView::SinglePass</enum>
+          </property>
           <property name="spacing">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="gridSize">
            <size>
-            <width>200</width>
-            <height>200</height>
+            <width>50</width>
+            <height>50</height>
            </size>
           </property>
           <property name="viewMode">
@@ -171,19 +192,25 @@
       <item>
        <widget class="QTableWidget" name="widget_detail">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>322</width>
           <height>0</height>
          </size>
         </property>
         <property name="toolTip">
          <string/>
+        </property>
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
         </property>
         <property name="sizeAdjustPolicy">
          <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -216,13 +243,13 @@
          <enum>Qt::SolidLine</enum>
         </property>
         <property name="wordWrap">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="cornerButtonEnabled">
          <bool>false</bool>
         </property>
         <property name="rowCount">
-         <number>6</number>
+         <number>7</number>
         </property>
         <property name="columnCount">
          <number>2</number>
@@ -257,6 +284,7 @@
         <row/>
         <row/>
         <row/>
+        <row/>
         <column/>
         <column/>
         <item row="0" column="0">
@@ -275,7 +303,7 @@
         </item>
         <item row="0" column="1">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
          <property name="flags">
           <set>ItemIsEditable|ItemIsEnabled</set>
@@ -297,7 +325,7 @@
         </item>
         <item row="1" column="1">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
          <property name="flags">
           <set>ItemIsEditable|ItemIsEnabled</set>
@@ -319,7 +347,7 @@
         </item>
         <item row="2" column="1">
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
          <property name="toolTip">
           <string notr="true"/>
@@ -356,7 +384,7 @@
           <string notr="true"/>
          </property>
          <property name="checkState">
-          <enum>Unchecked</enum>
+          <enum>Checked</enum>
          </property>
          <property name="flags">
           <set>ItemIsEditable|ItemIsEnabled</set>
@@ -373,7 +401,7 @@
           <string notr="true"/>
          </property>
          <property name="flags">
-          <set>ItemIsUserCheckable</set>
+          <set>NoItemFlags</set>
          </property>
         </item>
         <item row="4" column="1">
@@ -387,7 +415,7 @@
           <string notr="true"/>
          </property>
          <property name="flags">
-          <set>NoItemFlags</set>
+          <set>ItemIsEnabled</set>
          </property>
         </item>
         <item row="5" column="0">
@@ -406,7 +434,26 @@
           <string notr="true"/>
          </property>
          <property name="flags">
-          <set>NoItemFlags</set>
+          <set>ItemIsEnabled</set>
+         </property>
+        </item>
+        <item row="6" column="0">
+         <property name="text">
+          <string>Added</string>
+         </property>
+        </item>
+        <item row="6" column="1">
+         <property name="text">
+          <string notr="true"/>
+         </property>
+         <property name="toolTip">
+          <string notr="true"/>
+         </property>
+         <property name="whatsThis">
+          <string notr="true"/>
+         </property>
+         <property name="flags">
+          <set>ItemIsEnabled</set>
          </property>
         </item>
        </widget>
