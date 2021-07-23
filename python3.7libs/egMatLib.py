@@ -747,9 +747,16 @@ class egMatLibPanel(QWidget):
         if self.filter is "":
             return
         tmp = []
-        for mat in self.draw_mats:
-            if self.filter in mat["name"]:
-                tmp.append(mat)
+        if self.filter.startswith("*"):
+            # Filter for tags
+            curr_filter = self.filter[1:]
+            for mat in self.draw_mats:
+                if curr_filter in mat["tags"]:
+                    tmp.append(mat)
+        else:
+            for mat in self.draw_mats:
+                if self.filter in mat["name"]:
+                    tmp.append(mat)
         self.draw_mats = tmp
         return
 
