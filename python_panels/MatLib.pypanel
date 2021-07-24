@@ -8,13 +8,13 @@
   <interface name="MatLib" label="MatLib" icon="MISC_python" showNetworkNavigationBar="false" help_url="">
     <script><![CDATA[import sys
 import importlib         
-
-def createInterface():   
+   
+def createInterface():    
     import egMatLib  
     importlib.reload(egMatLib)       
     widget = egMatLib.egMatLibPanel()              
-    return widget 
-                   ]]></script>
+    return widget     
+                                                                                                      ]]></script>
     <includeInPaneTabMenu menu_position="99" create_separator="true"/>
     <includeInToolbarMenu menu_position="415" create_separator="false"/>
     <help><![CDATA[]]></help>

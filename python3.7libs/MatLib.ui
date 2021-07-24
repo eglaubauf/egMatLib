@@ -190,273 +190,337 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableWidget" name="widget_detail">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>322</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string/>
-        </property>
-        <property name="lineWidth">
-         <number>1</number>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAsNeeded</enum>
-        </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::AdjustToContents</enum>
-        </property>
-        <property name="autoScroll">
-         <bool>true</bool>
-        </property>
-        <property name="autoScrollMargin">
-         <number>16</number>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::DoubleClicked|QAbstractItemView::SelectedClicked</set>
-        </property>
-        <property name="showDropIndicator" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="dragDropOverwriteMode">
-         <bool>false</bool>
-        </property>
-        <property name="alternatingRowColors">
-         <bool>true</bool>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
-        </property>
-        <property name="showGrid">
-         <bool>true</bool>
-        </property>
-        <property name="gridStyle">
-         <enum>Qt::SolidLine</enum>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="cornerButtonEnabled">
-         <bool>false</bool>
-        </property>
-        <property name="rowCount">
-         <number>7</number>
-        </property>
-        <property name="columnCount">
-         <number>2</number>
-        </property>
-        <attribute name="horizontalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>60</number>
-        </attribute>
-        <attribute name="horizontalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderMinimumSectionSize">
-         <number>60</number>
-        </attribute>
-        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderDefaultSectionSize">
-         <number>10</number>
-        </attribute>
-        <attribute name="verticalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <row/>
-        <row/>
-        <row/>
-        <row/>
-        <row/>
-        <row/>
-        <row/>
-        <column/>
-        <column/>
-        <item row="0" column="0">
-         <property name="text">
-          <string notr="true">Name</string>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEnabled</set>
-         </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QTableWidget" name="widget_detail">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>322</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="lineWidth">
+           <number>1</number>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAsNeeded</enum>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
+          </property>
+          <property name="autoScroll">
+           <bool>true</bool>
+          </property>
+          <property name="autoScrollMargin">
+           <number>16</number>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::DoubleClicked|QAbstractItemView::SelectedClicked</set>
+          </property>
+          <property name="showDropIndicator" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="dragDropOverwriteMode">
+           <bool>false</bool>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="showGrid">
+           <bool>true</bool>
+          </property>
+          <property name="gridStyle">
+           <enum>Qt::SolidLine</enum>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="cornerButtonEnabled">
+           <bool>false</bool>
+          </property>
+          <property name="rowCount">
+           <number>7</number>
+          </property>
+          <property name="columnCount">
+           <number>2</number>
+          </property>
+          <attribute name="horizontalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>60</number>
+          </attribute>
+          <attribute name="horizontalHeaderHighlightSections">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>60</number>
+          </attribute>
+          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>10</number>
+          </attribute>
+          <attribute name="verticalHeaderHighlightSections">
+           <bool>false</bool>
+          </attribute>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <column/>
+          <column/>
+          <item row="0" column="0">
+           <property name="text">
+            <string notr="true">Name</string>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="0" column="1">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEditable|ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="1" column="0">
+           <property name="text">
+            <string notr="true">Categories</string>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="1" column="1">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEditable|ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="2" column="0">
+           <property name="text">
+            <string notr="true">Tags</string>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="2" column="1">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEditable|ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="3" column="0">
+           <property name="text">
+            <string notr="true">Favorite</string>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="3" column="1">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="checkState">
+            <enum>Checked</enum>
+           </property>
+           <property name="flags">
+            <set>ItemIsUserCheckable|ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="4" column="0">
+           <property name="text">
+            <string notr="true">ID</string>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="4" column="1">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="5" column="0">
+           <property name="text">
+            <string>Renderer</string>
+           </property>
+          </item>
+          <item row="5" column="1">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+          <item row="6" column="0">
+           <property name="text">
+            <string>Added</string>
+           </property>
+          </item>
+          <item row="6" column="1">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+           <property name="toolTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="flags">
+            <set>ItemIsEnabled</set>
+           </property>
+          </item>
+         </widget>
         </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEditable|ItemIsEnabled</set>
-         </property>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>IconSize</string>
+          </property>
+         </widget>
         </item>
-        <item row="1" column="0">
-         <property name="text">
-          <string notr="true">Categories</string>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEnabled</set>
-         </property>
+        <item>
+         <widget class="QSlider" name="slide_iconSize">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>512</number>
+          </property>
+          <property name="value">
+           <number>256</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
-        <item row="1" column="1">
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEditable|ItemIsEnabled</set>
-         </property>
+        <item>
+         <widget class="QCheckBox" name="cb_FavsOnly">
+          <property name="text">
+           <string>Show Favorites only</string>
+          </property>
+         </widget>
         </item>
-        <item row="2" column="0">
-         <property name="text">
-          <string notr="true">Tags</string>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEnabled</set>
-         </property>
+        <item>
+         <widget class="QRadioButton" name="cb_Redshift">
+          <property name="text">
+           <string>Redshift</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
-        <item row="2" column="1">
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEditable|ItemIsEnabled</set>
-         </property>
+        <item>
+         <widget class="QRadioButton" name="cb_Mantra">
+          <property name="text">
+           <string>Mantra</string>
+          </property>
+         </widget>
         </item>
-        <item row="3" column="0">
-         <property name="text">
-          <string notr="true">Favorite</string>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEnabled</set>
-         </property>
+        <item>
+         <widget class="QRadioButton" name="cb_Arnold">
+          <property name="text">
+           <string>Arnold</string>
+          </property>
+         </widget>
         </item>
-        <item row="3" column="1">
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-         <property name="flags">
-          <set>ItemIsEditable|ItemIsEnabled</set>
-         </property>
-        </item>
-        <item row="4" column="0">
-         <property name="text">
-          <string notr="true">ID</string>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>NoItemFlags</set>
-         </property>
-        </item>
-        <item row="4" column="1">
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEnabled</set>
-         </property>
-        </item>
-        <item row="5" column="0">
-         <property name="text">
-          <string>Renderer</string>
-         </property>
-        </item>
-        <item row="5" column="1">
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEnabled</set>
-         </property>
-        </item>
-        <item row="6" column="0">
-         <property name="text">
-          <string>Added</string>
-         </property>
-        </item>
-        <item row="6" column="1">
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="flags">
-          <set>ItemIsEnabled</set>
-         </property>
-        </item>
-       </widget>
+       </layout>
       </item>
      </layout>
     </item>
@@ -488,8 +552,6 @@
     <property name="title">
      <string>Library</string>
     </property>
-    <addaction name="separator"/>
-    <addaction name="action_openLibrary"/>
     <addaction name="action_updateAll"/>
     <addaction name="separator"/>
     <addaction name="action_prefs"/>
@@ -500,11 +562,6 @@
   <action name="action_updateAll">
    <property name="text">
     <string>Update All Materials</string>
-   </property>
-  </action>
-  <action name="action_openLibrary">
-   <property name="text">
-    <string>Open Library</string>
    </property>
   </action>
   <action name="action_prefs">

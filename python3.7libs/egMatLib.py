@@ -19,7 +19,6 @@ def saveMaterial(node):
     path = pref.get_dir() + "/"
     path = path.replace("\\", "/")
 
-
     # Create Library
     library = eg_library()
     library.load(path, pref)
@@ -32,7 +31,6 @@ def saveMaterial(node):
                 pane_tab.reloadActiveInterface()
                 return
 
-    # hou.ui.displayMessage("Open a MatLib Panel first")
     return
 
 
@@ -316,7 +314,6 @@ class eg_library():
             time.sleep(0.5)
         return False
 
-
     # Remove Category from Library
     def remove_category(self, cat):
         self.categories.remove(cat)
@@ -372,6 +369,15 @@ class eg_library():
         mat["tags"] = tags
         return
 
+    # Set Material Name for Material with given ID
+    def set_material_fav(self, id, fav):
+        mat = self.get_material_by_id(id)
+        mat["favorite"] = fav
+
+    def get_material_fav(self, id):
+        mat = self.get_material_by_id(id)
+        return mat["favorite"]
+
 # The PythonPanel
 class egMatLibPanel(QWidget):
     def __init__(self):
@@ -399,9 +405,10 @@ class egMatLibPanel(QWidget):
         self.filter = ""
         self.draw_mats = self.library.get_materials() # Filtererd Materials for Views
 
+        self.active_row = None
+
         self.createView()
         self.update_views()
-
 
     def update_views(self):
         self.update_thumb_view()
@@ -452,7 +459,6 @@ class egMatLibPanel(QWidget):
 
         #self.thumblist.viewportSizeHint(QSize(self.library.get_thumbSize()*4),QSize(self.library.get_thumbSize()*8))
         self.thumblist.setContentsMargins(0,0,0,0)
-
         self.thumblist.setSortingEnabled(True)
 
         # Category UI
@@ -475,8 +481,25 @@ class egMatLibPanel(QWidget):
         self.details.setColumnWidth(0,120)
         self.details.setColumnWidth(1,200)
 
-        self.details.itemChanged.connect(self.update_entry_from_detail)
-        self.details.itemDoubleClicked.connect(self.listen_entry_from_detail)
+        self.details.cellDoubleClicked.connect(self.update_entered)
+        self.details.cellChanged.connect(self.changed)
+        self.details.cellClicked.connect(self.cb_changed)
+
+
+        # Options
+        self.cb_FavsOnly = self.ui.findChild(QCheckBox, "cb_FavsOnly")
+        self.cb_Redshift = self.ui.findChild(QRadioButton, "cb_Redshift")
+        self.cb_Mantra = self.ui.findChild(QRadioButton, "cb_Mantra")
+        self.cb_Arnold = self.ui.findChild(QRadioButton, "cb_Arnold")
+
+        self.cb_FavsOnly.stateChanged.connect(self.update_views)
+        self.cb_Redshift.toggled.connect(self.update_views)
+        self.cb_Mantra.toggled.connect(self.update_views)
+        self.cb_Arnold.toggled.connect(self.update_views)
+
+        # IconSize Slider
+        self.slide_iconSize = self.ui.findChild(QSlider, "slide_iconSize")
+        self.slide_iconSize.sliderReleased.connect(self.slide)
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
@@ -493,6 +516,17 @@ class egMatLibPanel(QWidget):
         self.setLayout(mainLayout)
 
 
+
+    # Set IconSize via Slider
+    def slide(self):
+        self.library.set_thumbSize(self.slide_iconSize.value())
+        #Update Thumblist Grid
+        self.thumblist.setIconSize(QSize(self.library.get_thumbSize(), self.library.get_thumbSize()))
+        self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
+
+        self.update_views()
+        pass
+
     ###################################
     ############ RC MENUS #############
     ###################################
@@ -504,6 +538,7 @@ class egMatLibPanel(QWidget):
         renderAct = cmenu.addAction("Rerender Thumbnail")
         importAct = cmenu.addAction("Import to Scene")
         renderAllAct = cmenu.addAction("Render All Thumbnails")
+        toggleFav = cmenu.addAction("Toggle Favorite")
         action = cmenu.exec_(QCursor.pos())
 
         if action == delAct:
@@ -514,8 +549,23 @@ class egMatLibPanel(QWidget):
             self.import_material()
         elif action == renderAllAct:
             self.update_all_materials()
+        elif action == toggleFav:
+            self.toggle_fav()
         return
 
+    def toggle_fav(self):
+        item = self.get_selected_material_from_thumblist()
+        id = self.get_id_from_thumblist(item)
+        index = self.thumblist.indexFromItem(item)
+
+        if self.library.get_material_fav(id):
+            self.library.set_material_fav(id, 0)
+        else:
+            self.library.set_material_fav(id, 1)
+
+        self.update_details_view(item)
+        self.update_views()
+        return
 
     def catlist_rc_menu(self):
         cmenu = QMenu(self)
@@ -525,7 +575,6 @@ class egMatLibPanel(QWidget):
         addAct = cmenu.addAction("Add Category")
         action = cmenu.exec_(QCursor.pos())
 
-        #print(self)
         if action == removeAct:
             self.rmv_category_user()
             pass
@@ -541,7 +590,6 @@ class egMatLibPanel(QWidget):
     ########### USER STUFF ############
     ###################################
 
-
     def show_prefs(self):
 
         prefs = PrefsDialog(self.library, self.prefs)
@@ -550,22 +598,9 @@ class egMatLibPanel(QWidget):
         if prefs.canceled:
             return
 
-        #if dialog.categories:
-            #self.library.check_add_category(dialog.categories)
-        #if dialog.tags:
-            #self.library.check_add_tags(dialog.tags)
-        # if dialog.fav:
-        #     fav = dialog.fav
-        # TODO: Implement Favs
-        # fav = int(hou.ui.displayConfirmation("Do you want this to be a Favorite?"))
-
-        #self.library.add_material(sel[0] ,dialog.categories, dialog.categories, dialog.fav)
-        #self.library.update_from_disk()
-
         #Update Thumblist Grid
         self.thumblist.setIconSize(QSize(self.library.get_thumbSize(), self.library.get_thumbSize()))
         self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
-
         self.update_views()
         return
 
@@ -594,7 +629,6 @@ class egMatLibPanel(QWidget):
 
 
     def rename_category_user(self):
-
         choice, cat = hou.ui.readInput("Please enter the new category name:")
         if choice: # Return if no
             return
@@ -626,29 +660,37 @@ class egMatLibPanel(QWidget):
         self.active_item = item
         return
 
-    def update_entry_from_detail(self, item):
-        if self.active and self.active_item is item:
+    def update_entered(self, row, column):
+        self.active_row = row
+
+    def changed(self, row, column):
+        if self.active_row == row:
+            item = self.details.item(row, column)
             curr_id = self.details.item(4,1).text()
-            if item.row() == 0:
+            if row == 0:
                 # Change Name
                 self.library.set_material_name(curr_id, item.text())
-            elif item.row() == 1:
+            elif row == 1:
                 self.library.set_material_cat(curr_id, item.text())
-            elif item.row() == 2:
+            elif row == 2:
                 self.library.set_material_tag(curr_id, item.text())
-            elif item.row() == 3:
-                #Change Fav
-                # if item.CheckState() is Qt.Checked:
-                #     item.setCheckState(Qt.Unchecked)
-                # else:
-                #     item.setCheckState(Qt.Checked)
-                pass
-            # Update All
             self.library.save()
             self.update_views()
-            # Reset
-            self.active = False
+
+        self.active_row = None
         return
+
+    def cb_changed(self, row, column):
+        if row == 3:
+            item = self.details.item(row, column)
+            curr_id = self.details.item(4,1).text()
+            if item.checkState() is Qt.Checked:
+                self.library.set_material_fav(curr_id, 1)
+            else:
+                self.library.set_material_fav(curr_id, 0)
+        self.library.save()
+        self.update_views()
+
 
     ###################################
     ########## UPDATE VIEWS ###########
@@ -660,7 +702,6 @@ class egMatLibPanel(QWidget):
         if item is None:
             return
         id = self.get_id_from_thumblist(item)
-
 
         for mat in self.library.get_materials():
             if mat["id"] == id:
@@ -773,12 +814,39 @@ class egMatLibPanel(QWidget):
                 # Pass Empty Default Material
                 if mat["id"] == -1:
                     continue
+                # Show only Favs
+                if self.cb_FavsOnly.checkState() is Qt.Checked:
+                    if mat["favorite"] == 0:
+                        continue
+                if self.cb_Redshift.isChecked():
+                    if mat["renderer"] != "Redshift":
+                        continue
+                elif self.cb_Mantra.isChecked():
+                    if mat["renderer"] != "Mantra":
+                        continue
+                elif self.cb_Arnold.isChecked():
+                    if mat["renderer"] != "Arnold":
+                        continue
+
                 img = self.library.get_path() + self.prefs.get_img_dir() + str(mat["id"]) + self.prefs.get_img_ext()
 
+                favicon = self.path = hou.getenv("EGMATLIB") + "\def\Favorite.png"
                 # Check if Thumb Exists and attach
                 if os.path.isfile(img):
-                    pixmap = QPixmap.fromImage(QImage(img)).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
-                    icon = QIcon(pixmap)
+                    # Draw Star Icon on Top if Favorite
+                    if mat["favorite"]:
+                        pm = QPixmap(self.library.get_thumbSize(), self.library.get_thumbSize())
+                        pm1 = QPixmap.fromImage(QImage(img)).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
+                        pm2 = QPixmap.fromImage(QImage(favicon)).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
+                        painter = QPainter(pm)
+                        painter.drawPixmap(0,0,self.library.get_thumbSize(),self.library.get_thumbSize(),pm1)
+                        painter.drawPixmap(0,0,self.library.get_thumbSize(),self.library.get_thumbSize(),pm2)
+                        painter.end()
+                        icon = QIcon(pm)
+
+                    else:
+                        pixmap = QPixmap.fromImage(QImage(img)).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
+                        icon = QIcon(pixmap)
                 else:
                     icon = self.default_icon
 
@@ -790,7 +858,6 @@ class egMatLibPanel(QWidget):
                 item.setData(Qt.UserRole, mat["id"])  # Store ID with Thumb
                 self.thumblist.addItem(item)
                 self.thumblist.sortItems()
-
 
 
     # Create PlaceHolder Icon in case something goes wrong
@@ -985,7 +1052,7 @@ class PrefsDialog(QDialog):
         self.line_workdir = self.ui.findChild(QLineEdit, 'line_workdir')
         self.line_thumbsize = self.ui.findChild(QLineEdit, 'line_thumbsize')
         self.line_rendersize = self.ui.findChild(QLineEdit, 'line_rendersize')
-        self.cb_buttons = self.ui.findChild(QCheckBox, "cb_buttons")
+        #self.cb_buttons = self.ui.findChild(QCheckBox, "cb_buttons")
 
         self.buttons = self.ui.findChild(QDialogButtonBox, "buttonBox")
         self.buttons.accepted.connect(self.confirm)
@@ -1004,7 +1071,7 @@ class PrefsDialog(QDialog):
 
     def confirm(self):
         self.prefs.set_dir(self.line_workdir.text())
-        self.prefs.set_btns(int(self.cb_buttons.isChecked()))
+        #self.prefs.set_btns(int(self.cb_buttons.isChecked()))
         self.prefs.save()
 
         self.library.set_renderSize(int(self.line_rendersize.text()))
@@ -1021,7 +1088,7 @@ class PrefsDialog(QDialog):
     def fill_values(self):
 
         self.directory = self.prefs.get_dir()
-        self.show_buttons =  self.prefs.get_btns()
+        #self.show_buttons =  self.prefs.get_btns()
 
         self.rendersize = self.library.get_renderSize()
         self.thumbsize = self.library.get_thumbSize()
@@ -1029,8 +1096,8 @@ class PrefsDialog(QDialog):
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setText(str(self.rendersize))
         self.line_thumbsize.setText(str(self.thumbsize))
-        if self.show_buttons:
-            self.cb_buttons.setCheckState(Qt.Checked)
-        else:
-            self.cb_buttons.setCheckState(Qt.Unchecked)
-        return
+        # if self.show_buttons:
+        #     self.cb_buttons.setCheckState(Qt.Checked)
+        # else:
+        #     self.cb_buttons.setCheckState(Qt.Unchecked)
+        # return
