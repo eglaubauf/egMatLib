@@ -30,7 +30,6 @@ def saveMaterial(node):
             if pane_tab.label() == "MatLib":
                 pane_tab.reloadActiveInterface()
                 return
-
     return
 
 
@@ -212,7 +211,6 @@ class eg_library():
 
 
     def add_material(self, node, cats, tags, fav):
-
         id = uuid.uuid1().time
         if self.save_node(node, id):
             # Format
@@ -227,13 +225,38 @@ class eg_library():
             for t in tags:
                 t.replace(" ", "")
 
+            renderer = ""
+            if node.type().name() == "redshift_vopnet":
+                renderer = "Redshift"
+                builder = 1
+            elif node.type().name() == "materialbuilder":
+                renderer = "Mantra"
+                builder = 1
+            elif node.type().name() == "principledshader::2.0":
+                renderer = "Mantra"
+                builder = 0
+
             date = str(datetime.datetime.now())
             date = date[:-7]
 
-            material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav, "renderer": "Redshift", "date": date}
+            material = {"id": id, "name": name, "categories": cats, "tags": tags, "favorite": fav, "renderer": renderer, "date": date, "builder": builder}
             self.materials.append(material)
             self.save()
         return
+
+
+    def get_renderer_by_id(self, id):
+        for mat in self.materials:
+            if int(id) == mat["id"]:
+                return mat["renderer"]
+        return None
+
+    def check_materialBuilder_by_id(self, id):
+        for mat in self.materials:
+            if int(id) == mat["id"]:
+                return mat["builder"]
+        return None
+
 
     def import_material(self, id):
 
@@ -241,19 +264,32 @@ class eg_library():
 
         mat = self.get_material_by_id(id)
 
-        # CreateBuilder
-        builder = hou.node('/mat').createNode('redshift_vopnet')
-        builder.setName(mat["name"], unique_name=True)
-
-        # Delete Default children in RS-VopNet
-        for node in builder.children():
-            node.destroy()
-        # Load File
+        renderer = self.get_renderer_by_id(id)
+        builder = None
+        if renderer == "Redshift":
+            # CreateBuilder
+            builder = hou.node('/mat').createNode('redshift_vopnet')
+            builder.setName(mat["name"], unique_name=True)
+            # Delete Default children in RS-VopNet
+            for node in builder.children():
+                    node.destroy()
+        elif renderer == "Mantra":
+            builder = hou.node('/mat').createNode('materialbuilder')
+            builder.setName(mat["name"], unique_name=True)
+            # Delete Default children in MaterialBuilder
+            for node in builder.children():
+                node.destroy()
         try:
             builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
         except:
             hou.ui.displayMessage("File not found on Disk")
             return
+
+        if renderer == "Mantra" and not self.check_materialBuilder_by_id(id):
+            n = builder.children()[0]
+            hou.moveNodesTo((n, ), builder.parent())
+            builder.destroy()
+            builder = hou.selectedNodes()[0]
 
         # MakeFancyPos
         builder.moveToGoodPosition()
@@ -263,10 +299,16 @@ class eg_library():
     #  Render Image & Node-tree to disk
     def save_node(self, node, id):
         # Check against NodeType
-        if node.type().name() != "redshift_vopnet":
+        if node.type().name() == "redshift_vopnet":
+            return self.save_node_redshift(node, id)
+        elif node.type().name() == "materialbuilder" or node.type().name() == "principledshader::2.0":
+            return self.save_node_mantra(node, id)
+        else:
             hou.ui.displayMessage('Selected Node is not a Material Builder')
-            return False
+        return False
 
+
+    def save_node_redshift(self, node, id):
         # Filepath where to save stuff
         file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
 
@@ -301,8 +343,59 @@ class eg_library():
 
         # CleanUp
         thumb.destroy()
-
         return True
+
+
+    def save_node_mantra(self, node, id):
+        # Filepath where to save stuff
+        file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
+
+
+        origNode = node
+        builder = ""
+        if node.type().name() != "materialbuilder":
+            builder = hou.node("/mat").createNode("materialbuilder")
+            for c in builder.children():
+                c.destroy()
+            hou.copyNodesTo((node,), builder)
+            node = builder
+
+        children = node.children()
+        node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
+
+        node = origNode
+        builder.destroy()
+
+        # Create Thumbnail
+        thumb = hou.node("/obj").createNode("eg_thumbnail_Mantra::1.1")
+        thumb.parm("mat").set(node.path())
+
+        # Build path
+        path = self.get_path() + self.settings.get_img_dir() + str(id) + self.settings.get_img_ext()
+
+        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
+        thumb.parm("path").set(path)
+        exclude = "* ^" + thumb.name()
+        thumb.parm("obj_exclude").set(exclude)
+        lights = thumb.name() + "/*"
+        thumb.parm("lights").set(lights)
+        thumb.parm("render_resx").set(self.rendersize)
+        thumb.parm("render_resy").set(self.rendersize)
+
+        # Make sure there is no done file
+        if os.path.exists(self.get_path() + self.settings.get_done_file()):
+            os.remove(self.get_path() + self.settings.get_done_file())
+
+        # Render Frame
+        thumb.parm("render").pressButton()
+
+        # Wait until Render is finished
+        self.waitForRender(path)
+
+        # CleanUp
+        thumb.destroy()
+        return True
+
 
     # Wait until Background Rendering is finished
     def waitForRender(self, path):
@@ -334,7 +427,6 @@ class eg_library():
                 for i, c in enumerate(mat["categories"]):
                     if c == old:
                         self.materials[j]["categories"][i] = new
-
         return
 
     # Set Material Name for Material with given ID
@@ -830,7 +922,7 @@ class egMatLibPanel(QWidget):
 
                 img = self.library.get_path() + self.prefs.get_img_dir() + str(mat["id"]) + self.prefs.get_img_ext()
 
-                favicon = self.path = hou.getenv("EGMATLIB") + "\def\Favorite.png"
+                favicon = hou.getenv("EGMATLIB") + "\def\Favorite.png"
                 # Check if Thumb Exists and attach
                 if os.path.isfile(img):
                     # Draw Star Icon on Top if Favorite
@@ -1052,7 +1144,6 @@ class PrefsDialog(QDialog):
         self.line_workdir = self.ui.findChild(QLineEdit, 'line_workdir')
         self.line_thumbsize = self.ui.findChild(QLineEdit, 'line_thumbsize')
         self.line_rendersize = self.ui.findChild(QLineEdit, 'line_rendersize')
-        #self.cb_buttons = self.ui.findChild(QCheckBox, "cb_buttons")
 
         self.buttons = self.ui.findChild(QDialogButtonBox, "buttonBox")
         self.buttons.accepted.connect(self.confirm)
@@ -1071,7 +1162,6 @@ class PrefsDialog(QDialog):
 
     def confirm(self):
         self.prefs.set_dir(self.line_workdir.text())
-        #self.prefs.set_btns(int(self.cb_buttons.isChecked()))
         self.prefs.save()
 
         self.library.set_renderSize(int(self.line_rendersize.text()))
@@ -1088,16 +1178,9 @@ class PrefsDialog(QDialog):
     def fill_values(self):
 
         self.directory = self.prefs.get_dir()
-        #self.show_buttons =  self.prefs.get_btns()
-
         self.rendersize = self.library.get_renderSize()
         self.thumbsize = self.library.get_thumbSize()
 
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setText(str(self.rendersize))
         self.line_thumbsize.setText(str(self.thumbsize))
-        # if self.show_buttons:
-        #     self.cb_buttons.setCheckState(Qt.Checked)
-        # else:
-        #     self.cb_buttons.setCheckState(Qt.Unchecked)
-        # return
