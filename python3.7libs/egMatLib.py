@@ -12,8 +12,9 @@ from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2 import QtUiTools
 
-# Call from RC-Menus in Network Pane
+
 def saveMaterial(node):
+    # Call from RC-Menus in Network Pane
     # Initialize
     pref = prefs()
     path = pref.get_dir() + "/"
@@ -36,23 +37,25 @@ def saveMaterial(node):
 
 # Call from RC-Menus in Network Pane - Get User Info
 def get_material_info_user(library, sel):
-        # Get Stuff from User
-        dialog = materialDialog()
-        dialog.exec_()
+    # Get Stuff from User
+    dialog = materialDialog()
+    dialog.exec_()
 
-        if dialog.canceled:
-            return
-        if dialog.categories:
-            library.check_add_category(dialog.categories)
-        if dialog.tags:
-            library.check_add_tags(dialog.tags)
-
-        library.add_material(sel, dialog.categories, dialog.tags, dialog.fav)
+    if dialog.canceled:
         return
+    if dialog.categories:
+        library.check_add_category(dialog.categories)
+    if dialog.tags:
+        library.check_add_tags(dialog.tags)
+
+    library.add_material(sel, dialog.categories, dialog.tags, dialog.fav)
+    return
+
 
 ###################################
 ######### THE PYTHON PANEL ########
 ###################################
+
 
 class egMatLibPanel(QWidget):
     def __init__(self):
@@ -130,7 +133,7 @@ class egMatLibPanel(QWidget):
         self.thumblist.itemPressed.connect(self.update_details_view)
         self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
 
-        self.thumblist.setContentsMargins(0,0,0,0)
+        self.thumblist.setContentsMargins(0, 0, 0, 0)
         self.thumblist.setSortingEnabled(True)
 
         # Category UI
@@ -184,7 +187,6 @@ class egMatLibPanel(QWidget):
         mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
 
         self.setLayout(mainLayout)
-
 
     # Set IconSize via Slider
     def slide(self):
@@ -345,7 +347,7 @@ class egMatLibPanel(QWidget):
         '''Apply change in Detail view to Library '''
         if self.active_row == row:
             item = self.details.item(row, column)
-            curr_id = self.details.item(4,1).text()
+            curr_id = self.details.item(4, 1).text()
             if row == 0:
                 # Change Name
                 self.library.set_material_name(curr_id, item.text())
@@ -363,7 +365,7 @@ class egMatLibPanel(QWidget):
         '''Apply change in Detail View - Favorite'''
         if row == 3:
             item = self.details.item(row, column)
-            curr_id = self.details.item(4,1).text()
+            curr_id = self.details.item(4, 1).text()
             if item.checkState() is Qt.Checked:
                 self.library.set_material_fav(curr_id, 1)
             else:
@@ -386,28 +388,28 @@ class egMatLibPanel(QWidget):
         for mat in self.library.get_materials():
             if mat["id"] == id:
                 # set name
-                table_item = self.details.item(0,1)
+                table_item = self.details.item(0, 1)
                 table_item.setText(mat["name"])
                 # set cat
-                table_item = self.details.item(1,1)
+                table_item = self.details.item(1, 1)
                 table_item.setText(", ".join(mat["categories"]))
                 # set tag
-                table_item = self.details.item(2,1)
+                table_item = self.details.item(2, 1)
                 table_item.setText(", ".join(mat["tags"]))
                 # set fav
-                table_item = self.details.item(3,1)
+                table_item = self.details.item(3, 1)
                 if mat["favorite"] == 1:
                     table_item.setCheckState(Qt.Checked)
                 else:
                     table_item.setCheckState(Qt.Unchecked)
                 # set id
-                table_item = self.details.item(4,1)
+                table_item = self.details.item(4, 1)
                 table_item.setText(str(mat["id"]))
                 # set Renderer
-                table_item = self.details.item(5,1)
+                table_item = self.details.item(5, 1)
                 table_item.setText(mat["renderer"])
                 # set Date
-                table_item = self.details.item(6,1)
+                table_item = self.details.item(6, 1)
                 try:
                     table_item.setText(mat["date"])
                 except:
@@ -523,8 +525,8 @@ class egMatLibPanel(QWidget):
                         pm1 = QPixmap.fromImage(QImage(img)).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
                         pm2 = QPixmap.fromImage(QImage(favicon)).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
                         painter = QPainter(pm)
-                        painter.drawPixmap(0,0,self.library.get_thumbSize(),self.library.get_thumbSize(),pm1)
-                        painter.drawPixmap(0,0,self.library.get_thumbSize(),self.library.get_thumbSize(),pm2)
+                        painter.drawPixmap(0, 0, self.library.get_thumbSize(), self.library.get_thumbSize(), pm1)
+                        painter.drawPixmap(0, 0, self.library.get_thumbSize(), self.library.get_thumbSize(), pm2)
                         painter.end()
                         icon = QIcon(pm)
 
@@ -595,6 +597,7 @@ class egMatLibPanel(QWidget):
     def get_id_from_thumblist(self, item):
         '''Return the id for the selected item in thumbview'''
         return item.data(Qt.UserRole)
+
 
     # Delete Material from Library
     def delete_material(self):
@@ -727,11 +730,62 @@ class eg_library():
     def set_thumbSize(self, val):
         self.thumbsize = val
 
+
     def set_renderSize(self, val):
         self.rendersize = val
 
+
     def get_renderSize(self):
         return self.rendersize
+
+
+    def set_material_name(self, id, name):
+        '''Sets the Name for the given Material (id)'''
+        mat = self.get_material_by_id(id)
+        mat["name"] = name
+
+
+    def get_material_by_id(self, id):
+        '''Returns the Library-Entry for the given id'''
+        for mat in self.materials:
+            if int(id) == mat["id"]:
+                return mat
+        return None
+
+
+    def set_material_cat(self, id, cat):
+        '''Sets the category for the given Material (id)'''
+        self.check_add_category(cat)
+        mat = self.get_material_by_id(id)
+
+        cats = cat.split(",")
+        for c in cats:
+            c = c.replace(" ", "")
+        mat["categories"] = cats
+        return
+
+
+    def set_material_tag(self, id, tag):
+        '''Sets the tag for the given Material (id)'''
+        mat = self.get_material_by_id(id)
+        tags = tag.split(",")
+        for t in tags:
+            t = t.replace(" ", "")
+        mat["tags"] = tags
+        return
+
+
+    def set_material_fav(self, id, fav):
+        '''Sets the fav for the given Material (id)'''
+        mat = self.get_material_by_id(id)
+        mat["favorite"] = fav
+
+
+    def get_material_fav(self, id):
+        '''Gets the fav for the given Material (id) as 0/1'''
+        mat = self.get_material_by_id(id)
+        return mat["favorite"]
+
 
     def remove_material(self, id):
         '''Removes a Material from this Library and Disk'''
@@ -748,7 +802,6 @@ class eg_library():
                 self.save()
                 return
 
-
     def check_add_category(self, cat):
         '''Checks if this category exists and adds it if needed'''
         cats = cat.split(",")
@@ -759,7 +812,6 @@ class eg_library():
                     self.categories.append(c)
         return
 
-
     def check_add_tags(self, tags):
         '''Checks if this tag exists and adds it if needed'''
         tags = tags.split(",")
@@ -769,7 +821,6 @@ class eg_library():
                 if t not in self.tags:
                     self.tags.append(t)
         return
-
 
     def add_material(self, node, cats, tags, fav):
         '''Add a Material to this Library'''
@@ -806,14 +857,12 @@ class eg_library():
             self.save()
         return
 
-
     def get_renderer_by_id(self, id):
         '''Return the Renderer for this Material as a string'''
         for mat in self.materials:
             if int(id) == mat["id"]:
                 return mat["renderer"]
         return None
-
 
     def check_materialBuilder_by_id(self, id):
         '''Return if the Material is a Builder (Mantra) as a 0/1'''
@@ -822,7 +871,6 @@ class eg_library():
                 return mat["builder"]
         return None
 
-
     def get_current_network_node(self):
         '''Return thre current Node in the Network Editor'''
         for pt in hou.ui.paneTabs():
@@ -830,6 +878,28 @@ class eg_library():
                 return pt.currentNode()
         return None
 
+    def remove_category(self, cat):
+        '''Removes the given category from the library (and also in all Materials)'''
+        self.categories.remove(cat)
+        # check materials against category and remove there also:
+        for mat in self.materials:
+            if cat in mat["categories"]:
+                mat["categories"].remove(cat)
+        return
+
+    def rename_category(self, old, new):
+        '''Renames the given category in the library (and also in all Materials)'''
+        # Update Categories with that name
+        for count, current in enumerate(self.categories):
+            if current == old:
+                self.categories[count] = new
+        # Update all Categories with that name in all Materials
+        for j, mat in enumerate(self.materials):
+            if old in mat["categories"]:
+                for i, c in enumerate(mat["categories"]):
+                    if c == old:
+                        self.materials[j]["categories"][i] = new
+        return
 
     def import_material(self, id):
         '''Import a Material to the Nework Editor/Scene'''
@@ -846,7 +916,7 @@ class eg_library():
             currNode = self.get_current_network_node()
             if currNode is None:
                 import_path = ('/mat')
-            if currNode.type().name() != "matnet":
+            if currNode.type().name() != "matnet" and currNode.path() != "/mat":
                 matnet = hou.node(currNode.path()).createNode("matnet")
                 import_path = matnet.path()
             else:
@@ -886,7 +956,6 @@ class eg_library():
         return builder
 
 
-    #  Render Image & Node-tree to disk
     def save_node(self, node, id):
         '''Save Node wrapper for different Material Types'''
         # Check against NodeType
@@ -943,7 +1012,6 @@ class eg_library():
         # Filepath where to save stuff
         file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
 
-
         origNode = node
         builder = ""
         if node.type().name() != "materialbuilder":
@@ -990,7 +1058,6 @@ class eg_library():
         return True
 
 
-    # Wait until Background Rendering is finished
     def waitForRender(self):
         '''Freeze the UI until the current render is finsihed'''
         mustend = time.time() + 60.0
@@ -1000,78 +1067,6 @@ class eg_library():
                 return True
             time.sleep(0.5)
         return False
-
-    # Remove Category from Library
-    def remove_category(self, cat):
-        '''Removes the given category from the library (and also in all Materials)'''
-        self.categories.remove(cat)
-        # check materials against category and remove there also:
-        for mat in self.materials:
-            if cat in mat["categories"]:
-                mat["categories"].remove(cat)
-        return
-
-    def rename_category(self, old, new):
-        '''Renames the given category in the library (and also in all Materials)'''
-        # Update Categories with that name
-        for count, current in enumerate(self.categories):
-            if current == old:
-                self.categories[count] = new
-        # Update all Categories with that name in all Materials
-        for j, mat in enumerate(self.materials):
-            if old in mat["categories"]:
-                for i, c in enumerate(mat["categories"]):
-                    if c == old:
-                        self.materials[j]["categories"][i] = new
-        return
-
-    # Set Material Name for Material with given ID
-    def set_material_name(self, id, name):
-        '''Sets the Name for the given Material (id)'''
-        mat = self.get_material_by_id(id)
-        mat["name"] = name
-
-    # Get Material by ID
-
-    def get_material_by_id(self, id):
-        '''Returns the Library-Entry for the given id'''
-        for mat in self.materials:
-            if int(id) == mat["id"]:
-                return mat
-        return None
-
-    # Set Material Category for Material with given ID
-    def set_material_cat(self, id, cat):
-        '''Sets the category for the given Material (id)'''
-        self.check_add_category(cat)
-        mat = self.get_material_by_id(id)
-
-        cats = cat.split(",")
-        for c in cats:
-            c = c.replace(" ", "")
-        mat["categories"] = cats
-        return
-
-    # Set Material Tag for Material with given ID
-    def set_material_tag(self, id, tag):
-        '''Sets the tag for the given Material (id)'''
-        mat = self.get_material_by_id(id)
-        tags = tag.split(",")
-        for t in tags:
-            t = t.replace(" ", "")
-        mat["tags"] = tags
-        return
-
-    # Set Material Name for Material with given ID
-    def set_material_fav(self, id, fav):
-        '''Sets the fav for the given Material (id)'''
-        mat = self.get_material_by_id(id)
-        mat["favorite"] = fav
-
-    def get_material_fav(self, id):
-        '''Gets the fav for the given Material (id) as 0/1'''
-        mat = self.get_material_by_id(id)
-        return mat["favorite"]
 
 
 ###################################

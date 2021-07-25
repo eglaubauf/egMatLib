@@ -8,7 +8,7 @@
   <interface name="MatLib" label="MatLib" icon="MISC_python" showNetworkNavigationBar="false" help_url="">
     <script><![CDATA[import sys
 import importlib         
-
+ 
 def createInterface():
     import egMatLib
     importlib.reload(egMatLib)
