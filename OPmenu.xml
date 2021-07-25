@@ -7,28 +7,42 @@
                     <expression>
 <![CDATA[
 n = kwargs.get("node", None)
-if n.type().name() != "redshift_vopnet":
-    return False
-return True ]]>
+if n.type().name() == "redshift_vopnet":
+    return True
+elif n.type().name() == "materialbuilder":
+    return True
+elif n.type().name() == "principledshader::2.0":
+    return True
+return False ]]>
                     </expression>
                 </context>
                 <labelExpression>
 <![CDATA[
 n = kwargs.get("node", None)
-if n.type().name() != "redshift_vopnet":
-    return "Unavailable in this Context"
-else:
-    return "Save Material to egMatLib"
+if n.type().name() == "redshift_vopnet":
+    return "Save Material to MatLib"
+elif n.type().name() == "materialbuilder":
+    return "Save Material to MatLib"
+elif n.type().name() == "principledshader::2.0":
+    return "Save Material to MatLib"
+return "Unavailable in this Context"
 ]]>
                 </labelExpression>
                 <scriptCode>
 <![CDATA[
 n = kwargs.get("node", None)
-if n.type().name() != "redshift_vopnet":
-    hou.ui.displayMessage('Please select Material Builder Nodes to save Material')
-else:
+if n.type().name() == "redshift_vopnet":
     import egMatLib
     egMatLib.saveMaterial(n)
+elif n.type().name() == "materialbuilder":
+    import egMatLib
+    egMatLib.saveMaterial(n)
+elif n.type().name() == "principledshader::2.0":
+    import egMatLib
+    egMatLib.saveMaterial(n)
+else:
+    hou.ui.displayMessage('Please select Material Builder Nodes to save Material')
+
 ]]>
                 </scriptCode>
             </scriptItem>

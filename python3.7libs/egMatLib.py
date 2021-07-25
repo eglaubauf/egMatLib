@@ -118,6 +118,7 @@ class eg_library():
         self.tags = None
         self.settings = None
         self.path = None
+        self.currContext = 0
 
     def load(self, path, prefs):
         self.path = path
@@ -258,6 +259,12 @@ class eg_library():
         return None
 
 
+    def getCurrentNetworkEditorPane(self):
+        for pt in hou.ui.paneTabs():
+            if pt.type() == hou.paneTabType.NetworkEditor:
+                return pt.currentNode()
+        return None
+
     def import_material(self, id):
 
         file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
@@ -266,15 +273,28 @@ class eg_library():
 
         renderer = self.get_renderer_by_id(id)
         builder = None
+
+        # Import to current context
+        import_path = ('/mat')
+        if self.currContext:
+            currNode = self.getCurrentNetworkEditorPane()
+            if currNode is None:
+                import_path = ('/mat')
+            if currNode.type().name() != "matnet":
+                matnet = hou.node(currNode.path()).createNode("matnet")
+                import_path = matnet.path()
+            else:
+                import_path = currNode.path()
+
         if renderer == "Redshift":
             # CreateBuilder
-            builder = hou.node('/mat').createNode('redshift_vopnet')
+            builder = hou.node( ).createNode('redshift_vopnet')
             builder.setName(mat["name"], unique_name=True)
             # Delete Default children in RS-VopNet
             for node in builder.children():
                     node.destroy()
         elif renderer == "Mantra":
-            builder = hou.node('/mat').createNode('materialbuilder')
+            builder = hou.node(import_path).createNode('materialbuilder')
             builder.setName(mat["name"], unique_name=True)
             # Delete Default children in MaterialBuilder
             for node in builder.children():
@@ -285,6 +305,7 @@ class eg_library():
             hou.ui.displayMessage("File not found on Disk")
             return
 
+        # If node is Principled Shader
         if renderer == "Mantra" and not self.check_materialBuilder_by_id(id):
             n = builder.children()[0]
             hou.moveNodesTo((n, ), builder.parent())
@@ -530,8 +551,8 @@ class egMatLibPanel(QWidget):
         self.action_prefs.triggered.connect(self.show_prefs)
 
         # Link Buttons
-        self.btn_update = self.ui.findChild(QPushButton, 'btn_update')
-        self.btn_update.clicked.connect(self.update_single_material)
+        # self.btn_update = self.ui.findChild(QPushButton, 'btn_update')
+        # self.btn_update.clicked.connect(self.update_single_material)
 
         self.btn_save = self.ui.findChild(QPushButton, 'btn_save')
         self.btn_save.clicked.connect(self.save_material)
@@ -549,7 +570,6 @@ class egMatLibPanel(QWidget):
         self.thumblist.itemPressed.connect(self.update_details_view)
         self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
 
-        #self.thumblist.viewportSizeHint(QSize(self.library.get_thumbSize()*4),QSize(self.library.get_thumbSize()*8))
         self.thumblist.setContentsMargins(0,0,0,0)
         self.thumblist.setSortingEnabled(True)
 
@@ -582,12 +602,15 @@ class egMatLibPanel(QWidget):
         self.cb_FavsOnly = self.ui.findChild(QCheckBox, "cb_FavsOnly")
         self.cb_Redshift = self.ui.findChild(QRadioButton, "cb_Redshift")
         self.cb_Mantra = self.ui.findChild(QRadioButton, "cb_Mantra")
-        self.cb_Arnold = self.ui.findChild(QRadioButton, "cb_Arnold")
+        #self.cb_Arnold = self.ui.findChild(QRadioButton, "cb_Arnold")
 
         self.cb_FavsOnly.stateChanged.connect(self.update_views)
         self.cb_Redshift.toggled.connect(self.update_views)
         self.cb_Mantra.toggled.connect(self.update_views)
-        self.cb_Arnold.toggled.connect(self.update_views)
+        #self.cb_Arnold.toggled.connect(self.update_views)
+
+        self.cb_context = self.ui.findChild(QCheckBox, "cb_context")
+        self.cb_context.stateChanged.connect(self.update_context)
 
         # IconSize Slider
         self.slide_iconSize = self.ui.findChild(QSlider, "slide_iconSize")
@@ -598,7 +621,7 @@ class egMatLibPanel(QWidget):
         self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
 
         # Default icon for rendering
-        self.create_default_icon()
+        #self.create_default_icon()
 
         # set main layout and attach to widget
         mainLayout = QVBoxLayout()
@@ -617,7 +640,15 @@ class egMatLibPanel(QWidget):
         self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
 
         self.update_views()
-        pass
+        return
+
+    def update_context(self, state):
+        if state == Qt.Checked:
+            self.library.currContext = 1
+        else:
+            self.library.currContext = 0
+        return
+
 
     ###################################
     ############ RC MENUS #############
@@ -626,11 +657,12 @@ class egMatLibPanel(QWidget):
     def thumblist_rc_menu(self):
         cmenu = QMenu(self)
 
-        delAct = cmenu.addAction("Delete Entry")
-        renderAct = cmenu.addAction("Rerender Thumbnail")
         importAct = cmenu.addAction("Import to Scene")
-        renderAllAct = cmenu.addAction("Render All Thumbnails")
         toggleFav = cmenu.addAction("Toggle Favorite")
+        renderAct = cmenu.addAction("Rerender Thumbnail")
+        renderAllAct = cmenu.addAction("Render All Thumbnails")
+        cmenu.addSeparator()
+        delAct = cmenu.addAction("Delete Entry")
         action = cmenu.exec_(QCursor.pos())
 
         if action == delAct:
@@ -916,9 +948,9 @@ class egMatLibPanel(QWidget):
                 elif self.cb_Mantra.isChecked():
                     if mat["renderer"] != "Mantra":
                         continue
-                elif self.cb_Arnold.isChecked():
-                    if mat["renderer"] != "Arnold":
-                        continue
+                # elif self.cb_Arnold.isChecked():
+                #     if mat["renderer"] != "Arnold":
+                #         continue
 
                 img = self.library.get_path() + self.prefs.get_img_dir() + str(mat["id"]) + self.prefs.get_img_ext()
 
@@ -953,7 +985,7 @@ class egMatLibPanel(QWidget):
 
 
     # Create PlaceHolder Icon in case something goes wrong
-    def create_default_icon(self):
+    def default_icon(self):
         #Generate Default Icon
         default_img = QImage(self.library.get_thumbSize(), self.library.get_thumbSize(), QImage.Format_RGB16)
         default_img.fill(QColor(0, 0, 0))

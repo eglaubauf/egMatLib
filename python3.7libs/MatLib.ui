@@ -172,16 +172,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_update">
-            <property name="text">
-             <string>Update Thumbnail</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="btn_save">
             <property name="text">
-             <string>Save Selected to Library</string>
+             <string>Save to Library</string>
             </property>
            </widget>
           </item>
@@ -490,9 +483,26 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="cb_context">
+          <property name="text">
+           <string>Import to Current Context</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="cb_FavsOnly">
           <property name="text">
            <string>Show Favorites only</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="cb_Mantra">
+          <property name="text">
+           <string>Mantra</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -502,21 +512,7 @@
            <string>Redshift</string>
           </property>
           <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="cb_Mantra">
-          <property name="text">
-           <string>Mantra</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="cb_Arnold">
-          <property name="text">
-           <string>Arnold</string>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
