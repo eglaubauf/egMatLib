@@ -1,13 +1,13 @@
 {
 	"env": [
         {
-            "MATLIB": "G:/Git/MatLib"
+            "EGMATLIB": "G:/Git/MatLib"
         },
         {
-            "HOUDINI_OTLSCAN_PATH": "$MATLIB/otls"
+            "HOUDINI_OTLSCAN_PATH": "$EGMATLIB/otls"
         }
 	],
 	"path": [
-        "$MATLIB"
+        "$EGMATLIB"
     ]
 }

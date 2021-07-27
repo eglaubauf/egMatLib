@@ -1,8 +1,8 @@
 {
-    "directory": "G:\\Git\\egMatLib\\lib",
-    "extension": ".mat",
-    "img_extension": ".png",
-    "done_file": "/done.txt",
-    "mat_dir": "mat/",
-    "img_dir": "img/"
+    "extension": ".mat", 
+    "img_dir": "img/", 
+    "done_file": "/done.txt", 
+    "img_extension": ".png", 
+    "mat_dir": "mat/", 
+    "directory": "H:\\MatLib"
 }
