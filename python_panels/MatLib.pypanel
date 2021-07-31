@@ -12,7 +12,7 @@
 def createInterface():
     import egMatLib
     #importlib.reload(egMatLib)
-    #reload(egMatLib)
+    reload(egMatLib)
     widget = egMatLib.egMatLibPanel()
     return widget   ]]></script>
     <includeInPaneTabMenu menu_position="99" create_separator="true"/>
