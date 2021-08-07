@@ -1024,7 +1024,8 @@ class eg_library():
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         node = origNode
-        builder.destroy()
+        if builder != "":
+            builder.destroy()
 
         # Create Thumbnail
         thumb = hou.node("/obj").createNode("eg_thumbnail_Mantra::1.1")
