@@ -4,5 +4,5 @@
     "done_file": "/done.txt", 
     "img_extension": ".png", 
     "mat_dir": "mat/", 
-    "directory": "H:\\MatLib"
+    "directory": "/home/elmar/Documents/MatLib/"
 }

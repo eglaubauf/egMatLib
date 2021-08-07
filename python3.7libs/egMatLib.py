@@ -959,13 +959,18 @@ class eg_library():
     def save_node(self, node, id):
         '''Save Node wrapper for different Material Types'''
         # Check against NodeType
+        val = False
         if node.type().name() == "redshift_vopnet":
-            return self.save_node_redshift(node, id)
+            #Interruptable
+            with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
+                val= self.save_node_redshift(node, id)
         elif node.type().name() == "materialbuilder" or node.type().name() == "principledshader::2.0":
-            return self.save_node_mantra(node, id)
+            #Interruptable
+            with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
+                val = self.save_node_mantra(node, id)
         else:
             hou.ui.displayMessage('Selected Node is not a Material Builder')
-        return False
+        return val
 
 
     def save_node_redshift(self, node, id):
@@ -992,15 +997,9 @@ class eg_library():
         thumb.parm("render_resx").set(self.rendersize)
         thumb.parm("render_resy").set(self.rendersize)
 
-        # Make sure there is no done file
-        if os.path.exists(self.get_path() + self.settings.get_done_file()):
-            os.remove(self.get_path() + self.settings.get_done_file())
-
         # Render Frame
         thumb.parm("render").pressButton()
 
-        # Wait until Render is finished
-        self.waitForRender()
 
         # CleanUp
         thumb.destroy()
@@ -1043,30 +1042,15 @@ class eg_library():
         thumb.parm("render_resx").set(self.rendersize)
         thumb.parm("render_resy").set(self.rendersize)
 
-        # Make sure there is no done file
-        if os.path.exists(self.get_path() + self.settings.get_done_file()):
-            os.remove(self.get_path() + self.settings.get_done_file())
-
         # Render Frame
         thumb.parm("render").pressButton()
 
-        # Wait until Render is finished
-        self.waitForRender()
+
 
         # CleanUp
         thumb.destroy()
         return True
 
-
-    def waitForRender(self):
-        '''Freeze the UI until the current render is finsihed'''
-        mustend = time.time() + 60.0
-        while time.time() < mustend:
-            if os.path.exists(self.get_path() + self.settings.get_done_file()):
-                os.remove(self.get_path() + self.settings.get_done_file())
-                return True
-            time.sleep(0.5)
-        return False
 
 
 ###################################
