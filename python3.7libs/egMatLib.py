@@ -982,7 +982,7 @@ class eg_library():
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode("eg_thumbnail::1.1")
+        thumb = hou.node("/obj").createNode("eg_thumbnail::1.3")
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -1028,7 +1028,7 @@ class eg_library():
             builder.destroy()
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode("eg_thumbnail_Mantra::1.1")
+        thumb = hou.node("/obj").createNode("eg_thumbnail_Mantra::1.3")
         thumb.parm("mat").set(node.path())
 
         # Build path
