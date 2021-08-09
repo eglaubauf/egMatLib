@@ -12,11 +12,12 @@ if (sys.version_info > (3, 0)):
  # Python 3 code in this block
     def createInterface():
         import egMatLib
+        import importlib
         importlib.reload(egMatLib)
         widget = egMatLib.egMatLibPanel()
-        return widget   
+        return widget
 else:
- # Python 2 code in this block    
+ # Python 2 code in this block
     def createInterface():
         import egMatLib
         reload(egMatLib)
