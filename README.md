@@ -31,7 +31,6 @@ A Material Library for Houdini Mantra and Redshift
  - Other Builds might work, i will update regularly if things break
  - Python 2 support
  - Python 3 support
- -
 
 ### Todo
 - Update Material
