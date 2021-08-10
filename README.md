@@ -31,7 +31,6 @@ A Material Library for Houdini Mantra and Redshift
  - Other Builds might work, i will update regularly if things break
  - Python 2 support
  - Python 3 support
- -
 
 ### Todo
 - Update Material
@@ -66,7 +65,5 @@ A Material Library for Houdini Mantra and Redshift
 ### Contact & License
 
 - Found a bug? please open an issue or contact me directly, happy to help :)
-
-- As always: Open Source. Is. Will be. Feel free to use for any purpose, no reselling. GPLv3 License applies
 
 - Twitter: @eglaubauf
