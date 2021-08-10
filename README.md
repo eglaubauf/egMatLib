@@ -67,6 +67,4 @@ A Material Library for Houdini Mantra and Redshift
 
 - Found a bug? please open an issue or contact me directly, happy to help :)
 
-- As always: Open Source. Is. Will be. Feel free to use for any purpose, no reselling. GPLv3 License applies
-
 - Twitter: @eglaubauf
