@@ -65,6 +65,17 @@ class egMatLibPanel(QWidget):
         self.script_path = os.path.dirname(os.path.realpath(__file__))
         self.prefs = prefs()
         path = self.prefs.get_dir() + "/"
+        if not os.path.exists(path):
+            valid = 0
+            while not valid:
+                path = hou.ui.selectFile(file_type=hou.fileType.Directory)
+                path = hou.expandString(path)
+                if os.path.exists(path):
+                    valid = 1
+                    self.prefs.set_dir(path)
+                    self.prefs.save()
+                else:
+                    hou.ui.displayMessage("Please choose a valid path")
         path = path.replace("\\", "/")
 
         if not os.path.exists(path+"/library.json"):
