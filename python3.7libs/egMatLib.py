@@ -20,17 +20,19 @@ def saveMaterial(node):
     path = pref.get_dir() + "/"
     path = path.replace("\\", "/")
 
-    # Create Library
+
+    # Save new Data to Library
     library = eg_library()
     library.load(path, pref)
     get_material_info_user(library, node)
     library.save()
 
-    # Find MatLibPanel
-    for pane_tab in hou.ui.currentPaneTabs():
+    ### Update Widget
+    for pane_tab in hou.ui.paneTabs():
         if pane_tab.type() == hou.paneTabType.PythonPanel:
             if pane_tab.label() == "MatLib":
-                pane_tab.reloadActiveInterface()
+                egMatLibPanel = pane_tab.activeInterfaceRootWidget()
+                egMatLibPanel.update_external()
                 return
     return
 
@@ -56,12 +58,11 @@ def get_material_info_user(library, sel):
 ######### THE PYTHON PANEL ########
 ###################################
 
-
 class egMatLibPanel(QWidget):
     def __init__(self):
         super(egMatLibPanel, self).__init__()
 
-        #Initialize
+        # Initialize
         self.script_path = os.path.dirname(os.path.realpath(__file__))
         self.prefs = prefs()
         path = self.prefs.get_dir() + "/"
@@ -86,6 +87,7 @@ class egMatLibPanel(QWidget):
         if not os.path.exists(path+self.prefs.get_img_dir()):
             os.mkdir(path+self.prefs.get_img_dir())
 
+        self.path = path
         # Create Library
         self.library = eg_library()
         self.library.load(path, self.prefs)
@@ -98,6 +100,11 @@ class egMatLibPanel(QWidget):
 
         self.createView()
         self.update_views()
+
+    def update_external(self):
+        self.library.load(self.path, self.prefs)
+        self.update_views()
+        return
 
     def update_views(self):
         self.update_thumb_view()
