@@ -20,7 +20,6 @@ def saveMaterial(node):
     path = pref.get_dir() + "/"
     path = path.replace("\\", "/")
 
-
     # Save new Data to Library
     library = eg_library()
     library.load(path, pref)
@@ -1064,7 +1063,7 @@ class eg_library():
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode("eg_thumbnail::1.3")
+        thumb = hou.node("/obj").createNode("thumbnail_Redshift::1.0")
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -1076,11 +1075,11 @@ class eg_library():
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
-        thumb.parm("render_resx").set(self.rendersize)
-        thumb.parm("render_resy").set(self.rendersize)
+        thumb.parm("resx").set(self.rendersize)
+        thumb.parm("resy").set(self.rendersize)
 
         # Render Frame
-        thumb.parm("render").pressButton()
+        thumb.parm("execute").pressButton()
 
 
         # CleanUp
@@ -1110,7 +1109,7 @@ class eg_library():
             builder.destroy()
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode("eg_thumbnail_Mantra::1.3")
+        thumb = hou.node("/obj").createNode("thumbnail_Mantra::1.0")
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -1122,8 +1121,8 @@ class eg_library():
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
-        thumb.parm("render_resx").set(self.rendersize)
-        thumb.parm("render_resy").set(self.rendersize)
+        thumb.parm("resx").set(self.rendersize)
+        thumb.parm("resy").set(self.rendersize)
 
         # Render Frame
         thumb.parm("render").pressButton()
