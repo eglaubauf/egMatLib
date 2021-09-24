@@ -97,6 +97,7 @@ class egMatLibPanel(QWidget):
         self.draw_mats = self.library.get_materials() # Filtererd Materials for Views
 
         self.active_row = None
+        self.lastSelectedItems = None
 
         self.createView()
         self.update_views()
@@ -134,7 +135,6 @@ class egMatLibPanel(QWidget):
         self.action_prefs.triggered.connect(self.show_prefs)
 
         # Link Buttons
-
         self.btn_save = self.ui.findChild(QPushButton, 'btn_save')
         self.btn_save.clicked.connect(self.save_material)
 
@@ -244,7 +244,7 @@ class egMatLibPanel(QWidget):
         elif action == renderAct:
             self.update_single_material()
         elif action == importAct:
-            self.import_material()
+            self.import_materials()
         elif action == renderAllAct:
             self.update_all_materials()
         elif action == toggleFav:
@@ -252,14 +252,15 @@ class egMatLibPanel(QWidget):
         return
 
     def toggle_fav(self):
-        item = self.get_selected_material_from_thumblist()
-        id = self.get_id_from_thumblist(item)
-        index = self.thumblist.indexFromItem(item)
+        items = self.get_selected_items_from_thumblist()
+        for item in items:
+            id = self.get_id_from_thumblist(item)
+            index = self.thumblist.indexFromItem(item)
 
-        if self.library.get_material_fav(id):
-            self.library.set_material_fav(id, 0)
-        else:
-            self.library.set_material_fav(id, 1)
+            if self.library.get_material_fav(id):
+                self.library.set_material_fav(id, 0)
+            else:
+                self.library.set_material_fav(id, 1)
 
         self.update_details_view(item)
         self.update_views()
@@ -358,21 +359,24 @@ class egMatLibPanel(QWidget):
         return
 
     def update_entered(self, row, column):
-        '''Register change in  Detail view '''
+        '''Register change in Detail view '''
         self.active_row = row
 
     def changed(self, row, column):
         '''Apply change in Detail view to Library '''
         if self.active_row == row:
-            item = self.details.item(row, column)
-            curr_id = self.details.item(4, 1).text()
-            if row == 0:
-                # Change Name
-                self.library.set_material_name(curr_id, item.text())
-            elif row == 1:
-                self.library.set_material_cat(curr_id, item.text())
-            elif row == 2:
-                self.library.set_material_tag(curr_id, item.text())
+            detail_item = self.details.item(row, column)
+
+            items = self.lastSelectedItems
+            for item in items:
+                id = self.get_id_from_thumblist(item)
+                if row == 0:
+                    # Change Name
+                    self.library.set_material_name(id, detail_item.text())
+                elif row == 1:
+                    self.library.set_material_cat(id, detail_item.text())
+                elif row == 2:
+                    self.library.set_material_tag(id, detail_item.text())
             self.library.save()
             self.update_views()
 
@@ -382,14 +386,17 @@ class egMatLibPanel(QWidget):
     def cb_changed(self, row, column):
         '''Apply change in Detail View - Favorite'''
         if row == 3:
-            item = self.details.item(row, column)
-            curr_id = self.details.item(4, 1).text()
-            if item.checkState() is Qt.Checked:
-                self.library.set_material_fav(curr_id, 1)
-            else:
-                self.library.set_material_fav(curr_id, 0)
-        self.library.save()
-        self.update_views()
+            detail_item = self.details.item(row, column)
+            items = self.lastSelectedItems
+            for item in items:
+                id = self.get_id_from_thumblist(item)
+                if detail_item.checkState() is Qt.Checked:
+                    self.library.set_material_fav(id, 1)
+                else:
+                    self.library.set_material_fav(id, 0)
+            self.library.save()
+            self.update_views()
+
 
 
     ###################################
@@ -401,6 +408,29 @@ class egMatLibPanel(QWidget):
         '''Update upon changes in Detail view '''
         if item is None:
             return
+
+        items = self.get_selected_items_from_thumblist_silent()
+
+        cat_flag = False
+        tag_flag = False
+        if items is not None:
+            #Check all Selected Mats for same Cat and Tag Values
+            for x, item in enumerate(items):
+                id = self.get_id_from_thumblist(item)
+                curr_mat = self.library.get_material_by_id(id)
+
+                if x == 0:
+                    cat = curr_mat["categories"]
+                    tags = curr_mat["tags"]
+                    fav = curr_mat["favorite"]
+                else:
+                    #Check Categories
+                    if cat != curr_mat["categories"]:
+                        cat_flag = True
+                    #Check Tags
+                    if tags != curr_mat["tags"]:
+                        tag_flag = True
+
         id = self.get_id_from_thumblist(item)
 
         for mat in self.library.get_materials():
@@ -410,10 +440,16 @@ class egMatLibPanel(QWidget):
                 table_item.setText(mat["name"])
                 # set cat
                 table_item = self.details.item(1, 1)
-                table_item.setText(", ".join(mat["categories"]))
+                if cat_flag:
+                    table_item.setText("Multiple Values")
+                else:
+                    table_item.setText(", ".join(mat["categories"]))
                 # set tag
                 table_item = self.details.item(2, 1)
-                table_item.setText(", ".join(mat["tags"]))
+                if tag_flag:
+                    table_item.setText("Multiple Values")
+                else:
+                    table_item.setText(", ".join(mat["tags"]))
                 # set fav
                 table_item = self.details.item(3, 1)
                 if mat["favorite"] == 1:
@@ -600,15 +636,17 @@ class egMatLibPanel(QWidget):
     # Rerender Selected Material
     def update_single_material(self):
         '''Rerenders a single materials in the library - The UI is blocked for the duration of the render'''
-        item = self.get_selected_material_from_thumblist()
-        if not item:
-            return
-        builder = self.import_material()
-        id = self.get_id_from_thumblist(item)
-        self.library.save_node(builder, id)
+        items = self.get_selected_items_from_thumblist()
+        for item in items:
+            if not item:
+                return
+            builder = self.import_material(item)
+            id = self.get_id_from_thumblist(item)
+            self.library.save_node(builder, id)
+            builder.destroy()
+
         self.update_thumb_view()
-        builder.destroy()
-        hou.ui.displayMessage("Thumbnail updated")
+        hou.ui.displayMessage("Thumbnail(s) updated")
         return
 
 
@@ -623,12 +661,14 @@ class egMatLibPanel(QWidget):
         if not hou.ui.displayConfirmation('This will delete the selected Material from Disk. Are you sure?'):
             return
 
-        item = self.get_selected_item_from_thumblist()
-        if not item:
-            return
+        items = self.get_selected_items_from_thumblist()
 
-        id = self.get_id_from_thumblist(item)
-        self.library.remove_material(id)
+        for item in items:
+            if not item:
+                return
+
+            id = self.get_id_from_thumblist(item)
+            self.library.remove_material(id)
 
         # Update View
         self.update_thumb_view()
@@ -642,6 +682,23 @@ class egMatLibPanel(QWidget):
             hou.ui.displayMessage("No Material selected")
             return None
         return item
+
+    def get_selected_items_from_thumblist(self):
+        '''Return the material for the selected item in thumbview'''
+        items = self.thumblist.selectedItems()
+        if not items:
+            hou.ui.displayMessage("No Material selected")
+            return None
+        self.lastSelectedItems = items
+        return items
+
+    def get_selected_items_from_thumblist_silent(self):
+        '''Return the material for the selected item in thumbview'''
+        items = self.thumblist.selectedItems()
+        if not items:
+            return None
+        self.lastSelectedItems = items
+        return items
 
     #  Saves a Material to the Library
     def save_material(self):
@@ -674,6 +731,13 @@ class egMatLibPanel(QWidget):
         self.update_views()
         return
 
+
+    def import_materials(self):
+        items = self.get_selected_items_from_thumblist()
+        for item in items:
+            self.import_material(item)
+        hou.ui.displayMessage("Materials imported")
+        return
 
     #  Import Material to Scene
     def import_material(self, sel=None):

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>983</width>
-    <height>836</height>
+    <width>1401</width>
+    <height>1153</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -120,11 +120,17 @@
           <property name="showDropIndicator" stdset="0">
            <bool>false</bool>
           </property>
+          <property name="dragEnabled">
+           <bool>false</bool>
+          </property>
           <property name="dragDropMode">
-           <enum>QAbstractItemView::DragDrop</enum>
+           <enum>QAbstractItemView::NoDragDrop</enum>
           </property>
           <property name="defaultDropAction">
            <enum>Qt::IgnoreAction</enum>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ContiguousSelection</enum>
           </property>
           <property name="flow">
            <enum>QListView::LeftToRight</enum>
@@ -252,14 +258,14 @@
           <attribute name="horizontalHeaderVisible">
            <bool>false</bool>
           </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>60</number>
+          </attribute>
           <attribute name="horizontalHeaderDefaultSectionSize">
            <number>60</number>
           </attribute>
           <attribute name="horizontalHeaderHighlightSections">
            <bool>false</bool>
-          </attribute>
-          <attribute name="horizontalHeaderMinimumSectionSize">
-           <number>60</number>
           </attribute>
           <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
            <bool>false</bool>
@@ -268,7 +274,7 @@
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>10</number>
+           <number>30</number>
           </attribute>
           <attribute name="verticalHeaderHighlightSections">
            <bool>false</bool>
@@ -527,8 +533,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>983</width>
-     <height>18</height>
+     <width>1401</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="font">

@@ -6,7 +6,7 @@
  same interface or of the interfaces menu are not allowed
  in a single file. -->
   <interface name="MatLib" label="MatLib" icon="MISC_python" showNetworkNavigationBar="false" help_url="">
-    <script><![CDATA[import sys
+    <script><![CDATA[import sys 
 
 if (sys.version_info > (3, 0)):
  # Python 3 code in this block
@@ -22,7 +22,9 @@ else:
         import egMatLib
         reload(egMatLib)
         widget = egMatLib.egMatLibPanel()
-        return widget                        ]]></script>
+        return widget        
+                
+                                       ]]></script>
     <includeInPaneTabMenu menu_position="99" create_separator="true"/>
     <includeInToolbarMenu menu_position="415" create_separator="false"/>
     <help><![CDATA[]]></help>
