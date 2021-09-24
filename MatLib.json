@@ -1,7 +1,7 @@
 {
 	"env": [
         {
-            "EGMATLIB": "G:/Git/MatLib"
+            "EGMATLIB": "/home/elmar/MatLib"
         },
         {
             "HOUDINI_OTLSCAN_PATH": "$EGMATLIB/otls"

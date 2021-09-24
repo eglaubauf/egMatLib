@@ -4,44 +4,40 @@ A Material Library for Houdini Mantra and Redshift
 
 ### Features:
 
-- Lightweight storing of Node networks
-- Quick Restoring of Shader Trees
-- Full Support for all Node-Types
+- Lightweight (Houdini Native) storing and loading of node networks
+- Save Redshift Material Builders, Principled Shaders and Mantra Materialbuilders
+  - Inside this nodes all objects are supported
 - Favorites
-- Adding and removing of Categories
-- Tags
-- Search for Names and Tags (use t: )
+- Adding and removing of categories
+- Searchable tags (use t: as a modifier ) and material-names
 - Open Database (.json)
-- Stores Materials in Houdini's native node-storing format
-- Material Preview (ShaderSphere)
-- 2 open HDAs for custom edits (Mantra and Redshift)
+- Material Preview
+- open HDAs for Redshift and Mantra for custom preview shapes/images
 - Deletion of entries from the database (deletes also from disk)
-- Custom Preview and Rendersize
+- Multi Material Editing via the detail pane
+- Easy adjustable custom preview and rendersize
 - ACES 1.2 support
 - Moving/Selection of Database location
-- Right Click Menus via Network pane
+- Right Click Menus for adding materials quickly from the network pane
 - Importing to current network location (pwd()/matnet)
+- Double Click or right click for importing Materials into the scene
 - Easy installation with packages (see below)
 
 
 ### Compatibility
 
- - Tested on 18.5.633 Windows 10 and Ubuntu 20.04
- - Tested with Redshift 3.0.51
- - Other Builds might work, i will update regularly if things break
+ - Tested on 18.5.696 on Windows 10 and Ubuntu 20.04
+ - Tested with Redshift 3.0.56
+ - Other builds might work
+ - The repo will be updated regularly
  - Python 2 support
  - Python 3 support
-
-### Todo
-- Update Material
-- Arnold Support?
-- Cleanup
 
 
 ### Installation
 - Download or Clone this repository and unzip
-- Copy the proviede MatLib.json to your houdini18.5/packages folder
-- Edit the line "G:/Git/MatLib" to the location of your downloaded folder
+- Copy the proviede `MatLib.json` to your `houdini18.5/packages` folder
+- Edit the line `/home/elmar/MatLib` to the location of your downloaded folder, e.g.: `G:/Git/MatLib`
 - Start Houdini
 
 ### Usage
@@ -57,13 +53,15 @@ A Material Library for Houdini Mantra and Redshift
 
 
 ### Additional
-- You can move the directory by hand on disk iy you need to
-- Do not (!) edit the .json file by hand if you do not have to
+- You can move the directory by hand on disk if you need to
+- Do not (!) edit the .json file by hand if not needed
   - you have been warned ;)
 
+### Todo
+- Arnold Support
+- Cleanup
 
 ### Contact & License
 
-- Found a bug? please open an issue or contact me directly, happy to help :)
-
+- Found a bug? please open an issue or contact me directly via Twitter
 - Twitter: @eglaubauf
