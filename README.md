@@ -2,6 +2,9 @@
 
 A Material Library for Houdini Mantra and Redshift
 
+![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib.png)
+
+
 ### Features:
 
 - Lightweight (Houdini Native) storing and loading of node networks
@@ -50,9 +53,6 @@ A Material Library for Houdini Mantra and Redshift
  - Double Click on a Material in MatLib-Pane to import
  - Use the table view to the right for edit of currently seleted material
  - Search Function also can search tags with t:*yoursearchstring*
-
-![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib.png)
-
 
 ### Additional
 - You can move the directory by hand on disk if you need to
