@@ -51,6 +51,8 @@ A Material Library for Houdini Mantra and Redshift
  - Use the table view to the right for edit of currently seleted material
  - Search Function also can search tags with t:*yoursearchstring*
 
+![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib.png)
+
 
 ### Additional
 - You can move the directory by hand on disk if you need to
