@@ -1,0 +1,12 @@
+{
+    "enable" : true,
+    "env":
+    [
+    	{
+    		"HOUDINI_PATH" :
+    		{
+                "value": "/home/elmar/git/ODHoudiniShelfTools",
+        	}
+    	}
+    ]
+}
