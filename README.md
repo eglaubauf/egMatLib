@@ -29,6 +29,7 @@ A Material Library for Houdini Mantra and Redshift
 ### Compatibility
 
  - Tested on 18.5.696 on Windows 10 and Ubuntu 20.04
+ - Houdini Indie only
  - Tested with Redshift 3.0.56
  - Other builds might work
  - The repo will be updated regularly
