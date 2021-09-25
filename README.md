@@ -65,4 +65,4 @@ A Material Library for Houdini Mantra and Redshift
 
 - Found a bug? please open an issue or contact me directly via Twitter
 - Twitter: @eglaubauf
-- Feel free to support me via gumroad
+- Feel free to support me via gumroad https://elmeier.gumroad.com/l/bsghA
