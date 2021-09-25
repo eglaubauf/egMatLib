@@ -7,20 +7,19 @@ A Material Library for Houdini Mantra and Redshift
 
 ### Features:
 
-- Lightweight (Houdini Native) storing and loading of node networks
+- Lightweight (Houdini-native) storing and loading of node networks
 - Save Redshift Material Builders, Principled Shaders and Mantra Materialbuilders
   - Inside this nodes all objects are supported
 - Favorites
 - Adding and removing of categories
 - Searchable tags (use t: as a modifier ) and material-names
-- Open Database (.json)
+- Open database (.json)
 - Material Preview
-- open HDAs for Redshift and Mantra for custom preview shapes/images
+- open HDAs for Redshift and Mantra for custom preview-images
 - Deletion of entries from the database (deletes also from disk)
-- Multi Material Editing via the detail pane
+- Edit multiple materials at the same time via the Details-Pane
 - Easy adjustable custom preview and rendersize
-- ACES 1.2 support
-- Moving/Selection of Database location
+- ACES 1.2 support (Redshift Native)
 - Right Click Menus for adding materials quickly from the network pane
 - Importing to current network location (pwd()/matnet)
 - Double Click or right click for importing Materials into the scene
@@ -39,7 +38,7 @@ A Material Library for Houdini Mantra and Redshift
 
 ### Installation
 - Download or Clone this repository and unzip
-- Copy the proviede `MatLib.json` to your `houdini18.5/packages` folder
+- Copy the provided `MatLib.json` to your `houdini18.5/packages` folder
 - Edit the line `/home/elmar/MatLib` to the location of your downloaded folder, e.g.: `G:/Git/MatLib`
 - Start Houdini
 
@@ -61,9 +60,9 @@ A Material Library for Houdini Mantra and Redshift
 
 ### Todo
 - Arnold Support
-- Cleanup
 
 ### Contact & License
 
 - Found a bug? please open an issue or contact me directly via Twitter
 - Twitter: @eglaubauf
+- Feel free to support me via gumroad
