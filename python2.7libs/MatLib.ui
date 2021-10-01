@@ -539,6 +539,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QRadioButton" name="cb_Arnold">
+          <property name="text">
+           <string>Arnold</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>

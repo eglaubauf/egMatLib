@@ -7,6 +7,7 @@ import shutil
 import datetime
 import sys
 
+
 # PySide2
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -17,6 +18,8 @@ from PySide2 import QtUiTools
 #Load This HDAs for creation
 HDA_REDSHIFT = "thumbnail_Redshift::1.0"
 HDA_MANTRA = "thumbnail_Mantra::1.0"
+HDA_ARNOLD = "thumbnail_Arnold::2.0"
+
 
 def saveMaterial(node):
     # Call from RC-Menus in Network Pane
@@ -199,14 +202,15 @@ class egMatLibPanel(QWidget):
         self.cb_FavsOnly = self.ui.findChild(QCheckBox, "cb_FavsOnly")
         self.cb_Redshift = self.ui.findChild(QRadioButton, "cb_Redshift")
         self.cb_Mantra = self.ui.findChild(QRadioButton, "cb_Mantra")
-        # self.cb_Arnold = self.ui.findChild(QRadioButton, "cb_Arnold")
+        self.cb_Arnold = self.ui.findChild(QRadioButton, "cb_Arnold")
 
         self.cb_showCat = self.ui.findChild(QCheckBox, "cb_showCat")
 
         self.cb_FavsOnly.stateChanged.connect(self.update_views)
         self.cb_Redshift.toggled.connect(self.update_views)
         self.cb_Mantra.toggled.connect(self.update_views)
-        # self.cb_Arnold.toggled.connect(self.update_views)
+        self.cb_Arnold.toggled.connect(self.update_views)
+
         self.cb_showCat.stateChanged.connect(self.toggle_catView)
 
         self.cb_context = self.ui.findChild(QCheckBox, "cb_context")
@@ -593,9 +597,9 @@ class egMatLibPanel(QWidget):
                 elif self.cb_Mantra.isChecked():
                     if mat["renderer"] != "Mantra":
                         continue
-                # elif self.cb_Arnold.isChecked():
-                #     if mat["renderer"] != "Arnold":
-                #         continue
+                elif self.cb_Arnold.isChecked():
+                    if mat["renderer"] != "Arnold":
+                        continue
 
                 img = self.library.get_path() + self.prefs.get_img_dir() + str(mat["id"]) + self.prefs.get_img_ext()
 
@@ -959,6 +963,10 @@ class eg_library():
             elif node.type().name() == "principledshader::2.0":
                 renderer = "Mantra"
                 builder = 0
+            elif node.type().name() == "arnold_materialbuilder":
+                renderer = "Arnold"
+                builder = 1
+
 
             date = str(datetime.datetime.now())
             date = date[:-7]
@@ -1047,6 +1055,13 @@ class eg_library():
             # Delete Default children in MaterialBuilder
             for node in builder.children():
                 node.destroy()
+        elif renderer == "Arnold":
+            # CreateBuilder
+            builder = hou.node(import_path).createNode('arnold_materialbuilder')
+            builder.setName(mat["name"], unique_name=True)
+            # Delete Default children in Arnold MaterialBuilder
+            for node in builder.children():
+                    node.destroy()
 
         # Import file from disk
         try:
@@ -1079,6 +1094,9 @@ class eg_library():
             #Interruptable
             with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
                 val = self.save_node_mantra(node, id)
+        elif node.type().name() == "arnold_materialbuilder":
+            with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
+                val = self.save_node_arnold(node, id)
         else:
             hou.ui.displayMessage('Selected Node is not a Material Builder')
         return val
@@ -1093,7 +1111,7 @@ class eg_library():
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode(HDA_REDSHIFT) #HERE
+        thumb = hou.node("/obj").createNode(HDA_REDSHIFT)
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -1110,12 +1128,52 @@ class eg_library():
 
         # Render Frame
         thumb.parm("execute").pressButton()
-
-
         # CleanUp
         thumb.destroy()
         return True
 
+    def save_node_arnold(self, node, id): #ARNOLD
+        '''Saves the Arnold node to disk - does not add to library'''
+        # Filepath where to save stuff
+        file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
+
+        children = node.children()
+        node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
+
+        # Create Thumbnail
+        thumb = hou.node("/obj").createNode(HDA_ARNOLD)
+        thumb.parm("mat").set(node.path())
+
+        # Build path
+        path = self.get_path()  + self.settings.get_img_dir() + str(id) + self.settings.get_img_ext()
+
+        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
+        thumb.parm("path").set(path)
+        exclude = "* ^" + thumb.name()
+        thumb.parm("obj_exclude").set(exclude)
+        lights = thumb.name() + "/*"
+        thumb.parm("lights").set(lights)
+        thumb.parm("resx").set(self.rendersize)
+        thumb.parm("resy").set(self.rendersize)
+        thumb.parm("ar_light_color_texture").set(hou.getenv("EGMATLIB")+"/img/photo_studio_01_4k_ACEScg.hdr")
+
+        # Render Frame
+        thumb.parm("render").pressButton()
+
+        #WaitForRender - A really bad hack
+
+        done_path = hou.getenv("EGMATLIB")+"/lib/done.txt"
+        mustend = time.time() + 60.0
+        while time.time() < mustend:
+            if os.path.exists(done_path):
+                os.remove(done_path)
+                time.sleep(2)
+                break
+            time.sleep(1)
+
+
+        thumb.destroy()
+        return True
 
     def save_node_mantra(self, node, id):
         '''Saves the Mantra node to disk - does not add to library'''
@@ -1156,8 +1214,6 @@ class eg_library():
 
         # Render Frame
         thumb.parm("render").pressButton()
-
-
 
         # CleanUp
         thumb.destroy()

@@ -13,6 +13,8 @@ elif n.type().name() == "materialbuilder":
     return True
 elif n.type().name() == "principledshader::2.0":
     return True
+elif n.type().name() == "arnold_materialbuilder":
+    return True
 return False ]]>
                     </expression>
                 </context>
@@ -24,6 +26,8 @@ if n.type().name() == "redshift_vopnet":
 elif n.type().name() == "materialbuilder":
     return "Save Material to MatLib"
 elif n.type().name() == "principledshader::2.0":
+    return "Save Material to MatLib"
+elif n.type().name() == "arnold_materialbuilder":
     return "Save Material to MatLib"
 return "Unavailable in this Context"
 ]]>
@@ -38,6 +42,9 @@ elif n.type().name() == "materialbuilder":
     import egMatLib
     egMatLib.saveMaterial(n)
 elif n.type().name() == "principledshader::2.0":
+    import egMatLib
+    egMatLib.saveMaterial(n)
+elif n.type().name() == "arnold_materialbuilder":
     import egMatLib
     egMatLib.saveMaterial(n)
 else:
