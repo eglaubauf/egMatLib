@@ -36,7 +36,6 @@ A Material Library for Houdini Mantra, Redshift and Arnold
  - Python 2 support
  - Python 3 support
 
-
 ### Installation
 - Download or Clone this repository and unzip
 - Copy the provided `MatLib.json` to your `houdini18.5/packages` folder
@@ -54,13 +53,12 @@ A Material Library for Houdini Mantra, Redshift and Arnold
  - Use the table view to the right for edit of currently seleted material
  - Search Function also can search tags with t:*yoursearchstring*
 
+
 ### Additional
 - You can move the directory by hand on disk if you need to
 - Do not (!) edit the .json file by hand if not needed
   - you have been warned ;)
 
-### Todo
-- Arnold Support
 
 ### Contact & License
 
