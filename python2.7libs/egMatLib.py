@@ -390,7 +390,12 @@ class egMatLibPanel(QWidget):
                     # Change Name
                     self.library.set_material_name(id, detail_item.text())
                 elif row == 1:
-                    self.library.set_material_cat(id, detail_item.text())
+                    # Make sure there is only one Cat per Mat
+                    txt = detail_item.text()
+                    pos = txt.find(",")
+                    if pos != -1:
+                        txt = txt[-pos]
+                    self.library.set_material_cat(id, txt)
                 elif row == 2:
                     self.library.set_material_tag(id, detail_item.text())
             self.library.save()
