@@ -1,6 +1,6 @@
 # egMatLib - A Material Library for Houdini
 
-A Material Library for Houdini Mantra and Redshift
+A Material Library for Houdini Mantra, Redshift and Arnold
 
 ![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib.png)
 
@@ -8,7 +8,7 @@ A Material Library for Houdini Mantra and Redshift
 ### Features:
 
 - Lightweight (Houdini-native) storing and loading of node networks
-- Save Redshift Material Builders, Principled Shaders and Mantra Materialbuilders
+- Save Redshift Material Builders, Principled Shaders,  Mantra Materialbuilders and Arnold Materialbuilders
   - Inside this nodes all objects are supported
 - Favorites
 - Adding and removing of categories
@@ -30,7 +30,7 @@ A Material Library for Houdini Mantra and Redshift
 
  - Tested on 18.5.696 on Windows 10 and Ubuntu 20.04
  - Houdini Indie only
- - Tested with Redshift 3.0.56
+ - Tested with Redshift 3.0.57
  - Other builds might work
  - The repo will be updated regularly
  - Python 2 support
