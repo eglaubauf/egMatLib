@@ -111,9 +111,20 @@ class egMatLibPanel(QWidget):
         self.update_cat_view()
         return
 
-    ###################################
-    ########### VIEW STUFF ############
-    ###################################
+
+    def toggle_catView(self, state): #THIS
+        self.cat_layout = self.ui.findChild(QVBoxLayout, "cat_layout")
+        if state == Qt.Checked:
+            #self.cat_layout.setVisible(True)
+            self.cat_list.setVisible(True)
+            self.btn_rmv_cat.setVisible(True)
+            self.btn_add_cat.setVisible(True)
+        else:
+            self.cat_list.setVisible(False)
+            self.btn_rmv_cat.setVisible(False)
+            self.btn_add_cat.setVisible(False)
+        return
+
     ###################################
     ########### VIEW STUFF ############
     ###################################
@@ -184,11 +195,14 @@ class egMatLibPanel(QWidget):
         self.cb_Redshift = self.ui.findChild(QRadioButton, "cb_Redshift")
         self.cb_Mantra = self.ui.findChild(QRadioButton, "cb_Mantra")
         # self.cb_Arnold = self.ui.findChild(QRadioButton, "cb_Arnold")
+        self.cb_showCat = self.ui.findChild(QCheckBox, "cb_showCat")
+
 
         self.cb_FavsOnly.stateChanged.connect(self.update_views)
         self.cb_Redshift.toggled.connect(self.update_views)
         self.cb_Mantra.toggled.connect(self.update_views)
         # self.cb_Arnold.toggled.connect(self.update_views)
+        self.cb_showCat.stateChanged.connect(self.toggle_catView)
 
         self.cb_context = self.ui.findChild(QCheckBox, "cb_context")
         self.cb_context.stateChanged.connect(self.update_context)
