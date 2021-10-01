@@ -6,6 +6,7 @@ import json
 import uuid
 import shutil
 import datetime
+import sys
 
 
 # PySide2
@@ -522,7 +523,10 @@ class egMatLibPanel(QWidget):
 
         begin = self.cat_list.findItems("All", Qt.MatchExactly)[0]
 
-        begin.setText("___All")
+        if sys.platform == "linux" or sys.platform == "linux2":
+            begin.setText("000_All")
+        else:
+            begin.setText("___All")
         self.cat_list.sortItems()
         begin.setText("All")
         self.thumblist.sortItems()
