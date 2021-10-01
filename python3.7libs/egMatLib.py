@@ -13,6 +13,10 @@ from PySide2.QtCore import *
 from PySide2 import QtUiTools
 
 
+#Load This HDAs for creation
+HDA_REDSHIFT = "thumbnail_Redshift::1.0"
+HDA_MANTRA = "thumbnail_Mantra::1.0"
+
 def saveMaterial(node):
     # Call from RC-Menus in Network Pane
     # Initialize
@@ -1063,7 +1067,7 @@ class eg_library():
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode("thumbnail_Redshift::1.0")
+        thumb = hou.node("/obj").createNode(HDA_REDSHIFT) #HERE
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -1109,7 +1113,7 @@ class eg_library():
             builder.destroy()
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode("thumbnail_Mantra::1.0")
+        thumb = hou.node("/obj").createNode(HDA_MANTRA)
         thumb.parm("mat").set(node.path())
 
         # Build path
