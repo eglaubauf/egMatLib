@@ -760,7 +760,8 @@ class egMatLibPanel(QWidget):
         if dialog.tags:
             self.library.check_add_tags(dialog.tags)
 
-        self.library.add_material(sel[0] ,dialog.categories, dialog.tags, dialog.fav)
+        for mat in sel:
+            self.library.add_material(mat ,dialog.categories, dialog.tags, dialog.fav)
         self.update_views()
         return
 
