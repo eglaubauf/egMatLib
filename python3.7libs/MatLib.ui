@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1401</width>
+    <width>1890</width>
     <height>1153</height>
    </rect>
   </property>
@@ -585,7 +585,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1401</width>
+     <width>1890</width>
      <height>20</height>
     </rect>
    </property>
@@ -609,6 +609,8 @@
     <addaction name="action_updateAll"/>
     <addaction name="separator"/>
     <addaction name="action_prefs"/>
+    <addaction name="separator"/>
+    <addaction name="action_about"/>
    </widget>
    <addaction name="menu_file"/>
   </widget>
@@ -626,6 +628,11 @@
   <action name="action_deleteMaterial">
    <property name="text">
     <string>_deleteMaterial</string>
+   </property>
+  </action>
+  <action name="action_about">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

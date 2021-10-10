@@ -19,7 +19,7 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 - Deletion of entries from the database (deletes also from disk)
 - Edit multiple materials at the same time via the Details-Pane
 - Easy adjustable custom preview and rendersize
-- ACES 1.2 support (Redshift Native)
+- ACES 1.2 support (Redshift Native, Mantra & Arnold need $OCIO)
 - Right Click Menus for adding materials quickly from the network pane
 - Importing to current network location (pwd()/matnet)
 - Double Click or right click for importing Materials into the scene
@@ -59,9 +59,11 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 - Do not (!) edit the .json file by hand if not needed
   - you have been warned ;)
 
+### Acknowledgements
+- Thanks to Rich Nosworthy for providing the ShaderBall-Setup - https://www.richnosworthy.tv
 
 ### Contact & License
 
 - Found a bug? please open an issue or contact me directly via Twitter
 - Twitter: @eglaubauf
-- Feel free to support me via gumroad https://elmeier.gumroad.com/l/bsghA
+- Website: https://elmar-glaubauf.at/

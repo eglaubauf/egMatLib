@@ -16,9 +16,9 @@ from PySide2.QtCore import *
 from PySide2 import QtUiTools
 
 #Load This HDAs for creation
-HDA_REDSHIFT = "thumbnail_Redshift::1.0"
-HDA_MANTRA = "thumbnail_Mantra::1.0"
-HDA_ARNOLD = "thumbnail_Arnold::2.0"
+HDA_REDSHIFT = "thumbnail_Redshift::2.0"
+HDA_MANTRA = "thumbnail_Mantra::2.0"
+HDA_ARNOLD = "thumbnail_Arnold::3.0"
 
 
 def saveMaterial(node):
@@ -154,6 +154,9 @@ class egMatLibPanel(QWidget):
         self.menuGoto = self.ui.findChild(QMenu, 'menu_file')
         self.action_prefs = self.ui.findChild(QAction, 'action_prefs')
         self.action_prefs.triggered.connect(self.show_prefs)
+
+        self.action_about = self.ui.findChild(QAction, "action_about")
+        self.action_about.triggered.connect(self.show_about)
 
         # Link Buttons
         self.btn_save = self.ui.findChild(QPushButton, 'btn_save')
@@ -313,6 +316,13 @@ class egMatLibPanel(QWidget):
     ###################################
     ########### USER STUFF ############
     ###################################
+
+    def show_about(self):
+
+        about = AboutDialog()
+        about.exec_()
+
+        return
 
     def show_prefs(self):
 
@@ -670,16 +680,18 @@ class egMatLibPanel(QWidget):
     def update_single_material(self):
         '''Rerenders a single materials in the library - The UI is blocked for the duration of the render'''
         items = self.get_selected_items_from_thumblist()
+        call = False
         for item in items:
             if not item:
                 return
             builder = self.import_material(item)
             id = self.get_id_from_thumblist(item)
-            self.library.save_node(builder, id)
+            call = self.library.save_node(builder, id)
             builder.destroy()
 
         self.update_thumb_view()
-        hou.ui.displayMessage("Thumbnail(s) updated")
+        if call:
+            hou.ui.displayMessage("Thumbnail(s) updated")
         return
 
 
@@ -763,6 +775,7 @@ class egMatLibPanel(QWidget):
         for mat in sel:
             self.library.add_material(mat ,dialog.categories, dialog.tags, dialog.fav)
         self.update_views()
+
         return
 
 
@@ -1093,9 +1106,15 @@ class eg_library():
                 val= self.save_node_redshift(node, id)
         elif node.type().name() == "materialbuilder" or node.type().name() == "principledshader::2.0":
             #Interruptable
+            if hou.getenv("OCIO") is None:
+                hou.ui.displayMessage("Please set $OCIO first")
+                return False
             with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
                 val = self.save_node_mantra(node, id)
         elif node.type().name() == "arnold_materialbuilder":
+            if hou.getenv("OCIO") is None:
+                hou.ui.displayMessage("Please set $OCIO first")
+                return False
             with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
                 val = self.save_node_arnold(node, id)
         else:
@@ -1146,10 +1165,12 @@ class eg_library():
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.get_path()  + self.settings.get_img_dir() + str(id) + self.settings.get_img_ext()
+        path = self.get_path()  + self.settings.get_img_dir() + str(id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
-        thumb.parm("path").set(path)
+        thumb.parm("path").set(path+".exr")
+        thumb.parm("cop_out_img").set(path+self.settings.get_img_ext())
+
         exclude = "* ^" + thumb.name()
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
@@ -1174,6 +1195,9 @@ class eg_library():
 
 
         thumb.destroy()
+        if os.path.exists(path+".exr"):
+            os.remove(path+".exr")
+
         return True
 
     def save_node_mantra(self, node, id):
@@ -1202,10 +1226,11 @@ class eg_library():
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.get_path() + self.settings.get_img_dir() + str(id) + self.settings.get_img_ext()
+        path = self.get_path() + self.settings.get_img_dir() + str(id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
-        thumb.parm("path").set(path)
+        thumb.parm("path").set(path+".exr")
+        thumb.parm("cop_out_img").set(path+self.settings.get_img_ext())
         exclude = "* ^" + thumb.name()
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
@@ -1216,8 +1241,12 @@ class eg_library():
         # Render Frame
         thumb.parm("render").pressButton()
 
+
         # CleanUp
         thumb.destroy()
+        if os.path.exists(path+".exr"):
+            os.remove(path+".exr")
+
         return True
 
 
@@ -1400,3 +1429,24 @@ class PrefsDialog(QDialog):
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setText(str(self.rendersize))
         self.line_thumbsize.setText(str(self.thumbsize))
+
+
+class AboutDialog(QDialog):
+    def __init__(self):
+        super(AboutDialog, self).__init__()
+        self.script_path = os.path.dirname(os.path.realpath(__file__))
+
+        ## LOAD UI
+        ## Load UI from ui.file
+        loader = QtUiTools.QUiLoader()
+        file = QFile(self.script_path + '/About.ui')
+        file.open(QFile.ReadOnly)
+        self.ui = loader.load(file)
+        file.close()
+
+        # set main layout and attach to widget
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(self.ui)
+        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
+
+        self.setLayout(mainLayout)
