@@ -6,6 +6,7 @@ import uuid
 import shutil
 import datetime
 import sys
+import subprocess
 
 
 # PySide2
@@ -154,6 +155,16 @@ class egMatLibPanel(QWidget):
         self.menuGoto = self.ui.findChild(QMenu, 'menu_file')
         self.action_prefs = self.ui.findChild(QAction, 'action_prefs')
         self.action_prefs.triggered.connect(self.show_prefs)
+
+        self.action_check_integrity = self.ui.findChild(QAction, 'action_check_integrity')
+        self.action_check_integrity.triggered.connect(self.check_integrity)
+        self.action_cleanup_db = self.ui.findChild(QAction, 'action_cleanup_db')
+        self.action_cleanup_db.triggered.connect(self.cleanup_db)
+        self.action_open_folder = self.ui.findChild(QAction, 'action_open_folder')
+        self.action_open_folder.triggered.connect(self.open_matlib_folder)
+
+
+
 
         self.action_about = self.ui.findChild(QAction, "action_about")
         self.action_about.triggered.connect(self.show_about)
@@ -336,6 +347,78 @@ class egMatLibPanel(QWidget):
         self.thumblist.setIconSize(QSize(self.library.get_thumbSize(), self.library.get_thumbSize()))
         self.thumblist.setGridSize(QSize(self.library.get_thumbSize()+10, self.library.get_thumbSize()+40))
         self.update_views()
+        return
+
+  # Remove image thumbs and .mat-files not used in material library.
+    def cleanup_db(self):
+        materials = self.library.get_materials()
+        img_path = os.path.join( self.path, self.prefs.get_img_dir() )
+        mat_path = os.path.join( self.path, self.prefs.get_mat_dir() )
+
+        img_thumbs = os.listdir(img_path)
+        mat_files = os.listdir(mat_path)
+
+        for mat in materials:
+            id_str = "{}".format(mat['id'])
+            try:
+                img_thumbs.remove(id_str + self.prefs.get_img_ext())
+            except:
+                pass
+
+            try:
+                mat_files.remove(id_str + self.prefs.get_ext())
+            except:
+                pass
+
+        for img in img_thumbs:
+            try:
+                os.remove( os.path.join( img_path, img) )
+                print("File: " + os.path.join( img_path, img) + " removed")
+            except:
+                pass
+        for mat in mat_files:
+            try:
+                os.remove( os.path.join( mat_path, mat) )
+                print("File: " + os.path.join( mat_path, mat) + " removed")
+            except:
+                pass
+
+        return
+
+    # Check Integrity Of all material. Check if <id>.mat and <id>.png files are exists. If not exist - remove material from library.
+    def check_integrity(self):
+
+        materials = self.library.get_materials()
+
+        for mat in materials:
+            if mat['id'] > 0:
+                img_path = os.path.join( self.path, self.prefs.get_img_dir(), "{}".format(mat['id']) + self.prefs.get_img_ext())
+                mat_path = os.path.join( self.path, self.prefs.get_mat_dir(), "{}".format(mat['id']) + self.prefs.get_ext())
+
+                if os.path.exists(img_path) and os.path.exists(mat_path):
+                    pass
+                    #print("Material " +  mat['name'] + " is OK!!")
+                #elif os.path.exists(mat_path):
+                #     print("Material " +  mat['name'] + " .mat file is OK! Update thub image")
+                else:
+                    print("Material " +  mat['name'] + " is broken!!")
+                    self.library.remove_material(mat['id'])
+                    self.update_thumb_view()
+        return
+
+
+    def open_matlib_folder(self):
+
+        lib_dir = self.path
+        lib_dir.encode("unicode_escape")
+
+        if sys.platform is "win32":
+            os.startfile(lib_dir)
+            return
+
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        subprocess.call([opener, lib_dir])
+
         return
 
     # User Adds Category with Button
@@ -615,6 +698,7 @@ class egMatLibPanel(QWidget):
 
                 favicon = hou.getenv("EGMATLIB") + "/def/Favorite.png"
                 # Check if Thumb Exists and attach
+                icon = None
                 if os.path.isfile(img):
                     # Draw Star Icon on Top if Favorite
                     if mat["favorite"]:
@@ -631,7 +715,7 @@ class egMatLibPanel(QWidget):
                         pixmap = QPixmap.fromImage(QImage(img)).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
                         icon = QIcon(pixmap)
                 else:
-                    icon = self.default_icon
+                    icon = self.default_icon()
 
                 # Create entry in Thumblist
                 #img_name = self.get_material_by_id(mat["id"])
@@ -650,7 +734,8 @@ class egMatLibPanel(QWidget):
         default_img = QImage(self.library.get_thumbSize(), self.library.get_thumbSize(), QImage.Format_RGB16)
         default_img.fill(QColor(0, 0, 0))
         pixmap = QPixmap.fromImage(default_img).scaled(self.library.get_thumbSize(), self.library.get_thumbSize(), aspectMode=Qt.KeepAspectRatio)
-        self.default_icon = QIcon(pixmap)
+        default_icon = QIcon(pixmap)
+        return default_icon
 
 
     ###################################
@@ -773,7 +858,7 @@ class egMatLibPanel(QWidget):
             self.library.check_add_tags(dialog.tags)
 
         for mat in sel:
-            self.library.add_material(mat ,dialog.categories, dialog.tags, dialog.fav)
+            self.library.add_material(mat, dialog.categories, dialog.tags, dialog.fav)
         self.update_views()
 
         return
@@ -922,12 +1007,24 @@ class eg_library():
             if id == mat["id"]:
                 self.materials.remove(mat)
 
-                # Remove Files from Disk
-                file_path = self.path + str(id)
-                if os.path.exists(file_path + self.settings.get_mat_dir() + self.settings.get_ext()):
-                    os.remove(file_path + self.settings.get_mat_dir() + self.settings.get_ext())
-                if os.path.exists(file_path + self.settings.get_img_dir() + self.settings.get_img_ext()):
-                    os.remove(file_path + self.settings.get_img_dir() + self.settings.get_img_ext())
+                # # Remove Files from Disk
+                # file_path = self.path + str(id)
+                # if os.path.exists(file_path + self.settings.get_mat_dir() + self.settings.get_ext()):
+                #     os.remove(file_path + self.settings.get_mat_dir() + self.settings.get_ext())
+                # if os.path.exists(file_path + self.settings.get_img_dir() + self.settings.get_img_ext()):
+                #     os.remove(file_path + self.settings.get_img_dir() + self.settings.get_img_ext())
+                  # Remove Files from Disk
+                mat_file_path = os.path.join( self.path , self.settings.get_mat_dir(), str(id) + self.settings.get_ext() )
+                img_file_path = os.path.join( self.path , self.settings.get_img_dir(), str(id) + self.settings.get_img_ext() )
+                interface_file_path = os.path.join( self.path , self.settings.get_mat_dir(), str(id) + ".interface" )
+
+                if os.path.exists(mat_file_path):
+                    os.remove(mat_file_path)
+                if os.path.exists(img_file_path):
+                    os.remove(img_file_path)
+                if os.path.exists(interface_file_path):
+                    os.remove(interface_file_path)
+
                 self.save()
                 return
 
@@ -1049,29 +1146,86 @@ class eg_library():
             currNode = self.get_current_network_node()
             if currNode is None:
                 import_path = ('/mat')
+
+               # if current node is VOP node like "redshift_vopnet" try to go level up in hierarchy and stop when path equal to "/mat" or parent type = "matnet"
+            elif isinstance(currNode, hou.VopNode):
+                while (currNode.path() != '/mat' and currNode.type().name() != 'matnet') :
+                    currNode = currNode.parent()
+
             if currNode.type().name() != "matnet" and currNode.path() != "/mat":
                 matnet = hou.node(currNode.path()).createNode("matnet")
                 import_path = matnet.path()
             else:
                 import_path = currNode.path()
 
-
+        parms_file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + ".interface"
         if renderer == "Redshift":
             # CreateBuilder
-            builder = hou.node(import_path).createNode('redshift_vopnet')
+            builder = None
+
+            #Interface Check
+            if os.path.exists(parms_file_name):
+                interface_file = open(parms_file_name, 'r')
+                code = interface_file.read()
+                exec(code)
+
+                if hou_node.parent().path() == import_path:
+                    builder = hou_node
+                else:
+                    builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
+                    hou_node.destroy()
+            else:
+                builder = hou.node(import_path).createNode('redshift_vopnet')
+
             builder.setName(mat["name"], unique_name=True)
             # Delete Default children in RS-VopNet
             for node in builder.children():
                     node.destroy()
+
+
         elif renderer == "Mantra":
-            builder = hou.node(import_path).createNode('materialbuilder')
+
+            #Interface Check
+            if os.path.exists(parms_file_name):
+                interface_file = open(parms_file_name, 'r')
+                code = interface_file.read()
+                exec(code)
+
+                if hou_node.parent().path() == import_path:
+                    builder = hou_node
+                else:
+                    builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
+                    hou_node.destroy()
+            else:
+                builder = hou.node(import_path).createNode('materialbuilder')
+
             builder.setName(mat["name"], unique_name=True)
             # Delete Default children in MaterialBuilder
             for node in builder.children():
                 node.destroy()
+            # builder = hou.node(import_path).createNode('materialbuilder')
+            # builder.setName(mat["name"], unique_name=True)
+            # # Delete Default children in MaterialBuilder
+            # for node in builder.children():
+            #     node.destroy()
+
+
         elif renderer == "Arnold":
             # CreateBuilder
-            builder = hou.node(import_path).createNode('arnold_materialbuilder')
+            #Interface Check
+            if os.path.exists(parms_file_name):
+                interface_file = open(parms_file_name, 'r')
+                code = interface_file.read()
+                exec(code)
+
+                if hou_node.parent().path() == import_path:
+                    builder = hou_node
+                else:
+                    builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
+                    hou_node.destroy()
+            else:
+                builder = hou.node(import_path).createNode('arnold_materialbuilder')
+
             builder.setName(mat["name"], unique_name=True)
             # Delete Default children in Arnold MaterialBuilder
             for node in builder.children():
@@ -1127,7 +1281,14 @@ class eg_library():
         # Filepath where to save stuff
         file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
 
+        #interface-stuff
+        parms_file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + ".interface"
         children = node.children()
+
+        interface_file = open(parms_file_name, 'w')
+        #interface_file.write(node.parmTemplateGroup().asCode())
+        interface_file.write(node.asCode())
+
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
@@ -1157,8 +1318,18 @@ class eg_library():
         # Filepath where to save stuff
         file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
 
+        #interface-stuff
+        parms_file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + ".interface"
         children = node.children()
+
+        interface_file = open(parms_file_name, 'w')
+        #interface_file.write(node.parmTemplateGroup().asCode())
+        interface_file.write(node.asCode())
+
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
+
+        # children = node.children()
+        # node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         # Create Thumbnail
         thumb = hou.node("/obj").createNode(HDA_ARNOLD)
@@ -1214,7 +1385,14 @@ class eg_library():
             hou.copyNodesTo((node,), builder)
             node = builder
 
+         #interface-stuff
+        parms_file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + ".interface"
         children = node.children()
+
+        interface_file = open(parms_file_name, 'w')
+        #interface_file.write(node.parmTemplateGroup().asCode())
+        interface_file.write(node.asCode())
+
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         node = origNode

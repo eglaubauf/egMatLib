@@ -609,6 +609,10 @@
     <addaction name="action_updateAll"/>
     <addaction name="separator"/>
     <addaction name="action_prefs"/>
+    <addaction name="action_cleanup_db"/>
+    <addaction name="action_check_integrity"/>
+    <addaction name="separator"/>
+    <addaction name="action_open_folder"/>
     <addaction name="separator"/>
     <addaction name="action_about"/>
    </widget>
@@ -633,6 +637,21 @@
   <action name="action_about">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="action_cleanup_db">
+   <property name="text">
+    <string>Cleanup Library Files</string>
+   </property>
+  </action>
+  <action name="action_check_integrity">
+   <property name="text">
+    <string>Check Integrity</string>
+   </property>
+  </action>
+  <action name="action_open_folder">
+   <property name="text">
+    <string>Open Library Directory</string>
    </property>
   </action>
  </widget>
