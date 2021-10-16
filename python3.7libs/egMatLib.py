@@ -349,39 +349,44 @@ class egMatLibPanel(QWidget):
         self.update_views()
         return
 
-  # Remove image thumbs and .mat-files not used in material library.
+    # Remove image thumbs and .mat-files not used in material library.
     def cleanup_db(self):
+
         materials = self.library.get_materials()
-        img_path = os.path.join( self.path, self.prefs.get_img_dir() )
-        mat_path = os.path.join( self.path, self.prefs.get_mat_dir() )
+        img_path = os.path.join(self.path, self.prefs.get_img_dir())
+        mat_path = os.path.join(self.path, self.prefs.get_mat_dir())
 
         img_thumbs = os.listdir(img_path)
         mat_files = os.listdir(mat_path)
 
-        for mat in materials:
-            id_str = "{}".format(mat['id'])
-            try:
-                img_thumbs.remove(id_str + self.prefs.get_img_ext())
-            except:
-                pass
-
-            try:
-                mat_files.remove(id_str + self.prefs.get_ext())
-            except:
-                pass
 
         for img in img_thumbs:
-            try:
-                os.remove( os.path.join( img_path, img) )
-                print("File: " + os.path.join( img_path, img) + " removed")
-            except:
-                pass
-        for mat in mat_files:
-            try:
-                os.remove( os.path.join( mat_path, mat) )
-                print("File: " + os.path.join( mat_path, mat) + " removed")
-            except:
-                pass
+            id = img.split(".")[0]
+            found = False
+            for mat in materials:
+                if mat["id"] == int(id):
+                    found = True
+                    break
+            if not found:
+                try:
+                    os.remove( os.path.join(img_path, img) )
+                    print("File: " + os.path.join(img_path, img) + " removed")
+                except:
+                    pass
+
+        for m in mat_files:
+            id = m.split(".")[0]
+            found = False
+            for mat in materials:
+                if mat["id"] == int(id):
+                    found = True
+                    break
+            if not found:
+                try:
+                    os.remove( os.path.join(mat_path, m) )
+                    print("File: " + os.path.join(mat_path, m) + " removed")
+                except:
+                    pass
 
         return
 
@@ -394,14 +399,14 @@ class egMatLibPanel(QWidget):
             if mat['id'] > 0:
                 img_path = os.path.join(self.path, self.prefs.get_img_dir(), "{}".format(mat['id']) + self.prefs.get_img_ext())
                 mat_path = os.path.join(self.path, self.prefs.get_mat_dir(), "{}".format(mat['id']) + self.prefs.get_ext())
+                #interface_path = os.path.join(self.path, self.prefs.get_mat_dir(), "{}".format(mat['id']) + ".interface")
 
+                # Only check for img and mat for backwards compatibility
                 if os.path.exists(img_path) and os.path.exists(mat_path):
+                    # All clear - do nothing
                     pass
-                    #print("Material " +  mat['name'] + " is OK!!")
-                #elif os.path.exists(mat_path):
-                #     print("Material " +  mat['name'] + " .mat file is OK! Update thub image")
                 else:
-                    print("Material " +  mat['name'] + " is broken!!")
+                    print("Material " +  mat['name'] + " is broken.")
                     self.library.remove_material(mat['id'])
                     self.update_thumb_view()
         return
@@ -1093,13 +1098,6 @@ class eg_library():
         for mat in self.materials:
             if int(id) == mat["id"]:
                 return mat["renderer"]
-        return None
-
-    def get_builder_by_id(self, id):
-        '''Return the Renderer for this Material as a string'''
-        for mat in self.materials:
-            if int(id) == mat["id"]:
-                return mat["builder"]
         return None
 
     def check_materialBuilder_by_id(self, id):
