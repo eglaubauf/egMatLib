@@ -412,7 +412,11 @@ class egMatLibPanel(QWidget):
         lib_dir = self.path
         lib_dir.encode("unicode_escape")
 
+<<<<<<< HEAD
         if sys.platform != "linux" and sys.platform != "linux2":
+=======
+        if not sys.platform == "linux" or not sys.platform == "linux2":
+>>>>>>> d01592be2a5150fd2ae1297964de1ba95f0d220a
             os.startfile(lib_dir)
             return
         else:
