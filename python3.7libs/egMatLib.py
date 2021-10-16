@@ -1013,13 +1013,7 @@ class eg_library():
             if id == mat["id"]:
                 self.materials.remove(mat)
 
-                # # Remove Files from Disk
-                # file_path = self.path + str(id)
-                # if os.path.exists(file_path + self.settings.get_mat_dir() + self.settings.get_ext()):
-                #     os.remove(file_path + self.settings.get_mat_dir() + self.settings.get_ext())
-                # if os.path.exists(file_path + self.settings.get_img_dir() + self.settings.get_img_ext()):
-                #     os.remove(file_path + self.settings.get_img_dir() + self.settings.get_img_ext())
-                  # Remove Files from Disk
+                #Remove Files from Disk
                 mat_file_path = os.path.join( self.path , self.settings.get_mat_dir(), str(id) + self.settings.get_ext() )
                 img_file_path = os.path.join( self.path , self.settings.get_img_dir(), str(id) + self.settings.get_img_ext() )
                 interface_file_path = os.path.join( self.path , self.settings.get_mat_dir(), str(id) + ".interface" )
@@ -1153,18 +1147,29 @@ class eg_library():
             if currNode is None:
                 import_path = ('/mat')
 
-               # if current node is VOP node like "redshift_vopnet" try to go level up in hierarchy and stop when path equal to "/mat" or parent type = "matnet"
+            # if current node is VOP node like "redshift_vopnet" try to go level up in hierarchy and stop when path equal to "/mat" or parent type = "matnet"
             elif isinstance(currNode, hou.VopNode):
                 while (currNode.path() != '/mat' and currNode.type().name() != 'matnet') :
                     currNode = currNode.parent()
 
             if currNode.type().name() != "matnet" and currNode.path() != "/mat":
                 matnet = hou.node(currNode.path()).createNode("matnet")
+                # Use existing Matnet if available
+                for n in currNode.children():
+                    if n.type().name() != "matnet":
+                        matnet = n
+                        break
                 import_path = matnet.path()
             else:
                 import_path = currNode.path()
 
         parms_file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + ".interface"
+
+
+        #Create temporary storage of nodes
+        tmp_matnet = hou.node("obj").createNode("matnet")
+        hou_parent = tmp_matnet # needed for the code script below
+
 
         if renderer == "Redshift":
             # CreateBuilder
@@ -1176,12 +1181,12 @@ class eg_library():
                 code = interface_file.read()
                 exec(code)
 
-                hou_node = hou.selectedNodes()[0]
-                if hou_node.parent().path() == import_path:
-                    builder = hou_node
-                else:
-                    builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
-                    hou_node.destroy()
+                builder = hou.selectedNodes()[0]
+                # if hou_node.parent().path() == import_path:
+                #     builder = hou_node
+                # else:
+                #     builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
+                #     hou_node.destroy()
 
             else:
                 builder = hou.node(import_path).createNode('redshift_vopnet')
@@ -1190,6 +1195,7 @@ class eg_library():
             # Delete Default children in RS-VopNet
             for node in builder.children():
                     node.destroy()
+
 
         elif renderer == "Mantra":
             #Interface Check
@@ -1200,14 +1206,7 @@ class eg_library():
                     code = interface_file.read()
                     exec(code)
 
-                    hou_node = hou.selectedNodes()
-
-                    if hou_node[0].parent().path() == import_path:
-                        builder = hou_node[0]
-                    else:
-                        builder = hou.copyNodesTo( (hou_node[0],), hou.node(import_path) )[0]
-                        hou_node[0].destroy()
-
+                    builder = hou.selectedNodes()[0]
                 # Selection will be empty if not a MaterialBuilder
                 else:
                     builder = hou.node(import_path).createNode('materialbuilder')
@@ -1228,13 +1227,13 @@ class eg_library():
                 code = interface_file.read()
                 exec(code)
 
-                hou_node = hou.selectedNodes()[0]
+                builder = hou.selectedNodes()[0]
 
-                if hou_node.parent().path() == import_path:
-                    builder = hou_node
-                else:
-                    builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
-                    hou_node.destroy()
+                # if hou_node.parent().path() == import_path:
+                #     builder = hou_node
+                # else:
+                #     builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
+                #     hou_node.destroy()
             else:
                 builder = hou.node(import_path).createNode('arnold_materialbuilder')
 
@@ -1242,6 +1241,7 @@ class eg_library():
             # Delete Default children in Arnold MaterialBuilder
             for node in builder.children():
                     node.destroy()
+
 
         # Import file from disk
         try:
@@ -1257,8 +1257,17 @@ class eg_library():
             builder.destroy()
             builder = hou.selectedNodes()[0]
 
-        # MakeFancyPos
-        builder.moveToGoodPosition()
+        else:
+            # MakeFancyPos
+            print(import_path)
+            print(builder)
+            new_mat = hou.copyNodesTo((builder,), hou.node(import_path) )
+            new_mat[0].moveToGoodPosition()
+            builder = new_mat[0]
+
+        #Cleanup
+        tmp_matnet.destroy()
+
         return builder
 
 
