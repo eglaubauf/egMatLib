@@ -392,8 +392,8 @@ class egMatLibPanel(QWidget):
 
         for mat in materials:
             if mat['id'] > 0:
-                img_path = os.path.join( self.path, self.prefs.get_img_dir(), "{}".format(mat['id']) + self.prefs.get_img_ext())
-                mat_path = os.path.join( self.path, self.prefs.get_mat_dir(), "{}".format(mat['id']) + self.prefs.get_ext())
+                img_path = os.path.join(self.path, self.prefs.get_img_dir(), "{}".format(mat['id']) + self.prefs.get_img_ext())
+                mat_path = os.path.join(self.path, self.prefs.get_mat_dir(), "{}".format(mat['id']) + self.prefs.get_ext())
 
                 if os.path.exists(img_path) and os.path.exists(mat_path):
                     pass
@@ -412,12 +412,12 @@ class egMatLibPanel(QWidget):
         lib_dir = self.path
         lib_dir.encode("unicode_escape")
 
-        if sys.platform is "win32":
+        if not sys.platform == "linux" or not sys.platform == "linux2":
             os.startfile(lib_dir)
             return
-
-        opener = "open" if sys.platform == "darwin" else "xdg-open"
-        subprocess.call([opener, lib_dir])
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, lib_dir])
 
         return
 
@@ -1094,6 +1094,13 @@ class eg_library():
                 return mat["renderer"]
         return None
 
+    def get_builder_by_id(self, id):
+        '''Return the Renderer for this Material as a string'''
+        for mat in self.materials:
+            if int(id) == mat["id"]:
+                return mat["builder"]
+        return None
+
     def check_materialBuilder_by_id(self, id):
         '''Return if the Material is a Builder (Mantra) as a 0/1'''
         for mat in self.materials:
@@ -1159,6 +1166,7 @@ class eg_library():
                 import_path = currNode.path()
 
         parms_file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + ".interface"
+
         if renderer == "Redshift":
             # CreateBuilder
             builder = None
@@ -1169,11 +1177,13 @@ class eg_library():
                 code = interface_file.read()
                 exec(code)
 
+                hou_node = hou.selectedNodes()[0]
                 if hou_node.parent().path() == import_path:
                     builder = hou_node
                 else:
                     builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
                     hou_node.destroy()
+
             else:
                 builder = hou.node(import_path).createNode('redshift_vopnet')
 
@@ -1182,20 +1192,26 @@ class eg_library():
             for node in builder.children():
                     node.destroy()
 
-
         elif renderer == "Mantra":
-
             #Interface Check
             if os.path.exists(parms_file_name):
-                interface_file = open(parms_file_name, 'r')
-                code = interface_file.read()
-                exec(code)
+                # Only load parms if MatBuilder
+                if self.check_materialBuilder_by_id(id):
+                    interface_file = open(parms_file_name, 'r')
+                    code = interface_file.read()
+                    exec(code)
 
-                if hou_node.parent().path() == import_path:
-                    builder = hou_node
+                    hou_node = hou.selectedNodes()
+
+                    if hou_node[0].parent().path() == import_path:
+                        builder = hou_node[0]
+                    else:
+                        builder = hou.copyNodesTo( (hou_node[0],), hou.node(import_path) )[0]
+                        hou_node[0].destroy()
+
+                # Selection will be empty if not a MaterialBuilder
                 else:
-                    builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
-                    hou_node.destroy()
+                    builder = hou.node(import_path).createNode('materialbuilder')
             else:
                 builder = hou.node(import_path).createNode('materialbuilder')
 
@@ -1203,11 +1219,6 @@ class eg_library():
             # Delete Default children in MaterialBuilder
             for node in builder.children():
                 node.destroy()
-            # builder = hou.node(import_path).createNode('materialbuilder')
-            # builder.setName(mat["name"], unique_name=True)
-            # # Delete Default children in MaterialBuilder
-            # for node in builder.children():
-            #     node.destroy()
 
 
         elif renderer == "Arnold":
@@ -1217,6 +1228,8 @@ class eg_library():
                 interface_file = open(parms_file_name, 'r')
                 code = interface_file.read()
                 exec(code)
+
+                hou_node = hou.selectedNodes()[0]
 
                 if hou_node.parent().path() == import_path:
                     builder = hou_node
