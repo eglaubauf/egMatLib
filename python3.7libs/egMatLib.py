@@ -1172,21 +1172,13 @@ class eg_library():
 
 
         if renderer == "Redshift":
-            # CreateBuilder
-            builder = None
-
             #Interface Check
             if os.path.exists(parms_file_name):
                 interface_file = open(parms_file_name, 'r')
                 code = interface_file.read()
                 exec(code)
 
-                builder = hou.selectedNodes()[0]
-                # if hou_node.parent().path() == import_path:
-                #     builder = hou_node
-                # else:
-                #     builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
-                #     hou_node.destroy()
+                builder = hou_parent.children()[0]
 
             else:
                 builder = hou.node(import_path).createNode('redshift_vopnet')
@@ -1227,13 +1219,7 @@ class eg_library():
                 code = interface_file.read()
                 exec(code)
 
-                builder = hou.selectedNodes()[0]
-
-                # if hou_node.parent().path() == import_path:
-                #     builder = hou_node
-                # else:
-                #     builder = hou.copyNodesTo( (hou_node,), hou.node(import_path) )[0]
-                #     hou_node.destroy()
+                builder = hou_parent.children()[0]
             else:
                 builder = hou.node(import_path).createNode('arnold_materialbuilder')
 
@@ -1258,10 +1244,7 @@ class eg_library():
             builder = hou.selectedNodes()[0]
 
         else:
-            # MakeFancyPos
-            print(import_path)
-            print(builder)
-            new_mat = hou.copyNodesTo((builder,), hou.node(import_path) )
+            new_mat = hou.moveNodesTo((builder,), hou.node(import_path) )
             new_mat[0].moveToGoodPosition()
             builder = new_mat[0]
 
