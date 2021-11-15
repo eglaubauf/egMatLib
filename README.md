@@ -28,9 +28,9 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 
 ### Compatibility
 
- - Tested on 18.5.696 on Windows 10 and Ubuntu 20.04
- - Houdini Indie only
- - Tested with Redshift 3.0.57
+ - Tested on 19.0.383 on Windows 10
+ - Houdini Indie only (open HDAs for rebuild if desired)
+ - Tested with Redshift 3.0.59
  - Other builds might work
  - The repo will be updated regularly
  - Python 2 support
@@ -38,7 +38,7 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 
 ### Installation
 - Download or Clone this repository and unzip
-- Copy the provided `MatLib.json` to your `houdini18.5/packages` folder
+- Copy the provided `MatLib.json` to your `houdini19.0/packages` folder
 - Edit the line `/home/elmar/MatLib` to the location of your downloaded folder, e.g.: `G:/Git/MatLib`
 - Start Houdini
 
