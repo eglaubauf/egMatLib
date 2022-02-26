@@ -874,7 +874,7 @@ class egMatLibPanel(QWidget):
         items = self.get_selected_items_from_thumblist()
         for item in items:
             self.import_material(item)
-        hou.ui.displayMessage("Materials imported")
+        #hou.ui.displayMessage("Materials imported")
         return
 
     #  Import Material to Scene
