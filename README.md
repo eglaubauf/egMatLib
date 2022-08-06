@@ -28,11 +28,10 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 
 ### Compatibility
 
- - Tested on 19.0.383 on Windows 10
+ - Tested on 19.5.334 on Ubuntu 22.04
  - Houdini Indie only (open HDAs for rebuild if desired)
  - Tested with Redshift 3.0.59
  - Other builds might work
- - The repo will be updated regularly
  - Python 2 support
  - Python 3 support
 

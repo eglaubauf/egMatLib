@@ -656,7 +656,7 @@ class egMatLibPanel(QWidget):
     def filter_view_filter(self):
         '''Filter Thumbview for entered characters in filter-Line'''
         # Filter Thumbnail View
-        if self.filter is "":
+        if self.filter == "":
             return
         tmp = []
         if self.filter.startswith("*"):
