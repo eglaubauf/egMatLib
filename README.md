@@ -63,6 +63,4 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 
 ### Contact & License
 
-- Found a bug? please open an issue or contact me directly via Twitter
-- Twitter: @eglaubauf
-- Website: https://elmar-glaubauf.at/
+- Found a bug? please open an issue 
