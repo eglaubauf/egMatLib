@@ -9,6 +9,8 @@
 n = kwargs.get("node", None)
 if n.type().name() == "redshift_vopnet":
     return True
+elif n.type().name() == "octane_vopnet":
+    return True
 elif n.type().name() == "materialbuilder":
     return True
 elif n.type().name() == "principledshader::2.0":
@@ -23,6 +25,8 @@ return False ]]>
 n = kwargs.get("node", None)
 if n.type().name() == "redshift_vopnet":
     return "Save Material to MatLib"
+elif n.type().name() == "octane_vopnet":
+    return "Save Material to MatLib"
 elif n.type().name() == "materialbuilder":
     return "Save Material to MatLib"
 elif n.type().name() == "principledshader::2.0":
@@ -36,6 +40,9 @@ return "Unavailable in this Context"
 <![CDATA[
 n = kwargs.get("node", None)
 if n.type().name() == "redshift_vopnet":
+    import egMatLib
+    egMatLib.saveMaterial(n)
+elif n.type().name() == "octane_vopnet":
     import egMatLib
     egMatLib.saveMaterial(n)
 elif n.type().name() == "materialbuilder":
