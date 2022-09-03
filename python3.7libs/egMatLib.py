@@ -20,6 +20,7 @@ from PySide2 import QtUiTools
 HDA_REDSHIFT = "thumbnail_Redshift::2.0"
 HDA_MANTRA = "thumbnail_Mantra::2.0"
 HDA_ARNOLD = "thumbnail_Arnold::3.0"
+HDA_OCTANE = "thumbnail_Octane::1.0"
 
 
 def saveMaterial(node):
@@ -217,6 +218,7 @@ class egMatLibPanel(QWidget):
         self.cb_Redshift = self.ui.findChild(QRadioButton, "cb_Redshift")
         self.cb_Mantra = self.ui.findChild(QRadioButton, "cb_Mantra")
         self.cb_Arnold = self.ui.findChild(QRadioButton, "cb_Arnold")
+        self.cb_Octane = self.ui.findChild(QRadioButton, "cb_Octane")
 
         self.cb_showCat = self.ui.findChild(QCheckBox, "cb_showCat")
 
@@ -224,6 +226,7 @@ class egMatLibPanel(QWidget):
         self.cb_Redshift.toggled.connect(self.update_views)
         self.cb_Mantra.toggled.connect(self.update_views)
         self.cb_Arnold.toggled.connect(self.update_views)
+        self.cb_Octane.toggled.connect(self.update_views)
 
         self.cb_showCat.stateChanged.connect(self.toggle_catView)
 
@@ -699,6 +702,9 @@ class egMatLibPanel(QWidget):
                 elif self.cb_Arnold.isChecked():
                     if mat["renderer"] != "Arnold":
                         continue
+                elif self.cb_Octane.isChecked():
+                    if mat["renderer"] != "Octane":
+                        continue
 
                 img = self.library.get_path() + self.prefs.get_img_dir() + str(mat["id"]) + self.prefs.get_img_ext()
 
@@ -1068,6 +1074,9 @@ class eg_library():
             if node.type().name() == "redshift_vopnet":
                 renderer = "Redshift"
                 builder = 1
+            if node.type().name() == "octane_vopnet":
+                renderer = "Octane"
+                builder = 1
             elif node.type().name() == "materialbuilder":
                 renderer = "Mantra"
                 builder = 1
@@ -1188,6 +1197,22 @@ class eg_library():
             for node in builder.children():
                     node.destroy()
 
+        elif renderer == "Octane":
+            #Interface Check
+            if os.path.exists(parms_file_name):
+                interface_file = open(parms_file_name, 'r')
+                code = interface_file.read()
+                exec(code)
+
+                builder = hou_parent.children()[0]
+
+            else:
+                builder = hou.node(import_path).createNode('octane_vopnet')
+
+            builder.setName(mat["name"], unique_name=True)
+            # Delete Default children in Octane-VopNet
+            for node in builder.children():
+                    node.destroy()
 
         elif renderer == "Mantra":
             #Interface Check
@@ -1275,6 +1300,12 @@ class eg_library():
                 return False
             with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
                 val = self.save_node_arnold(node, id)
+        elif node.type().name() == "octane_vopnet":
+            if hou.getenv("OCIO") is None:
+                hou.ui.displayMessage("Please set $OCIO first")
+                return False
+            with hou.InterruptableOperation("Rendering", "Performing Tasks", open_interrupt_dialog=True) as operation:
+                val = self.save_node_octane(node, id)
         else:
             hou.ui.displayMessage('Selected Node is not a Material Builder')
         return val
@@ -1315,6 +1346,42 @@ class eg_library():
         thumb.parm("execute").pressButton()
         # CleanUp
         thumb.destroy()
+        return True
+    def save_node_octane(self, node, id): 
+         # Filepath where to save stuff
+        file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + self.settings.get_ext()
+
+        #interface-stuff
+        parms_file_name = self.get_path() + self.settings.get_mat_dir() + str(id) + ".interface"
+        children = node.children()
+
+        interface_file = open(parms_file_name, 'w')
+        #interface_file.write(node.parmTemplateGroup().asCode())
+        interface_file.write(node.asCode())
+
+        node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
+
+        # Create Thumbnail
+        thumb = hou.node("/obj").createNode(HDA_OCTANE)
+        thumb.parm("mat").set(node.path())
+
+        # Build path
+        path = self.get_path()  + self.settings.get_img_dir() + str(id) + self.settings.get_img_ext()
+
+        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
+        thumb.parm("path").set(path)
+        exclude = "* ^" + thumb.name()
+        thumb.parm("obj_exclude").set(exclude)
+        lights = thumb.name() + "/*"
+        thumb.parm("lights").set(lights)
+        thumb.parm("resx").set(self.rendersize)
+        thumb.parm("resy").set(self.rendersize)
+
+        # Render Frame
+        thumb.parm("execute").pressButton()
+
+        # CleanUp
+        #thumb.destroy()
         return True
 
     def save_node_arnold(self, node, id): #ARNOLD

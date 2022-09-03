@@ -524,7 +524,7 @@
            <string>Mantra</string>
           </property>
           <property name="checked">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -534,7 +534,7 @@
            <string>Redshift</string>
           </property>
           <property name="checked">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -542,6 +542,19 @@
          <widget class="QRadioButton" name="cb_Arnold">
           <property name="text">
            <string>Arnold</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="cb_Octane">
+          <property name="text">
+           <string>Octane</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
