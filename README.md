@@ -30,7 +30,7 @@ A Material Library for Houdini Mantra, Redshift and Arnold and Octane
 
  - Tested on 19.5.303 on Win 10
  - Houdini Indie only (open HDAs for rebuild if desired)
- - Tested with Redshift 3.0.59
+ - Tested with Redshift 3.5.07
  - Other builds might work
  - Python 2 support
  - Python 3 support
