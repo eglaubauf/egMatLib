@@ -1,6 +1,6 @@
 # egMatLib - A Material Library for Houdini
 
-A Material Library for Houdini Mantra, Redshift and Arnold
+A Material Library for Houdini Mantra, Redshift and Arnold and Octane
 
 ![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib.png)
 
@@ -28,12 +28,13 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 
 ### Compatibility
 
- - Tested on 19.5.334 on Ubuntu 22.04
+ - Tested on 19.5.303 on Win 10
  - Houdini Indie only (open HDAs for rebuild if desired)
  - Tested with Redshift 3.0.59
  - Other builds might work
  - Python 2 support
  - Python 3 support
+ - Octane is only supported for Houdini 19.0 as there are no public 19.5 builds so far
 
 ### Installation
 - Download or Clone this repository and unzip
@@ -60,7 +61,8 @@ A Material Library for Houdini Mantra, Redshift and Arnold
 
 ### Acknowledgements
 - Thanks to Rich Nosworthy for providing the ShaderBall-Setup - https://www.richnosworthy.tv
+- Thanks to @thopedam for providing the Octane Support
 
 ### Contact & License
 
-- Found a bug? please open an issue 
+- Found a bug? please open an issue
