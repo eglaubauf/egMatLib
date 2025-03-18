@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pythonPanelDocument>
+  <!-- This file contains definitions of Python interfaces and the
+ interfaces menu.  It should not be hand-edited when it is being
+ used by the application.  Note, that two definitions of the
+ same interface or of the interfaces menu are not allowed
+ in a single file. -->
+  <interface name="MatLib" label="MatLib" icon="MISC_python" showNetworkNavigationBar="false" help_url="">
+    <script><![CDATA[import sys 
+
+if (sys.version_info > (3, 0)):
+ # Python 3 code in this block
+    def createInterface():
+        import egMatLib
+        import importlib
+        importlib.reload(egMatLib)
+        widget = egMatLib.egMatLibPanel()
+        return widget
+else:
+ # Python 2 code in this block
+    def createInterface():
+        import egMatLib
+        reload(egMatLib)
+        widget = egMatLib.egMatLibPanel()
+        return widget]]></script>
+    <includeInPaneTabMenu menu_position="99" create_separator="true"/>
+    <includeInToolbarMenu menu_position="415" create_separator="false"/>
+    <help><![CDATA[]]></help>
+  </interface>
+</pythonPanelDocument>

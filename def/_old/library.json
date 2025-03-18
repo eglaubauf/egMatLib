@@ -1,0 +1,16 @@
+{
+    "thumbsize": 200,
+    "rendersize": 256,
+    "categories": [ "All" ],
+    "tags": [  ],
+    "materials": [
+        {
+            "id": -1,
+            "name": "",
+            "categories": [],
+            "tags": [],
+            "favorite": 0,
+            "renderer": ""
+        }
+    ]
+}
