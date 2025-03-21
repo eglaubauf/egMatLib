@@ -686,18 +686,58 @@ class MaterialLibrary:
         rop.parm("soho_foreground").set(1)
         rop.parm("execute").pressButton()
 
-        cop = rop.parent().createNode("cop2net")
-        convert = cop.createNode("Elmar::pngtoexr::1.0")  # TODO: LICENSE ISSUE
+        copnet = rop.parent().createNode("cop2net")
 
-        convert.parm("filename").set(path)
+        ############################
+        # CopNet Setup
+        copnet.setName("exr_to_png")
+
+        cop_file = self.copnet.createNode("file")
+
+        cop_file.parm("nodename").set(0)
+        cop_file.parm("overridedepth").set(2)
+        cop_file.parm("depth").set(4)
+        cop_file.parm("filename1").set(path)
+
+        # Vopnet
+        cop_vop = self.copnet.createNode("vopcop2filter")
+        gn = cop_vop.node("global1")
+        o = cop_vop.node("output1")
+        ftv = cop_vop.createNode("floattovec")
+        ocio = cop_vop.createNode("ocio_transform")
+        vtf = cop_vop.createNode("vectofloat")
+
+        o.setInput(0, vtf, 0)
+        o.setInput(1, vtf, 1)
+        o.setInput(2, vtf, 2)
+        o.setInput(3, gn, 6)
+
+        vtf.setInput(0, ocio, 0)
+
+        ocio.setInput(0, ftv, 0)
+        ocio.parm("fromspace").set("ACES - ACEScg")
+        ocio.parm("tospace").set("Output - sRGB")
+
+        ftv.setInput(0, gn, 3)
+        ftv.setInput(1, gn, 4)
+        ftv.setInput(2, gn, 5)
+
+        cop_out = self.copnet.createNode("rop_comp")
+
+        cop_vop.setInput(0, self.cop_file)
+        cop_out.setInput(0, self.cop_vop)
+
         newpath = (
             self.get_path()
             + self.settings.get_img_dir()
             + str(id)
             + self.settings.get_img_ext()
         )
-        convert.parm("copoutput").set(newpath)
-        convert.parm("execute").pressButton()
+
+        cop_out.parm("copoutput").set(newpath)
+        cop_out.parm("execute").pressButton()
+
+        ############################
 
         net.destroy()
 
