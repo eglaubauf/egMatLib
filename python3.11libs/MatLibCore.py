@@ -18,9 +18,7 @@ importlib.reload(helpers)
 importlib.reload(thumbNailScene)
 
 # Load This HDAs for creation
-HDA_ARNOLD = "thumbnail_Arnold::3.0"
 HDA_OCTANE = "thumbnail_Octane::1.0"
-
 
 ###################################
 ########### THE LIBRARY ###########
@@ -777,7 +775,7 @@ class MaterialLibrary:
             os.remove(path + ".exr")
         return
 
-    def save_node_redshift(self, node, id):
+    def save_node_redshift(self, node, id, update):
         """Saves the Redshift node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
@@ -833,7 +831,7 @@ class MaterialLibrary:
         thumb.destroy()
         return True
 
-    def save_node_octane(self, node, id):
+    def save_node_octane(self, node, id, update):
         # Filepath where to save stuff
         file_name = (
             self.get_path()
@@ -887,7 +885,7 @@ class MaterialLibrary:
         # thumb.destroy()
         return True
 
-    def save_node_arnold(self, node, id):  # ARNOLD
+    def save_node_arnold(self, node, id, update):  # ARNOLD
         """Saves the Arnold node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
@@ -914,7 +912,9 @@ class MaterialLibrary:
                 return True
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode(HDA_ARNOLD)
+        sc = thumbNailScene.ThumbNailScene()
+        sc.setup("Arnold")
+        thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -930,15 +930,9 @@ class MaterialLibrary:
         thumb.parm("lights").set(lights)
         thumb.parm("resx").set(self.rendersize)
         thumb.parm("resy").set(self.rendersize)
-        thumb.parm("ar_light_color_texture").set(
-            hou.getenv("EGMATLIB") + "/img/photo_studio_01_4k_ACEScg.hdr"
-        )
-
-        # Render Frame
         thumb.parm("render").pressButton()
 
         # WaitForRender - A really bad hack
-
         done_path = hou.getenv("EGMATLIB") + "/lib/done.txt"
         mustend = time.time() + 60.0
         while time.time() < mustend:

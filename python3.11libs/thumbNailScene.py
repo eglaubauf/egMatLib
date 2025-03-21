@@ -45,6 +45,17 @@ class ThumbNailScene:
             )
             self.rop.parm("execute").set(self.geo_node.parm("render"))
 
+        elif "Arnold" in renderer:
+
+            self.shaderBall = shaderBallScene.ShaderBallSetup()
+            self.shaderBall.setup(self.renderer, self.geo_node)
+
+            self.build_scene()
+            self.shaderBall.get_geo_node().parm("mat_ball").set(
+                self.geo_node.parm("mat")
+            )
+            self.shell.parm("execute").set(self.geo_node.parm("render"))
+
         return self.geo_node
 
     def build_parm_templates(self):
@@ -201,6 +212,53 @@ class ThumbNailScene:
                 "$EGMATLIB/img/photo_studio_01_4k_ACEScg.hdr"
             )
 
+        elif "Arnold" in self.renderer:
+            # Lights
+            self.lgt_right = self.geo_node.createNode("arnold_light")
+            self.lgt_right.setName("Right")
+            self.lgt_env = self.geo_node.createNode("arnold_light")
+            self.lgt_right.setName("Env")
+            self.lgt_left = self.geo_node.createNode("arnold_light")
+            self.lgt_right.setName("Left")
+
+            # Right
+            self.lgt_right.parm("tx").set(0.182989)
+            self.lgt_right.parm("ty").set(0.400678)
+            self.lgt_right.parm("tz").set(-0.637707)
+
+            self.lgt_right.parm("rx").set(-164.722)
+            self.lgt_right.parm("ry").set(0)
+            self.lgt_right.parm("rz").set(0)
+
+            self.lgt_right.parm("ar_light_type").set(3)
+            self.lgt_right.parm("ar_intensity").set(0.5)
+            self.lgt_right.parm("ar_samples").set(3)
+
+            # Left
+            self.lgt_left.parm("tx").set(0.00626206)
+            self.lgt_left.parm("ty").set(0.290401)
+            self.lgt_left.parm("tz").set(0.562686)
+
+            self.lgt_left.parm("rx").set(180)
+            self.lgt_left.parm("ry").set(180)
+            self.lgt_left.parm("rz").set(0)
+
+            self.lgt_right.parm("ar_light_type").set(3)
+            self.lgt_right.parm("ar_intensity").set(0.2)
+            self.lgt_right.parm("ar_samples").set(3)
+            self.lgt_right.parm("ar_quad_sizex").set(0.4)
+            self.lgt_right.parm("ar_quad_sizey").set(0.74)
+
+            # Env
+            self.lgt_env.parm("ry").set(-60)
+            self.lgt_env.parm("ar_light_type").set(6)
+            self.lgt_env.parm("ar_light_color_type").set(1)
+            self.lgt_env.parm("ar_intensity").set(0.2)
+            self.lgt_env.parm("ar_samples").set(3)
+            self.lgt_env.parm("ar_light_color_texture").set(
+                "$EGMATLIB/img/photo_studio_01_4k_ACEScg.tx"
+            )
+
     def build_cam(self):
         # Cam
         self.cam = self.geo_node.createNode("cam")
@@ -287,9 +345,41 @@ class ThumbNailScene:
                 self.geo_node.parm("path"), follow_parm_reference=False
             )
 
-    def build_cops(self):
+        if "Arnold" in self.renderer:
+            # RopNet Setup
+            self.rop = self.ropnet.createNode("arnold")
+            self.comp = self.ropnet.createNode("comp")
+            self.comp.setNextInput(self.rop)
 
-        if "Mantra" in self.renderer:
+            self.rop.parm("camera").set("../../RenderCam")
+
+            self.rop.parm("ar_AA_samples").set(4)
+            self.rop.parm("ar_GI_total_depth").set(4)
+            self.rop.parm("ar_GI_transmission_depth").set(4)
+            self.rop.parm("ar_threads").set(-1)
+            self.rop.parm("ar_skip_license_check").set(1)
+
+            self.rop.parm("excludeobject").set(self.geo_node.parm("obj_exclude"))
+            self.rop.parm("alights").set(self.geo_node.parm("lights"))
+
+            self.comp.parm("coppath").set("../../exr_to_png/OUT")
+            self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
+            self.comp.parm("convertcolorspace").set(0)
+            self.comp.parm("trange").set(0)
+
+            self.shell = self.ropnet.createNode("shell")
+            self.shell.parm("tpostrender").set(1)
+            self.shell.parm("lpostrender").set("python")
+            self.shell.parm("postrender").set(
+                """path = hou.getenv("EGMATLIB") + "/lib/"
+f = open(path + "done.txt", "w")
+f.close()
+"""
+            )
+            self.shell.setNextInput(self.comp)
+
+    def build_cops(self):
+        if "Mantra" in self.renderer or "Arnold" in self.renderer:
             # CopNet Setup
             self.copnet.setName("exr_to_png")
 
@@ -300,9 +390,15 @@ class ThumbNailScene:
             self.cop_file.parm("depth").set(4)
 
             self.cop_file.parm("filename1").set(self.rop.parm("vm_picture"))
-            self.rop.parm("vm_picture").set(
-                self.geo_node.parm("path"), follow_parm_reference=False
-            )
+
+            if "Redshift" in self.renderer:
+                self.rop.parm("vm_picture").set(
+                    self.geo_node.parm("path"), follow_parm_reference=False
+                )
+            elif "Arnold" in self.renderer:
+                self.rop.parm("ar_picture").set(
+                    self.geo_node.parm("path"), follow_parm_reference=False
+                )
 
             # Vopnet
             self.cop_vop = self.copnet.createNode("vopcop2filter")

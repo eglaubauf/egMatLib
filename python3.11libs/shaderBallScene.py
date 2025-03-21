@@ -104,6 +104,22 @@ class ShaderBallSetup:
 
             self.mat.setName("Plane", True)
 
+        elif "Arnold" in renderer:
+
+            self.mat = self.matnet.createNode("arnold_materialbuilder")
+            out = self.mat.node("OUT_material")
+
+            amat = self.mat.createNode("arnold::standard_surface")
+            amat.parm("specular").set(0)
+
+            tex = self.mat.createNode("arnold::image")
+            tex.parm("filename").set("$EGMATLIB/img/FloorTexture.tx")
+
+            amat.setInput(0, tex, 0)
+            out.setInput(0, amat, 0)
+
+            self.mat.setName("Plane", True)
+
     def apply_materials(self, material):
 
         pass
