@@ -74,19 +74,35 @@ class ShaderBallSetup:
         self.geo_node.layoutChildren()
 
     def apply_initial_materials(self, renderer):
-        self.mat = self.matnet.createNode("principledshader::2.0")
 
-        self.mat.parm("basecolorr").set(1)
-        self.mat.parm("basecolorg").set(1)
-        self.mat.parm("basecolorb").set(1)
-        self.mat.parm("basecolor_usePointColor").set(0)
-        self.mat.parm("basecolor_useTexture").set(1)
-        self.mat.parm("basecolor_texture").set("$EGMATLIB/img/FloorTexture.rat")
+        if "Mantra" in renderer:
+            self.mat = self.matnet.createNode("principledshader::2.0")
 
-        self.mat.parm("rough").set(0)
-        self.mat.parm("reflect").set(0)
+            self.mat.parm("basecolorr").set(1)
+            self.mat.parm("basecolorg").set(1)
+            self.mat.parm("basecolorb").set(1)
+            self.mat.parm("basecolor_usePointColor").set(0)
+            self.mat.parm("basecolor_useTexture").set(1)
+            self.mat.parm("basecolor_texture").set("$EGMATLIB/img/FloorTexture.rat")
 
-        self.mat.setName("Plane", True)
+            self.mat.parm("rough").set(0)
+            self.mat.parm("reflect").set(0)
+
+            self.mat.setName("Plane", True)
+
+        elif "Redshift" in renderer:
+
+            self.mat = self.matnet.createNode("redshift_vopnet")
+
+            rsmat = self.mat.node("StandardMaterial1")
+            rsmat.parm("refl_weight").set(0)
+
+            tex = self.mat.createNode("redshift::TextureSampler")
+            tex.parm("tex0").set("$EGMATLIB/img/FloorTexture.exr")
+
+            rsmat.setInput(0, tex, 0)
+
+            self.mat.setName("Plane", True)
 
     def apply_materials(self, material):
 

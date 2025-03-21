@@ -18,11 +18,8 @@ importlib.reload(helpers)
 importlib.reload(thumbNailScene)
 
 # Load This HDAs for creation
-HDA_REDSHIFT = "thumbnail_Redshift::2.0"
-HDA_MANTRA = "thumbnail_Mantra::2.0"
 HDA_ARNOLD = "thumbnail_Arnold::3.0"
 HDA_OCTANE = "thumbnail_Octane::1.0"
-HDA_MATX = "thumbnail_MatX::1.0"
 
 
 ###################################
@@ -690,7 +687,8 @@ class MaterialLibrary:
         rop.parm("execute").pressButton()
 
         cop = rop.parent().createNode("cop2net")
-        convert = cop.createNode("Elmar::pngtoexr::1.0")
+        convert = cop.createNode("Elmar::pngtoexr::1.0")  # TODO: LICENSE ISSUE
+
         convert.parm("filename").set(path)
         newpath = (
             self.get_path()
@@ -716,7 +714,6 @@ class MaterialLibrary:
         sc.setup("Mantra")
         thumb = sc.get_node()
 
-        # thumb = hou.node("/obj").createNode(HDA_MANTRA)
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -768,7 +765,9 @@ class MaterialLibrary:
                 return True
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode(HDA_REDSHIFT)
+        sc = thumbNailScene.ThumbNailScene()
+        sc.setup("Redshift")
+        thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
 
         # Build path
