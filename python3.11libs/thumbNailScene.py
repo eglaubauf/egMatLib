@@ -24,7 +24,6 @@ class ThumbNailScene:
         self.geo_node.parm("lights").set("*")
 
         if "Mantra" in renderer:
-
             self.shaderBall = shaderBallScene.ShaderBallSetup()
             self.shaderBall.setup(self.renderer, self.geo_node)
 
@@ -35,7 +34,6 @@ class ThumbNailScene:
             self.comp.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Redshift" in renderer:
-
             self.shaderBall = shaderBallScene.ShaderBallSetup()
             self.shaderBall.setup(self.renderer, self.geo_node)
 
@@ -46,7 +44,6 @@ class ThumbNailScene:
             self.rop.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Arnold" in renderer:
-
             self.shaderBall = shaderBallScene.ShaderBallSetup()
             self.shaderBall.setup(self.renderer, self.geo_node)
 
@@ -55,6 +52,16 @@ class ThumbNailScene:
                 self.geo_node.parm("mat")
             )
             self.shell.parm("execute").set(self.geo_node.parm("render"))
+
+        elif "Octane" in renderer:
+            self.shaderBall = shaderBallScene.ShaderBallSetup()
+            self.shaderBall.setup(self.renderer, self.geo_node)
+
+            self.build_scene()
+            self.shaderBall.get_geo_node().parm("mat_ball").set(
+                self.geo_node.parm("mat")
+            )
+            self.rop.parm("execute").set(self.geo_node.parm("render"))
 
         return self.geo_node
 
@@ -259,6 +266,72 @@ class ThumbNailScene:
                 "$EGMATLIB/img/photo_studio_01_4k_ACEScg.tx"
             )
 
+        elif "Octane" in self.renderer:
+            # Lights
+            self.lgt_right = self.geo_node.createNode("octane_light")
+            self.lgt_right.setName("Right")
+            self.lgt_left = self.geo_node.createNode("octane_light")
+            self.lgt_right.setName("Left")
+
+            # Right
+            self.lgt_right.parm("tx").set(0.182989)
+            self.lgt_right.parm("ty").set(0.400678)
+            self.lgt_right.parm("tz").set(-0.637707)
+
+            self.lgt_right.parm("rx").set(-164.722)
+            self.lgt_right.parm("ry").set(-11.677)
+            self.lgt_right.parm("rz").set(0)
+
+            self.lgt_right.parm("sx").set(0.5)
+            self.lgt_right.parm("sy").set(0.5)
+            self.lgt_right.parm("sz").set(0.5)
+
+            self.lgt_right.parm("NT_EMIS_BLACKBODY1_power").set(30)
+
+            # Left
+            self.lgt_left.parm("tx").set(-0.0788468)
+            self.lgt_left.parm("ty").set(0.247556)
+            self.lgt_left.parm("tz").set(0.562686)
+
+            self.lgt_left.parm("sx").set(0.28)
+            self.lgt_left.parm("sy").set(0.5)
+            self.lgt_left.parm("sz").set(0.5)
+
+            self.lgt_left.parm("NT_EMIS_BLACKBODY1_power").set(15)
+
+            # Do weird Octane Domelight as shader
+            self.mat_net = self.geo_node.createNode("matnet")
+
+            # Octane Current
+            target = self.mat_net.createNode("octane_mat_renderTarget")
+
+            if "::2.0" in target.type().name():
+                # Octane FUTURE
+                target.parm("kernelMenu").set(3)
+                target.parm("environmentMenu").set(6)
+
+                target.parm("maxsamples").set(200)
+                target.parm("textureEnvPower").set(0.2)
+                target.parm("textureEnvironmentFilename").set(
+                    "$EGMATLIB/img/photo_studio_01_4k_ACEScg.hdr"
+                )
+                target.parm("colorSpace").set("NAMED_COLOR_SPACE_ACESCG")
+                target.setName("Octane_RenderTarget")
+
+            else:
+                # Octane Current
+                target.parm("parmKernel").set(1)
+                target.parm("parmEnvironment").set(1)
+
+                target.parm("maxSamples2").set(200)
+                target.parm("power4").set(0.2)
+                target.parm("A_FILENAME4").set(
+                    "$EGMATLIB/img/photo_studio_01_4k_ACEScg.hdr"
+                )
+                target.parm("colorSpace2").set("NAMED_COLOR_SPACE_ACESCG")
+
+            target.setName("Octane_RenderTarget")
+
     def build_cam(self):
         # Cam
         self.cam = self.geo_node.createNode("cam")
@@ -276,6 +349,10 @@ class ThumbNailScene:
         self.cam.parm("far").set(2000)
         self.cam.parm("resx").set(512)
         self.cam.parm("resy").set(512)
+
+        self.cam.parm("focus").set(0.188163)
+        self.cam.parm("fstop").set(1000)
+
         self.cam.setName("RenderCam", True)
 
         # Rot cam to match shaderball
@@ -377,6 +454,34 @@ f.close()
 """
             )
             self.shell.setNextInput(self.comp)
+
+        if "Octane" in self.renderer:
+            # RopNet Setup
+            self.rop = self.ropnet.createNode("Octane_ROP")
+
+            self.rop.parm("HO_renderCamera").set("../../RenderCam")
+            self.rop.parm("HO_iprCamera").set("../../RenderCam")
+            self.rop.parm("HO_renderTarget").set("../../matnet1/Octane_RenderTarget")
+
+            self.rop.parm("HO_renderToMPlay").set(0)
+
+            self.rop.parm("HO_img_colorSpace").set(5)
+            self.rop.parm("HO_img_ocioColorSpace").set(114)
+
+            self.rop.parm("HO_img_fileFormat").set(0)
+
+            self.rop.parm("HO_mbDeformations").set(0)
+            self.rop.parm("HO_mbFur").set(0)
+            self.rop.parm("HO_mbInstances").set(0)
+            self.rop.parm("HO_mbParticles").set(0)
+
+            self.rop.parm("HO_img_deepFile").set("deep filename")
+
+            self.rop.parm("HO_objects_exclude").set(self.geo_node.parm("obj_exclude"))
+
+            self.rop.parm("HO_img_fileName").set(
+                self.geo_node.parm("path"), follow_parm_reference=False
+            )
 
     def build_cops(self):
         if "Mantra" in self.renderer or "Arnold" in self.renderer:

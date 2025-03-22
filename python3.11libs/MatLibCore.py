@@ -17,9 +17,6 @@ importlib.reload(Material)
 importlib.reload(helpers)
 importlib.reload(thumbNailScene)
 
-# Load This HDAs for creation
-HDA_OCTANE = "thumbnail_Octane::1.0"
-
 ###################################
 ########### THE LIBRARY ###########
 ###################################
@@ -858,9 +855,12 @@ class MaterialLibrary:
                 return True
 
         # Create Thumbnail
-        thumb = hou.node("/obj").createNode(HDA_OCTANE)
+        sc = thumbNailScene.ThumbNailScene()
+        sc.setup("Octane")
+        thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
-
+        print("Here")
+        print(thumb.name())
         # Build path
         path = (
             self.get_path()
@@ -869,7 +869,7 @@ class MaterialLibrary:
             + self.settings.get_img_ext()
         )
 
-        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
+        # Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path)
         exclude = "* ^" + thumb.name()
         thumb.parm("obj_exclude").set(exclude)
@@ -879,7 +879,7 @@ class MaterialLibrary:
         thumb.parm("resy").set(self.rendersize)
 
         # Render Frame
-        thumb.parm("execute").pressButton()
+        thumb.parm("render").pressButton()
 
         # CleanUp
         # thumb.destroy()

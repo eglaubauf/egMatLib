@@ -120,6 +120,19 @@ class ShaderBallSetup:
 
             self.mat.setName("Plane", True)
 
+        elif "Octane" in renderer:
+
+            self.mat = self.matnet.createNode("octane_vopnet")
+
+            omat = self.mat.node("Standard_Surface")
+            omat.parm("specular").set(0)
+
+            tex = self.mat.createNode("octane::NT_TEX_IMAGE")
+            tex.parm("A_FILENAME").set("$EGMATLIB/img/FloorTexture.exr")
+
+            omat.setInput(1, tex, 0)
+            self.mat.setName("Plane", True)
+
     def apply_materials(self, material):
 
         pass
