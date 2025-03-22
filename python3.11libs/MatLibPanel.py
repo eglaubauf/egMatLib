@@ -10,14 +10,15 @@ import MatLibCore
 import MatLibDialogs
 import MatLibPrefs
 
-# TODO: enable premium switch
+# TODO: FUTURE
 # import egx_matTools.egx_matPerFolder.folderProcessor as importMat
 # from egx_matTools.egx_materialBuild_MatX import controller as importMatX
 # from egx_matTools.egx_materialBuild_Mantra import controller as importMantra
 
 importlib.reload(MatLibCore)
 importlib.reload(MatLibPrefs)
-# TODO: enable premium switch
+
+# TODO: FUTURE
 # importlib.reload(importMat)
 # importlib.reload(importMatX)
 # importlib.reload(importMantra)
@@ -115,9 +116,30 @@ class MatLibPanel(QWidget):
         return
 
     def update_views(self):
+        self.update_ui()
         self.update_thumb_view()
         self.update_cat_view()
         return
+
+    def update_ui(self):
+        if self.cb_Mantra.isChecked():
+            self.radio_USD.setDisabled(False)
+            self.radio_current.setDisabled(False)
+        if self.cb_MatX.isChecked():
+            self.radio_USD.setDisabled(False)
+            self.radio_current.setDisabled(False)
+        if self.cb_Arnold.isChecked():
+            self.radio_default.setChecked(True)
+            self.radio_USD.setDisabled(True)
+            self.radio_current.setDisabled(True)
+        if self.cb_Redshift.isChecked():
+            self.radio_default.setChecked(True)
+            self.radio_USD.setDisabled(True)
+            self.radio_current.setDisabled(True)
+        if self.cb_Octane.isChecked():
+            self.radio_default.setChecked(True)
+            self.radio_USD.setDisabled(True)
+            self.radio_current.setDisabled(True)
 
     def toggle_catView(self):
         if self.action_catView.isChecked():
@@ -191,7 +213,7 @@ class MatLibPanel(QWidget):
         self.action_about = self.ui.findChild(QAction, "action_about")
         self.action_about.triggered.connect(self.show_about)
 
-        # TODO: enable premium switch
+        # TODO: FUTURE
         # self.action_import_folder = self.ui.findChild(QAction, "action_import_folder")
         # self.action_import_folder.triggered.connect(self.import_folder)
 
@@ -271,6 +293,18 @@ class MatLibPanel(QWidget):
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
         self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
+
+        # TODO: Hide Menus for now - FUTURE
+        self.a_folder = self.ui.findChild(QAction, "action_import_folder")
+        self.a_folder.setDisabled(True)
+        self.a_folder.setVisible(False)
+
+        self.a_files = self.ui.findChild(QAction, "action_import_files")
+        self.a_files.setDisabled(True)
+        self.a_files.setVisible(False)
+
+        self.menu_import = self.ui.findChild(QMenu, "menuImport")
+        self.menu_import.setDisabled(True)
 
         # set main layout and attach to widget
         mainLayout = QVBoxLayout()
@@ -402,7 +436,7 @@ class MatLibPanel(QWidget):
         choice = hou.ui.displayMessage(msg, buttons)
         if choice < 0 or choice == len(buttons) - 1:
             return
-        # TODO: enable premium switch
+        # TODO: FUTURE
         # elif choice == 0:
         #     self.h = importMantra.Controller()
         #     self.h.show()
