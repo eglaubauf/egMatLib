@@ -1,25 +1,35 @@
 # egMatLib - A Material Library for Houdini
 
-A Material Library for Houdini Mantra, Redshift and Arnold and Octane
+A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
 ![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib.png)
 
+### New Features
 
-### Features:
+- Added USD/Solaris Support for Karma
+- MaterialX Shader saves
+- Octane support has been revamped and new Rendertarget compatibility has been added
+- Removed HDAs to provide unrestricted licensing support
+- Added new Preference Setting to block rendering of materials on import [^1]
+- UI improvements: Detail and Cat View can now be hided from the menu
+
+
+
+[^1]: this is useful when importing a lot of materials, to not block the ui on import. Use Rerender Thumbnail option afterwards
+
+### Base Features:
 
 - Lightweight (Houdini-native) storing and loading of node networks
-- Save Redshift Material Builders, Principled Shaders,  Mantra Materialbuilders and Arnold Materialbuilders
-  - Inside this nodes all objects are supported
+- Save Materialx, Redshift Material Builders, Principled Shaders,  Mantra Materialbuilders and Arnold Materialbuilders
 - Favorites
 - Adding and removing of categories
 - Searchable tags (use t: as a modifier ) and material-names
 - Open database (.json)
 - Material Preview
-- open HDAs for Redshift and Mantra for custom preview-images
 - Deletion of entries from the database (deletes also from disk)
 - Edit multiple materials at the same time via the Details-Pane
 - Easy adjustable custom preview and rendersize
-- ACES 1.2 support (Redshift Native, Mantra & Arnold need $OCIO)
+- ACES 1.2 support
 - Right Click Menus for adding materials quickly from the network pane
 - Importing to current network location (pwd()/matnet)
 - Double Click or right click for importing Materials into the scene
@@ -28,18 +38,20 @@ A Material Library for Houdini Mantra, Redshift and Arnold and Octane
 
 ### Compatibility
 
- - Tested on 19.5.303 on Win 10
- - Houdini Indie only (open HDAs for rebuild if desired)
- - Tested with Redshift 3.5.07
- - Other builds might work
- - Python 2 support
+ - Tested on 20.5.487 on Ubuntu 24.04 and MacOS, Windows should work too
+ - USD/Solaris for Karma only
  - Python 3 support
- - Octane is only supported for Houdini 19.0 as there are no public 19.5 builds so far
+ - Removed Python 2 support
+ - Redshift 3.5+
+ - Octane  for 20.5.487 tested
+ - HtoA 6.3.7.0
+
+
 
 ### Installation
 - Download or Clone this repository and unzip
-- Copy the provided `MatLib.json` to your `houdini19.0/packages` folder
-- Edit the line `/home/elmar/MatLib` to the location of your downloaded folder, e.g.: `G:/Git/MatLib`
+- Copy the provided `MatLib.json` to your `houdini20.5/packages` folder
+- Edit the line `/home/user/MatLib` to the location of your downloaded folder, e.g.: `C:/git/MatLib`
 - Start Houdini
 
 ### Usage
@@ -48,9 +60,9 @@ A Material Library for Houdini Mantra, Redshift and Arnold and Octane
    - Choose a safe directory --> this is where all your data will be stored
    - You also can change this directory later from Library/Preferences
  - Use buttons for import/export from library
- - Right Click on Redshift Material Builder, Principled Shader or Material Builder to store a material
+ - Right Click Material X Builder (Solaris/USD), Karma Builder (Solaris/USD),  Redshift Material Builder, Principled Shader,  Material Builder to store a material
  - Double Click on a Material in MatLib-Pane to import
- - Use the table view to the right for edit of currently seleted material
+ - Use the details view to the right for edit of currently seleted material
  - Search Function also can search tags with t:*yoursearchstring*
 
 
@@ -61,8 +73,12 @@ A Material Library for Houdini Mantra, Redshift and Arnold and Octane
 
 ### Acknowledgements
 - Thanks to Rich Nosworthy for providing the ShaderBall-Setup - https://www.richnosworthy.tv
-- Thanks to @thopedam for providing the Octane Support
+- Thanks to @thopedam for providing initial Octane Support
 
-### Contact & License
 
-- Found a bug? please open an issue
+
+### Contact
+- Found a bug or suggest a feature? please open an issue
+
+
+I soley do this project for fun and entirely in my free time. If you are using it on a regular basis, consider buying me a coffee.
