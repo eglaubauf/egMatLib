@@ -317,10 +317,10 @@ class MatLibPanel(QWidget):
         self.setLayout(mainLayout)
 
         # Cleanup UI
-        self.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
-        self.menu.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
-        self.menuGoto.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
-        self.menu_import.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
+        self.setStyleSheet("""  font-family: Lato; """)
+        self.menu.setStyleSheet(""" font-family: Lato; """)
+        self.menuGoto.setStyleSheet("""  font-family: Lato; """)
+        self.menu_import.setStyleSheet("""  font-family: Lato; """)
 
     # Set IconSize via Slider
     def slide(self):

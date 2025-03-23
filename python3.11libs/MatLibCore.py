@@ -1,9 +1,12 @@
 import os
 
+# from debian import c
+
 import helpers
 import hou
 import json
-import sys
+
+# import sys
 
 import uuid
 import datetime
@@ -613,6 +616,7 @@ class MaterialLibrary:
         parms_file_name = (
             self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
         )
+
         children = node.children()
 
         interface_file = open(parms_file_name, "w")
@@ -620,11 +624,15 @@ class MaterialLibrary:
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
+        if "subnet" in node.type().name():
+            children = (node,)
+
         # If this is not a manual update and renderOnImport is off, finish here
         if not update:
             if not self.renderOnImport:
                 return True
-        return self.create_thumb_mtlx(self, children, update)
+
+        return self.create_thumb_mtlx(children, id)
 
     def create_thumbnail(self, nodes, id):
         renderer = self.get_renderer_by_id(id)
@@ -646,14 +654,28 @@ class MaterialLibrary:
         ref = net.createNode("reference::2.0")
         ref.parm("filepath1").set(hou.getenv("EGMATLIB") + "/usd/shaderBallScene.usd")
 
-        lib = net.createNode("materiallibrary")
-        # lib.parm('matnode1').set('*')
+        lib1 = net.createNode("materiallibrary")
+        lib1.setFirstInput(ref)
+        surf = lib1.createNode("mtlxstandard_surface")
+        tex = lib1.createNode("mtlxtiledimage")
+        tex.parm("file").set("color3")
+        tex.parm("file").set("$EGMATLIB/img/FloorTexture.exr")
+        surf.setInput(1, tex, 0)
+        surf.setGenericFlag(hou.nodeFlag.Material, True)
+        lib1.parm("materials").set(1)
+        lib1.parm("matnode1").set("mtlxstandard_surface1")
+        lib1.parm("matpath1").set("mtlxstandard_surface")
+        lib1.parm("geopath1").set("/shaderBallScene/geo/plane/mesh_0")
+        lib1.parm("assign1").set(1)
 
-        lib.setFirstInput(ref)
+        lib = net.createNode("materiallibrary")
+        lib.setFirstInput(lib1)
 
         nodes = hou.copyNodesTo((children), lib)
         for n in nodes:
             if n.type().name() == "mtlxstandard_surface":
+                n.setGenericFlag(hou.nodeFlag.Material, True)
+            if "subnet" in n.type().name():
                 n.setGenericFlag(hou.nodeFlag.Material, True)
 
         lib.parm("fillmaterials").pressButton()
@@ -687,7 +709,7 @@ class MaterialLibrary:
         # CopNet Setup
         copnet.setName("exr_to_png")
 
-        cop_file = self.copnet.createNode("file")
+        cop_file = copnet.createNode("file")
 
         cop_file.parm("nodename").set(0)
         cop_file.parm("overridedepth").set(2)
@@ -695,7 +717,7 @@ class MaterialLibrary:
         cop_file.parm("filename1").set(path)
 
         # Vopnet
-        cop_vop = self.copnet.createNode("vopcop2filter")
+        cop_vop = copnet.createNode("vopcop2filter")
         gn = cop_vop.node("global1")
         o = cop_vop.node("output1")
         ftv = cop_vop.createNode("floattovec")
@@ -717,10 +739,10 @@ class MaterialLibrary:
         ftv.setInput(1, gn, 4)
         ftv.setInput(2, gn, 5)
 
-        cop_out = self.copnet.createNode("rop_comp")
+        cop_out = copnet.createNode("rop_comp")
 
-        cop_vop.setInput(0, self.cop_file)
-        cop_out.setInput(0, self.cop_vop)
+        cop_vop.setInput(0, cop_file)
+        cop_out.setInput(0, cop_vop)
 
         newpath = (
             self.get_path()
