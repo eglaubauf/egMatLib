@@ -1,4 +1,5 @@
 import os
+from re import S
 
 import hou
 import shutil
@@ -83,6 +84,7 @@ class MatLibPanel(QWidget):
                     valid = 1
                     self.prefs.set_dir(path)
                     self.prefs.save()
+
                 else:
                     hou.ui.displayMessage("Please choose a valid path")
         path = path.replace("\\", "/")
@@ -92,6 +94,7 @@ class MatLibPanel(QWidget):
             shutil.copy(oldpath, path + "/library.json")
         if not os.path.exists(path + self.prefs.get_img_dir()):
             os.mkdir(path + self.prefs.get_img_dir())
+            os.mkdir(path + self.prefs.get_asset_dir())
 
         self.path = path
         # Create Library
@@ -313,6 +316,12 @@ class MatLibPanel(QWidget):
 
         self.setLayout(mainLayout)
 
+        # Cleanup UI
+        self.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
+        self.menu.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
+        self.menuGoto.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
+        self.menu_import.setStyleSheet(""" font-size: 10px; font-family: Lato; """)
+
     # Set IconSize via Slider
     def slide(self):
         self.library.set_thumbSize(self.slide_iconSize.value())
@@ -378,6 +387,8 @@ class MatLibPanel(QWidget):
             self.toggle_detailsView_rc()
         elif action == toggle_cats:
             self.toggle_catView_rc()
+
+        self.update_views()
 
         return
 

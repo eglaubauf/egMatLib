@@ -1,7 +1,7 @@
 {
     "thumbsize": 200,
     "rendersize": 256,
-    "renderOnImport": 0,
+    "renderOnImport": 1,
     "categories": [
         "All"
     ],

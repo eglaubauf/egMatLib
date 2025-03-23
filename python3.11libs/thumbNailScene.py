@@ -347,8 +347,12 @@ class ThumbNailScene:
         self.cam.parm("aperture").set(36)
         self.cam.parm("near").set(0.002)
         self.cam.parm("far").set(2000)
-        self.cam.parm("resx").set(512)
-        self.cam.parm("resy").set(512)
+        self.cam.parm("resx").set(
+            self.geo_node.parm("resx"), follow_parm_reference=False
+        )
+        self.cam.parm("resy").set(
+            self.geo_node.parm("resy"), follow_parm_reference=False
+        )
 
         self.cam.parm("focus").set(0.188163)
         self.cam.parm("fstop").set(1000)
@@ -379,8 +383,8 @@ class ThumbNailScene:
             self.rop.parm("vm_writecheckpoint").set(0)
 
             self.rop.parm("vm_renderengine").set("pbrraytrace")
-            self.rop.parm("vm_samplesx").set(4)
-            self.rop.parm("vm_samplesy").set(4)
+            self.rop.parm("vm_samplesx").set(3)
+            self.rop.parm("vm_samplesy").set(3)
 
             self.rop.parm("vm_reflectlimit").set(1)
             self.rop.parm("vm_refractlimit").set(2)
