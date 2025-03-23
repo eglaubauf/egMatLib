@@ -659,7 +659,7 @@ class MaterialLibrary:
         surf = lib1.createNode("mtlxstandard_surface")
         tex = lib1.createNode("mtlxtiledimage")
         tex.parm("file").set("color3")
-        tex.parm("file").set("$EGMATLIB/img/FloorTexture.exr")
+        tex.parm("file").set("$EGMATLIB/img/FloorTexture.rat")
         surf.setInput(1, tex, 0)
         surf.setGenericFlag(hou.nodeFlag.Material, True)
         lib1.parm("materials").set(1)
