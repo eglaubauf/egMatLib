@@ -82,3 +82,5 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
 
 I soley do this project for fun and entirely in my free time. If you are using it on a regular basis, consider buying me a coffee.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D31CEN9X)
