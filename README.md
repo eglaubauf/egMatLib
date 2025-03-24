@@ -2,7 +2,7 @@
 
 A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
-[![Interface](https://github.com/eglaubauf/egMatLib/blob/dev/img/MatLib_2_0.png)]
+![Interface](https://github.com/eglaubauf/egMatLib/blob/dev/img/MatLib_2_0.png)
 
 ### New Features
 
