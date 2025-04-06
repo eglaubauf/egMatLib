@@ -2,13 +2,13 @@
 
 A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
-![Interface](https://github.com/eglaubauf/egMatLib/blob/dev/img/MatLib_2_0.png)
+[![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib_2_0.png)](https://github.com/eglaubauf/egMatLib/blob/dev/img/MatLib_2_0.png)
 
-### New Features
+### New Features 2025
 
 - Added USD/Solaris Support for Karma
 - MaterialX Shader saves
-- Octane support has been revamped and new Rendertarget compatibility has been added
+- Octane support has been revamped and new Rendertarget compatibility has been added (currently Octane Beta)
 - Removed HDAs to provide unrestricted licensing support
 - Added new Preference Setting to block rendering of materials on import [^1]
 - UI improvements: Detail and Cat View can now be hided from the menu
@@ -47,7 +47,6 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
  - HtoA 6.3.7.0
 
 
-
 ### Installation
 - Download or Clone this repository and unzip
 - Copy the provided `MatLib.json` to your `houdini20.5/packages` folder
@@ -76,11 +75,11 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 - Thanks to @thopedam for providing initial Octane Support
 
 
-
 ### Contact
 - Found a bug or suggest a feature? please open an issue
 
 
+### Support
 I soley do this project for fun and entirely in my free time. If you are using it on a regular basis, consider buying me a coffee.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D31CEN9X)
