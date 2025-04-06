@@ -1,16 +1,22 @@
 {
     "thumbsize": 200,
     "rendersize": 256,
-    "categories": [ "All" ],
-    "tags": [  ],
-    "materials": [
+    "renderOnImport": 1,
+    "categories": [
+        "All"
+    ],
+    "tags": [],
+    "assets": [
         {
             "id": -1,
             "name": "",
             "categories": [],
             "tags": [],
             "favorite": 0,
-            "renderer": ""
+            "date": -1,
+            "renderer": "",
+            "usd": 0,
+            "builder": 0
         }
     ]
 }
