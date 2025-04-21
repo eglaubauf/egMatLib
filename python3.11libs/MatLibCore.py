@@ -616,7 +616,7 @@ class MaterialLibrary:
             if not self.renderOnImport:
                 return True
 
-        return self.create_thumb_mtlx(self, nodetree, update)
+        return self.create_thumb_mtlx(nodetree, id)
 
     def save_node_mtlX(self, node, id, update):
         """Saves the MtlX node to disk - does not add to library"""
@@ -688,11 +688,23 @@ class MaterialLibrary:
         lib.setFirstInput(lib1)
 
         nodes = hou.copyNodesTo((children), lib)
+        collect = 0
         for n in nodes:
-            if n.type().name() == "mtlxstandard_surface":
+            if n.type().name() == "collect":
                 n.setGenericFlag(hou.nodeFlag.Material, True)
-            if "subnet" in n.type().name():
-                n.setGenericFlag(hou.nodeFlag.Material, True)
+                collect = 1
+            for p in n.parms():
+                if "_activate_" in p.name():
+                    p.set(1)
+
+        if not collect:
+            for n in nodes:
+                if n.type().name() == "mtlxstandard_surface":
+                    n.setGenericFlag(hou.nodeFlag.Material, True)
+                    break
+                elif "subnet" in n.type().name():
+                    n.setGenericFlag(hou.nodeFlag.Material, True)
+                    break
 
         lib.parm("fillmaterials").pressButton()
         lib.parm("assign1").set(1)
