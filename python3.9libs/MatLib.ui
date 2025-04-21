@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>841</width>
-    <height>962</height>
+    <height>916</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -307,7 +307,7 @@
               <x>0</x>
               <y>0</y>
               <width>220</width>
-              <height>908</height>
+              <height>831</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -800,7 +800,7 @@
      <x>0</x>
      <y>0</y>
      <width>841</width>
-     <height>21</height>
+     <height>37</height>
     </rect>
    </property>
    <property name="font">
@@ -823,7 +823,7 @@
     <property name="title">
      <string>Library</string>
     </property>
-    <addaction name="action_updateAll"/>
+    <addaction name="action_open"/>
     <addaction name="separator"/>
     <addaction name="action_prefs"/>
     <addaction name="action_cleanup_db"/>
@@ -927,6 +927,11 @@
   <action name="actionImport_From_Files_Mantra">
    <property name="text">
     <string>Import From Files (Mantra)</string>
+   </property>
+  </action>
+  <action name="action_open">
+   <property name="text">
+    <string>Open Library</string>
    </property>
   </action>
  </widget>

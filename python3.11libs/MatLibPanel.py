@@ -75,7 +75,6 @@ class MatLibPanel(QWidget):
         path = self.prefs.get_dir() + "/"
 
         self.library = None
-
         self.createView()
 
         self.selected_cat = None
@@ -86,11 +85,15 @@ class MatLibPanel(QWidget):
 
         self.edit = False
 
-    def open(self):
-        path = self.prefs.get_dir() + "/"
-        path = hou.ui.selectFile(file_type=hou.fileType.Directory)
+        if os.path.exists(path):
+            self.open(path)
 
-        path = hou.expandString(path)
+    def open(self, path=None):
+
+        if not path:
+            path = self.prefs.get_dir() + "/"
+            path = hou.ui.selectFile(file_type=hou.fileType.Directory)
+            path = hou.expandString(path)
 
         # Get Dir from User
         count = 0
