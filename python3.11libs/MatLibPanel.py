@@ -1,5 +1,4 @@
 import os
-from re import S
 
 import hou
 import shutil
@@ -75,18 +74,42 @@ class MatLibPanel(QWidget):
         self.prefs = MatLibPrefs.prefs()
         path = self.prefs.get_dir() + "/"
 
-        if not os.path.exists(path):
-            valid = 0
-            while not valid:
+        self.library = None
+
+        self.createView()
+
+        self.selected_cat = None
+        self.filter = ""
+
+        self.active_row = None
+        self.lastSelectedItems = None
+
+        self.edit = False
+
+    def open(self):
+        path = self.prefs.get_dir() + "/"
+        path = hou.ui.selectFile(file_type=hou.fileType.Directory)
+
+        path = hou.expandString(path)
+
+        # Get Dir from User
+        count = 0
+        while count < 1:
+            if os.path.exists(path):
+                self.prefs.set_dir(path)
+                self.prefs.save()
+                count = 3
+            elif path == "":
+                return
+            else:
+                hou.ui.displayMessage("Please choose a valid path")
                 path = hou.ui.selectFile(file_type=hou.fileType.Directory)
                 path = hou.expandString(path)
-                if os.path.exists(path):
-                    valid = 1
-                    self.prefs.set_dir(path)
-                    self.prefs.save()
+            count += 1
+        # Return if still not a valid path
+        if path == "":
+            return
 
-                else:
-                    hou.ui.displayMessage("Please choose a valid path")
         path = path.replace("\\", "/")
 
         if not os.path.exists(path + "/library.json"):
@@ -101,21 +124,15 @@ class MatLibPanel(QWidget):
         self.library = MatLibCore.MaterialLibrary()
         self.library.load(path, self.prefs)
 
-        self.selected_cat = None
-        self.filter = ""
         self.draw_assets = self.library.get_assets()  # Filterered assets for Views
-
-        self.active_row = None
-        self.lastSelectedItems = None
-
-        self.edit = False
-
-        self.createView()
         self.update_views()
 
     def update_external(self):
-        self.library.load(self.path, self.prefs)
-        self.update_views()
+        if self.library:
+            self.library.load(self.path, self.prefs)
+            self.update_views()
+        else:
+            hou.ui.displayMessage("Please open a library first")
         return
 
     def update_views(self):
@@ -216,6 +233,9 @@ class MatLibPanel(QWidget):
         self.action_about = self.ui.findChild(QAction, "action_about")
         self.action_about.triggered.connect(self.show_about)
 
+        self.action_open = self.ui.findChild(QAction, "action_open")
+        self.action_open.triggered.connect(self.open)
+
         # TODO: FUTURE
         # self.action_import_folder = self.ui.findChild(QAction, "action_import_folder")
         # self.action_import_folder.triggered.connect(self.import_folder)
@@ -227,14 +247,14 @@ class MatLibPanel(QWidget):
         self.action_force_update.triggered.connect(self.update_external)
 
         self.thumblist = self.ui.findChild(QListWidget, "listw_matview")
-        self.thumblist.setIconSize(
-            QSize(self.library.get_thumbSize(), self.library.get_thumbSize())
-        )
+        # self.thumblist.setIconSize(
+        #     QSize(self.library.get_thumbSize(), self.library.get_thumbSize())
+        # )
         self.thumblist.doubleClicked.connect(self.import_asset)
         self.thumblist.itemPressed.connect(self.update_details_view)
-        self.thumblist.setGridSize(
-            QSize(self.library.get_thumbSize() + 10, self.library.get_thumbSize() + 40)
-        )
+        # self.thumblist.setGridSize(
+        #     QSize(self.library.get_thumbSize() + 10, self.library.get_thumbSize() + 40)
+        # )
         self.thumblist.setContentsMargins(0, 0, 0, 0)
         self.thumblist.setSortingEnabled(True)
 
@@ -477,6 +497,9 @@ class MatLibPanel(QWidget):
         return
 
     def show_prefs(self):
+        if not self.library:
+            hou.ui.displayMessage("Please open a library first")
+            return
         prefs = MatLibDialogs.PrefsDialog(self.library, self.prefs)
         prefs.exec_()
 
@@ -549,6 +572,9 @@ class MatLibPanel(QWidget):
         return
 
     def cleanup_db(self):
+        if not self.library:
+            hou.ui.displayMessage("Please open a library first")
+            return
         assets = self.library.get_assets()
         mark_rmv = 0
         mark_render = 0
@@ -618,6 +644,9 @@ class MatLibPanel(QWidget):
         return
 
     def render_missing(self):
+        if not self.library:
+            hou.ui.displayMessage("Please open a library first")
+            return
         assets = self.library.get_assets()
 
         for asset in assets:
@@ -645,6 +674,9 @@ class MatLibPanel(QWidget):
         return
 
     def open_usdlib_folder(self):
+        if not self.library:
+            hou.ui.displayMessage("Please open a library first")
+            return
         lib_dir = self.path
         lib_dir.encode("unicode_escape")
 
@@ -1083,6 +1115,9 @@ class MatLibPanel(QWidget):
 
     # Rerender All Visible assets
     def update_all_assets(self):
+        if not self.library:
+            hou.ui.displayMessage("Please open a library first")
+            return
         """Rerenders all assets in the library - The UI is blocked for the duration of the render"""
         if not hou.ui.displayConfirmation(
             "This can take a long time to render. Houdini will not be responsive during that time. Do you want continue rendering all visible assets?"
