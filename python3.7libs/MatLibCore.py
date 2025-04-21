@@ -291,13 +291,10 @@ class MaterialLibrary:
                 "builder": builder,
                 "usd": use_usd,
             }
-            print("Here")
+
             new_mat = Material.Material.from_dict(material)
-            print("new mat")
             self.assets.append(new_mat)
-            print("append")
             self.save()
-            print("saved")
 
     def get_renderer_by_id(self, id):
         """Return the Renderer for this Material as a string"""
@@ -312,6 +309,9 @@ class MaterialLibrary:
             if int(id) == mat.get_id():
                 return mat.get_builder()
         return None
+
+    def update_context(self):
+        self.context = self.get_current_network_node()
 
     def import_asset_to_scene(self, id):
         """Import a Material to the Nework Editor/Scene"""
@@ -330,12 +330,9 @@ class MaterialLibrary:
         # Import to current context
         import_path = None
         use_USD = False
-        # checks = ['materiallibrary', 'matnet', 'mat']
+
         # This checks if USD has been selected in the panel and imports accordingly
-        if (
-            self.context.type().name() == "stage"
-            or self.context.type().name() == "lopnet"
-        ):
+        if self.context == hou.node("/stage"):
             import_path = self.context.createNode("materiallibrary")
             use_USD = True
         elif self.context.path() == "/mat":
@@ -345,31 +342,51 @@ class MaterialLibrary:
                 import_path = hou.node("/stage").createNode("materiallibrary")
                 use_USD = True
         else:
-            import_path = self.get_current_network_node()
+            self.context = self.get_current_network_node()
+
+            # If Stage or LOPnet
             if (
                 self.context.type().name() == "stage"
                 or self.context.type().name() == "lopnet"
             ):
                 import_path = self.context.createNode("materiallibrary")
                 use_USD = True
-            elif self.context.type().name() == "materiallibrary":
-                use_USD = True
-            elif self.context.type().name() == "materialbuilder":
-                if "stage" in self.context.path() or "lopnet" in self.context.path():
-                    import_path = import_path.parent()
+            else:
+                self.context = self.get_current_network_node().parent()
+                # print("Context updated: " + self.context.name())
+                # If materiallibrary in Lopnet/Stage
+                if (
+                    "stage" in self.context.type().name()
+                    or "lopnet" in self.context.type().name()
+                ):
+                    import_path = self.context.createNode("materiallibrary")
                     use_USD = True
+
+                elif self.context.type().name() == "materiallibrary":
+                    import_path = self.context
+                    use_USD = True
+                # If oldschool matbuilder or matbld in lops
+                elif self.context.type().name() == "materialbuilder":
+                    if (
+                        "stage" in self.context.path()
+                        or "lopnet" in self.context.path()
+                    ):
+                        import_path = import_path.parent()
+                        use_USD = True
+                    else:
+                        import_path = import_path.parent()
+                        # override if Material was saved in USD Mode
+                        if mat.get_usd():
+                            import_path = hou.node("/stage").createNode(
+                                "materiallibrary"
+                            )
+                            use_USD = True
                 else:
-                    import_path = import_path.parent()
+                    import_path = import_path.createNode("matnet")
                     # override if Material was saved in USD Mode
                     if mat.get_usd():
                         import_path = hou.node("/stage").createNode("materiallibrary")
                         use_USD = True
-            else:
-                import_path = import_path.createNode("matnet")
-                # override if Material was saved in USD Mode
-                if mat.get_usd():
-                    import_path = hou.node("/stage").createNode("materiallibrary")
-                    use_USD = True
 
         parms_file_name = (
             self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
@@ -425,7 +442,6 @@ class MaterialLibrary:
                     builder = hou.selectedNodes()[0]
                 # Selection will be empty if not a MaterialBuilder
                 else:
-                    print(import_path)
                     builder = import_path.createNode("materialbuilder")
             else:
                 builder = hou.node(import_path).createNode("materialbuilder")
@@ -455,12 +471,12 @@ class MaterialLibrary:
         elif renderer == "MatX":
             # Interface Check
             if os.path.exists(parms_file_name):
-
                 interface_file = open(parms_file_name, "r")
                 code = interface_file.read()
                 exec(code)
 
                 builder = import_path.createNode("subnet")
+                builder.setName(mat.get_name(), unique_name=True)
                 for n in builder.children():
                     n.destroy()
 
@@ -600,7 +616,7 @@ class MaterialLibrary:
             if not self.renderOnImport:
                 return True
 
-        return self.create_thumb_mtlx(self, nodetree, update)
+        return self.create_thumb_mtlx(nodetree, id)
 
     def save_node_mtlX(self, node, id, update):
         """Saves the MtlX node to disk - does not add to library"""
@@ -672,11 +688,23 @@ class MaterialLibrary:
         lib.setFirstInput(lib1)
 
         nodes = hou.copyNodesTo((children), lib)
+        collect = 0
         for n in nodes:
-            if n.type().name() == "mtlxstandard_surface":
+            if n.type().name() == "collect":
                 n.setGenericFlag(hou.nodeFlag.Material, True)
-            if "subnet" in n.type().name():
-                n.setGenericFlag(hou.nodeFlag.Material, True)
+                collect = 1
+            for p in n.parms():
+                if "_activate_" in p.name():
+                    p.set(1)
+
+        if not collect:
+            for n in nodes:
+                if n.type().name() == "mtlxstandard_surface":
+                    n.setGenericFlag(hou.nodeFlag.Material, True)
+                    break
+                elif "subnet" in n.type().name():
+                    n.setGenericFlag(hou.nodeFlag.Material, True)
+                    break
 
         lib.parm("fillmaterials").pressButton()
         lib.parm("assign1").set(1)
@@ -766,7 +794,6 @@ class MaterialLibrary:
     def create_thumb_mantra(self, node, id):
         # Create Thumbnail
 
-        print("Save_Thumb_Mantra")
         sc = thumbNailScene.ThumbNailScene()
         sc.setup("Mantra")
         thumb = sc.get_node()
@@ -881,8 +908,6 @@ class MaterialLibrary:
         sc.setup("Octane")
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
-        print("Here")
-        print(thumb.name())
         # Build path
         path = (
             self.get_path()
