@@ -12,8 +12,8 @@ importlib.reload(MatLibPanel)
 
 
 def onCreateInterface():
-    widget = MatLibPanel.MatLibPanel()
-    return widget]]></script>
+    matlib_widget = MatLibPanel.MatLibPanel()
+    return matlib_widget]]></script>
     <includeInPaneTabMenu menu_position="99" create_separator="true"/>
     <includeInToolbarMenu menu_position="415" create_separator="true"/>
     <help><![CDATA[]]></help>
