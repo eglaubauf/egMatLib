@@ -353,7 +353,7 @@ class MaterialLibrary:
                 use_USD = True
             else:
                 self.context = self.get_current_network_node().parent()
-                # print("Context updated: " + self.context.name())
+                print("Context updated: " + self.context.name())
                 # If materiallibrary in Lopnet/Stage
                 if (
                     "stage" in self.context.type().name()
@@ -371,18 +371,20 @@ class MaterialLibrary:
                         "stage" in self.context.path()
                         or "lopnet" in self.context.path()
                     ):
-                        import_path = import_path.parent()
+                        import_path = self.context
                         use_USD = True
                     else:
-                        import_path = import_path.parent()
+                        import_path = self.context.parent()
                         # override if Material was saved in USD Mode
                         if mat.get_usd():
                             import_path = hou.node("/stage").createNode(
                                 "materiallibrary"
                             )
                             use_USD = True
+                elif self.context.type().name() == "matnet":
+                    import_path = self.context
                 else:
-                    import_path = import_path.createNode("matnet")
+                    import_path = self.context.createNode("matnet")
                     # override if Material was saved in USD Mode
                     if mat.get_usd():
                         import_path = hou.node("/stage").createNode("materiallibrary")
@@ -409,6 +411,7 @@ class MaterialLibrary:
                 builder = hou.node(import_path).createNode("redshift_vopnet")
 
             builder.setName(mat.get_name(), unique_name=True)
+            builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in RS-VopNet
             for node in builder.children():
                 node.destroy()
@@ -426,6 +429,7 @@ class MaterialLibrary:
                 builder = hou.node(import_path).createNode("octane_vopnet")
 
             builder.setName(mat.get_name(), unique_name=True)
+            builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in Octane-VopNet
             for node in builder.children():
                 node.destroy()
@@ -447,6 +451,7 @@ class MaterialLibrary:
                 builder = hou.node(import_path).createNode("materialbuilder")
 
             builder.setName(mat.get_name(), unique_name=True)
+            builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in MaterialBuilder
             for node in builder.children():
                 node.destroy()
@@ -464,6 +469,7 @@ class MaterialLibrary:
                 builder = hou.node(import_path).createNode("arnold_materialbuilder")
 
             builder.setName(mat.get_name(), unique_name=True)
+            builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in Arnold MaterialBuilder
             for node in builder.children():
                 node.destroy()
@@ -477,6 +483,7 @@ class MaterialLibrary:
 
                 builder = import_path.createNode("subnet")
                 builder.setName(mat.get_name(), unique_name=True)
+                builder.setGenericFlag(hou.nodeFlag.Material, True)
                 for n in builder.children():
                     n.destroy()
 
