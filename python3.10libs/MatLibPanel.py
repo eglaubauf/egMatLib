@@ -1216,6 +1216,11 @@ class MatLibPanel(QWidget):
         if not sel:
             hou.ui.displayMessage("No material selected")
             return
+        if not self.library:
+            hou.ui.displayMessage(
+                "Please set a Materiallibrary first. Please use the MatLib Panel - Library/Open Dialog."
+            )
+            return
         self.get_material_info_user(sel)
         return
 
