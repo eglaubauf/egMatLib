@@ -72,7 +72,9 @@ class MatLibPanel(QWidget):
         # Initialize
         self.script_path = os.path.dirname(os.path.realpath(__file__))
         self.prefs = MatLibPrefs.prefs()
-        path = self.prefs.get_dir() + "/"
+        path = self.prefs.get_dir()
+        if not path.endswith("/"):
+            path = path + "/"
 
         self.library = None
         self.createView()
@@ -91,7 +93,9 @@ class MatLibPanel(QWidget):
     def open(self, path=None):
 
         if not path:
-            path = self.prefs.get_dir() + "/"
+            path = self.prefs.get_dir()
+            if not path.endswith("/"):
+                path = path + "/"
             path = hou.ui.selectFile(file_type=hou.fileType.Directory)
             path = hou.expandString(path)
 
