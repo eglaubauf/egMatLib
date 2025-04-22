@@ -775,6 +775,8 @@ class MaterialLibrary:
         ftv.setInput(2, gn, 5)
 
         cop_out = copnet.createNode("rop_comp")
+        cop_out.parm("convertcolorspace").set(0)
+        cop_out.parm("gamma").set(1)
 
         cop_vop.setInput(0, cop_file)
         cop_out.setInput(0, cop_vop)
