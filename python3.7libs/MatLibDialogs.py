@@ -58,10 +58,15 @@ class usdDialog(QDialog):
         self.canceled = True
         self.close()
 
+    def reject(self):
+        self.canceled = True
+        self.close()
+
 
 ###################################
 ########  THE PREFS DIALOG ########
 ###################################
+
 
 class PrefsDialog(QDialog):
     def __init__(self, library, prefs):
@@ -71,7 +76,7 @@ class PrefsDialog(QDialog):
         self.library = library
         self.prefs = prefs
         self.canceled = False
-        
+
         ## LOAD UI
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
@@ -123,11 +128,12 @@ class PrefsDialog(QDialog):
         self.rendersize = self.library.get_renderSize()
         self.thumbsize = self.library.get_thumbSize()
         self.renderOnImport = self.library.get_renderOnImport()
- 
+
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setText(str(self.rendersize))
         self.line_thumbsize.setText(str(self.thumbsize))
         self.cbx_renderOnImport.setChecked(self.renderOnImport)
+
 
 class materialDialog(QDialog):
     def __init__(self):
@@ -143,7 +149,7 @@ class materialDialog(QDialog):
         ## LOAD UI
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
-        file = QFile(self.script_path + '/Dialog.ui')
+        file = QFile(self.script_path + "/Dialog.ui")
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -157,8 +163,8 @@ class materialDialog(QDialog):
 
         # Link Slots & Signals
         # FILTER UI
-        self.line_cats = self.ui.findChild(QLineEdit, 'line_categories')
-        self.line_tags = self.ui.findChild(QLineEdit, 'line_tags')
+        self.line_cats = self.ui.findChild(QLineEdit, "line_categories")
+        self.line_tags = self.ui.findChild(QLineEdit, "line_tags")
         self.cb_fav = self.ui.findChild(QCheckBox, "cb_fav")
         self.cb_usd = self.ui.findChild(QCheckBox, "cb_usd")
 
@@ -178,7 +184,6 @@ class materialDialog(QDialog):
     def destroy(self):
         self.canceled = True
         self.close()
-
 
 
 class AboutDialog(QDialog):
