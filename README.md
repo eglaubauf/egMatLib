@@ -30,6 +30,7 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 - Edit multiple materials at the same time via the Details-Pane
 - Easy adjustable custom preview and rendersize
 - ACES 1.2 support
+- Added ACES 1.3 support (both, 1.2 and 1.3 are supported now)
 - Right Click Menus for adding materials quickly from the network pane
 - Importing to current network location (pwd()/matnet)
 - Double Click or right click for importing Materials into the scene
@@ -38,7 +39,7 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
 ### Compatibility
 
- - Tested on 20.5.487 on Ubuntu 24.04 and MacOS, Windows should work too
+ - Tested on 20.5.550 on Ubuntu 24.04 and MacOS, Windows should work too
  - USD/Solaris for Karma only
  - Python 3 support
  - Removed Python 2 support
