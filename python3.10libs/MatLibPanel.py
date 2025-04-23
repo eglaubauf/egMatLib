@@ -1233,9 +1233,9 @@ class MatLibPanel(QWidget):
         """Query user for input upon material-save"""
         # Get Stuff from User
         dialog = MatLibDialogs.usdDialog()
-        dialog.exec_()
+        r = dialog.exec_()
 
-        if dialog.canceled:
+        if dialog.canceled or not r:
             return
 
         # Check if Category or Tags already exist

@@ -403,6 +403,11 @@ class ThumbNailScene:
             self.comp.parm("coppath").set("../../exr_to_png/OUT")
             self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
             self.comp.parm("convertcolorspace").set(0)
+            if self.aces_1_3:
+                self.comp.parm("convertcolorspace").set(3)
+                self.comp.parm("ocio_display").set("sRGB - Display")
+                self.comp.parm("ocio_view").set("ACES 1.0 - SDR Video")
+
             self.comp.parm("trange").set(0)
 
         elif "Redshift" in self.renderer:
@@ -446,6 +451,10 @@ class ThumbNailScene:
             self.comp.parm("coppath").set("../../exr_to_png/OUT")
             self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
             self.comp.parm("convertcolorspace").set(0)
+            if self.aces_1_3:
+                self.comp.parm("convertcolorspace").set(3)
+                self.comp.parm("ocio_display").set("sRGB - Display")
+                self.comp.parm("ocio_view").set("ACES 1.0 - SDR Video")
             self.comp.parm("trange").set(0)
 
             self.shell = self.ropnet.createNode("shell")
@@ -509,33 +518,49 @@ f.close()
                     self.geo_node.parm("path"), follow_parm_reference=False
                 )
 
-            # Vopnet
-            self.cop_vop = self.copnet.createNode("vopcop2filter")
-            gn = self.cop_vop.node("global1")
-            o = self.cop_vop.node("output1")
-            ftv = self.cop_vop.createNode("floattovec")
-            ocio = self.cop_vop.createNode("ocio_transform")
-            vtf = self.cop_vop.createNode("vectofloat")
-
-            o.setInput(0, vtf, 0)
-            o.setInput(1, vtf, 1)
-            o.setInput(2, vtf, 2)
-            o.setInput(3, gn, 6)
-
-            vtf.setInput(0, ocio, 0)
-
-            ocio.setInput(0, ftv, 0)
-            ocio.parm("fromspace").set("ACES - ACEScg")
-            ocio.parm("tospace").set("Output - sRGB")
-
-            ftv.setInput(0, gn, 3)
-            ftv.setInput(1, gn, 4)
-            ftv.setInput(2, gn, 5)
-
             self.cop_out = self.copnet.createNode("null")
 
-            self.cop_vop.setInput(0, self.cop_file)
-            self.cop_out.setInput(0, self.cop_vop)
+            self.aces_1_3 = False
+            self.cop_file.parm("colorspace").set(3)  # OCIO
+
+            if "v1.3" in hou.getenv("OCIO").lower():
+                self.aces_1_3 = True
+            else:
+                for item in self.cop_file.parm("ocio_space").menuItems():
+                    if "encoded" in item.lower():
+                        self.aces_1_3 = True
+            # ACES 1.3
+            if self.aces_1_3:
+                self.cop_file.parm("colorspace").set(3)  # OCIO
+                self.cop_file.parm("ocio_space").set("ACEScg")
+                self.cop_vop.setInput(0, self.cop_file)
+
+            else:
+                # Vopnet
+                self.cop_vop = self.copnet.createNode("vopcop2filter")
+                gn = self.cop_vop.node("global1")
+                o = self.cop_vop.node("output1")
+                ftv = self.cop_vop.createNode("floattovec")
+                ocio = self.cop_vop.createNode("ocio_transform")
+                vtf = self.cop_vop.createNode("vectofloat")
+
+                o.setInput(0, vtf, 0)
+                o.setInput(1, vtf, 1)
+                o.setInput(2, vtf, 2)
+                o.setInput(3, gn, 6)
+
+                vtf.setInput(0, ocio, 0)
+
+                ocio.setInput(0, ftv, 0)
+                ocio.parm("fromspace").set("ACES - ACEScg")
+                ocio.parm("tospace").set("Output - sRGB")
+
+                ftv.setInput(0, gn, 3)
+                ftv.setInput(1, gn, 4)
+                ftv.setInput(2, gn, 5)
+
+                self.cop_vop.setInput(0, self.cop_file)
+                self.cop_out.setInput(0, self.cop_vop)
 
             self.cop_out.setGenericFlag(hou.nodeFlag.Display, True)
             self.cop_out.setGenericFlag(hou.nodeFlag.Render, True)

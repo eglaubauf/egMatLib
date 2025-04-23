@@ -755,35 +755,60 @@ class MaterialLibrary:
         cop_file.parm("depth").set(4)
         cop_file.parm("filename1").set(path)
 
-        # Vopnet
-        cop_vop = copnet.createNode("vopcop2filter")
-        gn = cop_vop.node("global1")
-        o = cop_vop.node("output1")
-        ftv = cop_vop.createNode("floattovec")
-        ocio = cop_vop.createNode("ocio_transform")
-        vtf = cop_vop.createNode("vectofloat")
-
-        o.setInput(0, vtf, 0)
-        o.setInput(1, vtf, 1)
-        o.setInput(2, vtf, 2)
-        o.setInput(3, gn, 6)
-
-        vtf.setInput(0, ocio, 0)
-
-        ocio.setInput(0, ftv, 0)
-        ocio.parm("fromspace").set("ACES - ACEScg")
-        ocio.parm("tospace").set("Output - sRGB")
-
-        ftv.setInput(0, gn, 3)
-        ftv.setInput(1, gn, 4)
-        ftv.setInput(2, gn, 5)
-
         cop_out = copnet.createNode("rop_comp")
-        cop_out.parm("convertcolorspace").set(0)
-        cop_out.parm("gamma").set(1)
 
-        cop_vop.setInput(0, cop_file)
-        cop_out.setInput(0, cop_vop)
+        aces_1_3 = False
+        cop_file.parm("colorspace").set(3)  # OCIO
+
+        if "v1.3" in hou.getenv("OCIO").lower():
+            aces_1_3 = True
+        else:
+            for item in cop_file.parm("ocio_space").menuItems():
+                if "encoded" in item.lower():
+                    aces_1_3 = True
+
+        # ACES 1.3
+        if aces_1_3:
+            cop_file.parm("colorspace").set(3)  # OCIO
+            cop_file.parm("ocio_space").set("ACEScg")
+
+            cop_out.setInput(0, cop_file)
+            cop_out.parm("convertcolorspace").set(3)
+            cop_out.parm("ocio_display").set("sRGB - Display")
+            cop_out.parm("ocio_view").set("ACES 1.0 - SDR Video")
+
+        else:
+            # ACES 1.2
+            # Vopnet
+            cop_file.parm("colorspace").set(0)
+            cop_vop = copnet.createNode("vopcop2filter")
+            gn = cop_vop.node("global1")
+            o = cop_vop.node("output1")
+            ftv = cop_vop.createNode("floattovec")
+            ocio = cop_vop.createNode("ocio_transform")
+            vtf = cop_vop.createNode("vectofloat")
+
+            o.setInput(0, vtf, 0)
+            o.setInput(1, vtf, 1)
+            o.setInput(2, vtf, 2)
+            o.setInput(3, gn, 6)
+
+            vtf.setInput(0, ocio, 0)
+
+            ocio.setInput(0, ftv, 0)
+
+            ocio.parm("fromspace").set("ACES - ACEScg")
+            ocio.parm("tospace").set("Output - sRGB")
+
+            ftv.setInput(0, gn, 3)
+            ftv.setInput(1, gn, 4)
+            ftv.setInput(2, gn, 5)
+
+            cop_out.parm("convertcolorspace").set(0)
+            cop_out.parm("gamma").set(1)
+
+            cop_vop.setInput(0, cop_file)
+            cop_out.setInput(0, cop_vop)
 
         newpath = (
             self.get_path()

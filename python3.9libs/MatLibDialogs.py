@@ -58,10 +58,6 @@ class usdDialog(QDialog):
         self.canceled = True
         self.close()
 
-    def reject(self):
-        self.canceled = True
-        self.close()
-
 
 ###################################
 ########  THE PREFS DIALOG ########
