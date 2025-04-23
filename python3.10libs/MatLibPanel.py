@@ -42,9 +42,10 @@ def saveMaterial(node):
 
     # Get Stuff from User
     dialog = MatLibDialogs.usdDialog()
-    dialog.exec_()
-    if dialog.canceled:
+    r = dialog.exec_()
+    if dialog.canceled or not r:
         return
+
     # Check if Category or Tags already exist
     if dialog.categories:
         library.check_add_category(dialog.categories)

@@ -331,6 +331,8 @@ class MaterialLibrary:
         import_path = None
         use_USD = False
 
+        # self.update_context()
+        # print(self.context)
         # This checks if USD has been selected in the panel and imports accordingly
         if self.context == hou.node("/stage"):
             import_path = self.context.createNode("materiallibrary")
@@ -353,7 +355,7 @@ class MaterialLibrary:
                 use_USD = True
             else:
                 self.context = self.get_current_network_node().parent()
-                print("Context updated: " + self.context.name())
+                # print("Context updated: " + self.context.name())
                 # If materiallibrary in Lopnet/Stage
                 if (
                     "stage" in self.context.type().name()
@@ -528,6 +530,8 @@ class MaterialLibrary:
             while i < import_path.parm("materials").evalAsInt():
                 import_path.parm("".join(["assign", str(i + 1)])).set(0)
                 i += 1
+
+        self.context = self.get_current_network_node()
         return builder
 
     def save_node(self, node, id, update):
@@ -687,7 +691,7 @@ class MaterialLibrary:
         surf.setGenericFlag(hou.nodeFlag.Material, True)
         lib1.parm("materials").set(1)
         lib1.parm("matnode1").set("mtlxstandard_surface1")
-        lib1.parm("matpath1").set("mtlxstandard_surface")
+        lib1.parm("matpath1").set("/thumb/bg_material")
         lib1.parm("geopath1").set("/shaderBallScene/geo/plane/mesh_0")
         lib1.parm("assign1").set(1)
 
