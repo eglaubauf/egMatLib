@@ -1273,8 +1273,18 @@ class MatLibPanel(QWidget):
 
     def render_thumbnail(self, id):
 
+        # Move to correct context before rerendering assets
+        if "MatX" in self.library.get_renderer_by_id(id):
+            self.library.set_context(hou.node("/stage"))
+        else:
+            self.library.set_context(hou.node("/mat"))
+
         builder = self.library.import_asset_to_scene(id)
         self.library.create_thumbnail(builder, id)
-        builder.destroy()
+
+        if "stage" in self.library.context.path():
+            builder.parent().destroy()
+        else:
+            builder.destroy()
 
         return
