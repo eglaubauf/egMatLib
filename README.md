@@ -4,6 +4,13 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
 [![Interface](https://github.com/eglaubauf/egMatLib/blob/main/img/MatLib_2_0.png)](https://github.com/eglaubauf/egMatLib/blob/dev/img/MatLib_2_0.png)
 
+
+### New Features 2025.07
+ - better UI scaling
+ - Scale and hide-able UI Elements for CatView and DetailsView
+ - Readme Updates
+ - Add confirmation message on Library Creation
+
 ### New Features 2025
 
 - Added USD/Solaris Support for Karma
@@ -56,8 +63,8 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
 ### Usage
  - Open Pane (MatLib)
- - On first usage the pane will prompt you for a directory:
-   - Choose a safe directory --> this is where all your data will be stored
+ - Choose Library/Open Libary:
+   - Choose a safe folder --> this is where all your data will be stored
    - You also can change this directory later from Library/Preferences
  - Use buttons for import/export from library
  - Right Click Material X Builder (Solaris/USD), Karma Builder (Solaris/USD),  Redshift Material Builder, Principled Shader,  Material Builder to store a material

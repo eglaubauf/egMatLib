@@ -119,14 +119,18 @@ class MatLibPanel(QWidget):
             return
 
         path = path.replace("\\", "/")
-
+        new_folder = False
         if not os.path.exists(path + "/library.json"):
             oldpath = hou.getenv("EGMATLIB") + "/def/library.json"
             shutil.copy(oldpath, path + "/library.json")
+            new_folder = True
         if not os.path.exists(path + self.prefs.get_img_dir()):
             os.mkdir(path + self.prefs.get_img_dir())
             os.mkdir(path + self.prefs.get_asset_dir())
-
+            new_folder = True
+        if new_folder:
+            msg = "A new library has been created successfully"
+            hou.ui.displayMessage(msg)
         self.path = path
         # Create Library
         self.library = MatLibCore.MaterialLibrary()
@@ -334,8 +338,9 @@ class MatLibPanel(QWidget):
         self.a_files.setDisabled(True)
         self.a_files.setVisible(False)
 
-        self.menu_import = self.ui.findChild(QMenu, "menuImport")
-        self.menu_import.setDisabled(True)
+        # self.menu_import = self.ui.findChild(QMenu, "menuImport")
+        # self.menu_import.setDisabled(True)
+        # self.menu_import.setVisible(False)
 
         # set main layout and attach to widget
         mainLayout = QVBoxLayout()
@@ -348,7 +353,7 @@ class MatLibPanel(QWidget):
         self.setStyleSheet("""  font-family: Lato; """)
         self.menu.setStyleSheet(""" font-family: Lato; """)
         self.menuGoto.setStyleSheet("""  font-family: Lato; """)
-        self.menu_import.setStyleSheet("""  font-family: Lato; """)
+        # self.menu_import.setStyleSheet("""  font-family: Lato; """)
 
     # Set IconSize via Slider
     def slide(self):
