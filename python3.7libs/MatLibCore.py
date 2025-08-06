@@ -104,10 +104,10 @@ class MaterialLibrary:
     def get_tags(self):
         return self.tags
 
-    def get_thumbSize(self):
+    def get_thumbsize(self):
         return self.thumbsize
 
-    def set_thumbSize(self, val):
+    def set_thumbsize(self, val):
         self.thumbsize = val
 
     def set_renderSize(self, val):
@@ -133,8 +133,12 @@ class MaterialLibrary:
     def get_asset_by_id(self, id):
         """Returns the Asset for the given id"""
         for asset in self.assets:
-            if int(id) == asset.get_id():
-                return asset
+            if type(id) is int:
+                if int(id) == asset.get_id():
+                    return asset
+            else:
+                if id == asset.get_id():
+                    return asset
         return None
 
     def set_asset_cat(self, id, cat):
@@ -299,15 +303,23 @@ class MaterialLibrary:
     def get_renderer_by_id(self, id):
         """Return the Renderer for this Material as a string"""
         for mat in self.assets:
-            if int(id) == mat.get_id():
-                return mat.get_renderer()
+            if type(id) is int:
+                if int(id) == mat.get_id():
+                    return mat.get_renderer()
+            else:
+                if id == mat.get_id():
+                    return mat.get_renderer()
         return None
 
     def check_materialBuilder_by_id(self, id):
         """Return if the Material is a Builder (Mantra) as a 0/1"""
         for mat in self.assets:
-            if int(id) == mat.get_id():
-                return mat.get_builder()
+            if type(id) is int:
+                if int(id) == mat.get_id():
+                    return mat.get_builder()
+            else:
+                if id == mat.get_id():
+                    return mat.get_builder()
         return None
 
     def update_context(self):
