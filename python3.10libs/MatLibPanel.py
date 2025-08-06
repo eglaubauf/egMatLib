@@ -9,19 +9,12 @@ import importlib
 import MatLibCore
 import MatLibDialogs
 import MatLibPrefs
-
-# TODO: FUTURE
-# import egx_matTools.egx_matPerFolder.folderProcessor as importMat
-# from egx_matTools.egx_materialBuild_MatX import controller as importMatX
-# from egx_matTools.egx_materialBuild_Mantra import controller as importMantra
+import egx_uiHelpers
 
 importlib.reload(MatLibCore)
 importlib.reload(MatLibPrefs)
+importlib.reload(egx_uiHelpers)
 
-# TODO: FUTURE
-# importlib.reload(importMat)
-# importlib.reload(importMatX)
-# importlib.reload(importMantra)
 
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -260,12 +253,12 @@ class MatLibPanel(QWidget):
 
         self.thumblist = self.ui.findChild(QListWidget, "listw_matview")
         # self.thumblist.setIconSize(
-        #     QSize(self.library.get_thumbSize(), self.library.get_thumbSize())
+        #     QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
         # )
         self.thumblist.doubleClicked.connect(self.import_asset)
         self.thumblist.itemPressed.connect(self.update_details_view)
         # self.thumblist.setGridSize(
-        #     QSize(self.library.get_thumbSize() + 10, self.library.get_thumbSize() + 40)
+        #     QSize(self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40)
         # )
         self.thumblist.setContentsMargins(0, 0, 0, 0)
         self.thumblist.setSortingEnabled(True)
@@ -286,7 +279,7 @@ class MatLibPanel(QWidget):
         self.line_id = self.ui.findChild(QLineEdit, "line_id")
         self.line_render = self.ui.findChild(QLineEdit, "line_render")
         self.line_date = self.ui.findChild(QLineEdit, "line_date")
-        self.box_fav = self.ui.findChild(QCheckBox, "cb_fav")
+        self.box_fav = self.ui.findChild(QCheckBox, "cb_set_fav")
         self.btn_update = self.ui.findChild(QPushButton, "btn_update")
         self.btn_update.clicked.connect(self.user_update_asset)
 
@@ -322,8 +315,21 @@ class MatLibPanel(QWidget):
         self.radio_default.toggled.connect(self.update_context)
 
         # IconSize Slider
-        self.slide_iconSize = self.ui.findChild(QSlider, "slide_iconSize")
-        self.slide_iconSize.sliderReleased.connect(self.slide)
+        self.slide_iconsize = self.ui.findChild(QSlider, "slide_iconSize")
+        self.slide_iconsize.setVisible(False)
+
+        # Set Up Clickable Slider
+        self.click_slider = egx_uiHelpers.ClickSlider()
+        self.click_slider.setOrientation(Qt.Horizontal)
+        self.click_slider.setMinimum(0)
+        self.click_slider.setMaximum(512)
+        self.click_slider.setSingleStep(50)
+        self.click_slider.setPageStep(50)
+        self.slider_layout = self.ui.findChild(QVBoxLayout, "slider_layout")
+        self.slider_layout.addWidget(self.click_slider)
+        self.click_slider.valueChanged.connect(self.slide)
+        if self.library:
+            self.click_slider.setValue(self.library.get_thumbsize())
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
@@ -357,13 +363,13 @@ class MatLibPanel(QWidget):
 
     # Set IconSize via Slider
     def slide(self):
-        self.library.set_thumbSize(self.slide_iconSize.value())
+        self.library.set_thumbsize(self.slide_iconSize.value())
         # Update Thumblist Grid
         self.thumblist.setIconSize(
-            QSize(self.library.get_thumbSize(), self.library.get_thumbSize())
+            QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
         )
         self.thumblist.setGridSize(
-            QSize(self.library.get_thumbSize() + 10, self.library.get_thumbSize() + 40)
+            QSize(self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40)
         )
 
         self.update_views()
@@ -521,10 +527,10 @@ class MatLibPanel(QWidget):
 
         # Update Thumblist Grid
         self.thumblist.setIconSize(
-            QSize(self.library.get_thumbSize(), self.library.get_thumbSize())
+            QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
         )
         self.thumblist.setGridSize(
-            QSize(self.library.get_thumbSize() + 10, self.library.get_thumbSize() + 40)
+            QSize(self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40)
         )
         self.update_views()
         return
@@ -1022,17 +1028,17 @@ class MatLibPanel(QWidget):
                     # Draw Star Icon on Top if Favorite
                     if asset.get_fav():
                         pm = QPixmap(
-                            self.library.get_thumbSize(), self.library.get_thumbSize()
+                            self.library.get_thumbsize(), self.library.get_thumbsize()
                         )
 
                         pm1 = QPixmap.fromImage(QImage(img)).scaled(
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             aspectMode=Qt.KeepAspectRatio,
                         )
                         pm2 = QPixmap.fromImage(QImage(favicon)).scaled(
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             aspectMode=Qt.KeepAspectRatio,
                         )
                         painter = QPainter(pm)
@@ -1040,24 +1046,24 @@ class MatLibPanel(QWidget):
                         painter.fillRect(
                             0,
                             0,
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             QColor(0, 0, 0, 0),
                         )
                         painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
                         painter.drawPixmap(
                             0,
                             0,
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             pm1,
                         )
 
                         painter.drawPixmap(
                             0,
                             0,
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             pm2,
                         )
                         painter.end()
@@ -1065,29 +1071,29 @@ class MatLibPanel(QWidget):
 
                     else:
                         pm = QPixmap(
-                            self.library.get_thumbSize(), self.library.get_thumbSize()
+                            self.library.get_thumbsize(), self.library.get_thumbsize()
                         )
                         painter = QPainter(pm)
                         painter.setCompositionMode(QPainter.CompositionMode_Clear)
                         painter.fillRect(
                             0,
                             0,
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             QColor(0, 0, 0, 0),
                         )
                         painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
 
                         pixmap = QPixmap.fromImage(QImage(img)).scaled(
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             aspectMode=Qt.KeepAspectRatio,
                         )
                         painter.drawPixmap(
                             0,
                             0,
-                            self.library.get_thumbSize(),
-                            self.library.get_thumbSize(),
+                            self.library.get_thumbsize(),
+                            self.library.get_thumbsize(),
                             pixmap,
                         )
                         painter.end()
@@ -1109,14 +1115,14 @@ class MatLibPanel(QWidget):
         """Creates the default icon if something goes wrong"""
         # Generate Default Icon
         default_img = QImage(
-            self.library.get_thumbSize(),
-            self.library.get_thumbSize(),
+            self.library.get_thumbsize(),
+            self.library.get_thumbsize(),
             QImage.Format_RGB16,
         )
         default_img.fill(QColor(0, 0, 0))
         pixmap = QPixmap.fromImage(default_img).scaled(
-            self.library.get_thumbSize(),
-            self.library.get_thumbSize(),
+            self.library.get_thumbsize(),
+            self.library.get_thumbsize(),
             aspectMode=Qt.KeepAspectRatio,
         )
         default_icon = QIcon(pixmap)
@@ -1292,4 +1298,20 @@ class MatLibPanel(QWidget):
         else:
             builder.destroy()
 
+        return
+
+    def slide(self):
+
+        # Update Thumblist Grid
+        if self.library:
+            self.library.set_thumbsize(self.click_slider.value())
+            self.thumblist.setIconSize(
+                QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
+            )
+            self.thumblist.setGridSize(
+                QSize(
+                    self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40
+                )
+            )
+            self.update_views()
         return
