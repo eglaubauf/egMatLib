@@ -1,5 +1,13 @@
-from PySide2 import QtCore
-from PySide2 import QtWidgets
+import hou
+
+if hou.applicationVersion()[0] >= 21:
+    from PySide6.QtGui import *
+    from PySide6 import QtWidgets
+    from PySide6.QtCore import *
+    from PySide6 import QtUiTools
+else:
+    from PySide2 import QtCore
+    from PySide2 import QtWidgets
 
 
 class ClickSlider(QtWidgets.QSlider):

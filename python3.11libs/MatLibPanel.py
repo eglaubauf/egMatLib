@@ -14,12 +14,18 @@ import egx_uiHelpers
 importlib.reload(MatLibCore)
 importlib.reload(MatLibPrefs)
 importlib.reload(egx_uiHelpers)
+importlib.reload(MatLibDialogs)
 
-
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
-from PySide2 import QtUiTools
+if hou.applicationVersion()[0] >= 21:
+    from PySide6.QtGui import *
+    from PySide6.QtWidgets import *
+    from PySide6.QtCore import *
+    from PySide6 import QtUiTools
+else:
+    from PySide2.QtGui import *
+    from PySide2.QtWidgets import *
+    from PySide2.QtCore import *
+    from PySide2 import QtUiTools
 
 
 def saveMaterial(node):
