@@ -1,10 +1,17 @@
 import os
+import hou
 
 # PySide2
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
-from PySide2 import QtUiTools
+if hou.applicationVersion()[0] >= 21:
+    from PySide6.QtGui import *
+    from PySide6.QtWidgets import *
+    from PySide6.QtCore import *
+    from PySide6 import QtUiTools
+else:
+    from PySide2.QtGui import *
+    from PySide2.QtWidgets import *
+    from PySide2.QtCore import *
+    from PySide2 import QtUiTools
 
 
 ###################################
@@ -107,7 +114,7 @@ class PrefsDialog(QDialog):
         self.prefs.save()
 
         self.library.set_renderSize(int(self.line_rendersize.text()))
-        self.library.set_thumbSize(int(self.line_thumbsize.text()))
+        self.library.set_thumbsize(int(self.line_thumbsize.text()))
         self.library.set_renderOnImport(int(self.cbx_renderOnImport.isChecked()))
 
         self.library.save()
@@ -122,7 +129,7 @@ class PrefsDialog(QDialog):
     def fill_values(self):
         self.directory = self.prefs.get_dir()
         self.rendersize = self.library.get_renderSize()
-        self.thumbsize = self.library.get_thumbSize()
+        self.thumbsize = self.library.get_thumbsize()
         self.renderOnImport = self.library.get_renderOnImport()
 
         self.line_workdir.setText(self.directory)
