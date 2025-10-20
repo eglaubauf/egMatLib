@@ -21,7 +21,6 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 - UI improvements: Detail and Cat View can now be hided from the menu
 
 
-
 [^1]: this is useful when importing a lot of materials, to not block the ui on import. Use Rerender Thumbnail option afterwards
 
 ### Base Features:
@@ -46,14 +45,12 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
 ### Compatibility
 
- - Tested on 20.5.550 on Ubuntu 24.04 and MacOS, Windows should work too
+ - Tested on 21.0.508 on Windows
  - USD/Solaris for Karma only
  - Python 3 support
- - Removed Python 2 support
  - Redshift 3.5+
  - Octane  for 20.5.487 tested
  - HtoA 6.3.7.0
-
 
 ### Installation
 - Download or Clone this repository and unzip
