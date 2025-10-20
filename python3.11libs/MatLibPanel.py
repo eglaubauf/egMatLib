@@ -914,7 +914,7 @@ class MatLibPanel(QWidget):
                     self.box_fav.setCheckState(Qt.Unchecked)
                 # set id
                 self.line_id.setText(str(asset.get_id()))
-                self.line_date.setText(asset.get_date())
+                self.line_date.setText(str(asset.get_date()))
         return
 
     # Update the Views when selection changes
