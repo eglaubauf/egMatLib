@@ -90,6 +90,8 @@ class MatLibPanel(QWidget):
         if os.path.exists(path):
             self.open(path)
 
+        self.update_context(True)
+
     def open(self, path=None):
 
         if not path:

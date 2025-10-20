@@ -498,7 +498,7 @@
                  <item row="0" column="0">
                   <widget class="QRadioButton" name="radio_default">
                    <property name="text">
-                    <string>All</string>
+                    <string>/mat</string>
                    </property>
                    <property name="checked">
                     <bool>true</bool>
@@ -524,7 +524,7 @@
                  <item row="1" column="0">
                   <widget class="QRadioButton" name="radio_USD">
                    <property name="text">
-                    <string>USD</string>
+                    <string>Solaris</string>
                    </property>
                    <property name="checked">
                     <bool>false</bool>

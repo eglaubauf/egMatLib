@@ -343,8 +343,6 @@ class MaterialLibrary:
         import_path = None
         use_USD = False
 
-        # self.update_context()
-        # print(self.context)
         # This checks if USD has been selected in the panel and imports accordingly
         if self.context == hou.node("/stage"):
             import_path = self.context.createNode("materiallibrary")
@@ -356,53 +354,43 @@ class MaterialLibrary:
                 import_path = hou.node("/stage").createNode("materiallibrary")
                 use_USD = True
         else:
-            self.context = self.get_current_network_node()
+            # Radio is set to Current Network
+            parent = self.get_current_network_node().parent()
 
             # If Stage or LOPnet
-            if (
-                self.context.type().name() == "stage"
-                or self.context.type().name() == "lopnet"
-            ):
-                import_path = self.context.createNode("materiallibrary")
+            if parent.type().name() == "stage" or parent.type().name() == "lopnet":
+                import_path = parent.createNode("materiallibrary")
                 use_USD = True
-            else:
-                self.context = self.get_current_network_node().parent()
-                # print("Context updated: " + self.context.name())
-                # If materiallibrary in Lopnet/Stage
-                if (
-                    "stage" in self.context.type().name()
-                    or "lopnet" in self.context.type().name()
-                ):
-                    import_path = self.context.createNode("materiallibrary")
-                    use_USD = True
 
-                elif self.context.type().name() == "materiallibrary":
-                    import_path = self.context
+            elif parent.type().name() == "materiallibrary":
+                import_path = parent
+                use_USD = True
+            # If oldschool matbuilder or matbld in lops
+            elif parent.type().name() == "materialbuilder":
+                if "stage" in parent.path() or "lopnet" in parent.path():
+                    import_path = parent
                     use_USD = True
-                # If oldschool matbuilder or matbld in lops
-                elif self.context.type().name() == "materialbuilder":
-                    if (
-                        "stage" in self.context.path()
-                        or "lopnet" in self.context.path()
-                    ):
-                        import_path = self.context
-                        use_USD = True
-                    else:
-                        import_path = self.context.parent()
-                        # override if Material was saved in USD Mode
-                        if mat.get_usd():
-                            import_path = hou.node("/stage").createNode(
-                                "materiallibrary"
-                            )
-                            use_USD = True
-                elif self.context.type().name() == "matnet":
-                    import_path = self.context
                 else:
-                    import_path = self.context.createNode("matnet")
+                    import_path = parent
                     # override if Material was saved in USD Mode
                     if mat.get_usd():
                         import_path = hou.node("/stage").createNode("materiallibrary")
                         use_USD = True
+            elif parent.type().name() == "matnet":
+                import_path = parent
+            elif parent.type().name() == "mat":
+                import_path = hou.node("/mat")
+            elif parent.type().name() == "obj":
+                if self.get_current_network_node().type().name() != "matnet":
+                    import_path = self.get_current_network_node().createNode("matnet")
+            elif parent.path() == "/":
+                import_path = hou.node("/obj").createNode("matnet")
+            else:
+                import_path = parent.createNode("matnet")
+                # override if Material was saved in USD Mode
+                if mat.get_usd():
+                    import_path = hou.node("/stage").createNode("materiallibrary")
+                    use_USD = True
 
         parms_file_name = (
             self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
@@ -519,19 +507,6 @@ class MaterialLibrary:
             new_mat[0].moveToGoodPosition()
             builder = new_mat[0]
 
-        # not sure why this was here
-        # # If USD move into Material Library
-        # if (
-        #     self.context.type().name() == "stage"
-        #     or self.context.type().name() == "lopnet"
-        # ):
-        #     print(builder)
-        #     # nodes = builder.children()
-        #     # nodes = hou.moveNodesTo(nodes, builder.parent())
-        #     # builder.destroy()
-
-        #     # builder = nodes[0].parent()
-
         # Cleanup
         tmp_matnet.destroy()
 
@@ -543,7 +518,6 @@ class MaterialLibrary:
                 import_path.parm("".join(["assign", str(i + 1)])).set(0)
                 i += 1
 
-        self.context = self.get_current_network_node()
         return builder
 
     def save_node(self, node, id, update):
