@@ -384,6 +384,8 @@ class MatLibPanel(QWidget):
         return
 
     def update_context(self, state):
+        if not self.library:
+            return
         if self.radio_USD.isChecked():
             self.library.set_context(hou.node("/stage"))
         elif self.radio_current.isChecked():
