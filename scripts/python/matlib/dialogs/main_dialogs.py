@@ -20,7 +20,7 @@ else:
 class usdDialog(QDialog):
     def __init__(self):
         super(usdDialog, self).__init__()
-        self.script_path = os.path.dirname(os.path.realpath(__file__))
+        self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         # Set Vars
         self.categories = None
@@ -31,7 +31,7 @@ class usdDialog(QDialog):
         ## LOAD UI
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
-        file = QFile(self.script_path + "/Dialog.ui")
+        file = QFile(self.script_path + "/ui/material_dialog.ui")
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -74,7 +74,7 @@ class usdDialog(QDialog):
 class PrefsDialog(QDialog):
     def __init__(self, library, prefs):
         super(PrefsDialog, self).__init__()
-        self.script_path = os.path.dirname(os.path.realpath(__file__))
+        self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         self.library = library
         self.prefs = prefs
@@ -83,7 +83,7 @@ class PrefsDialog(QDialog):
         ## LOAD UI
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
-        file = QFile(self.script_path + "/PrefsMatLib.ui")
+        file = QFile(self.script_path + "/ui/prefs.ui")
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -141,7 +141,7 @@ class PrefsDialog(QDialog):
 class materialDialog(QDialog):
     def __init__(self):
         super(materialDialog, self).__init__()
-        self.script_path = os.path.dirname(os.path.realpath(__file__))
+        self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         # Set Vars
         self.categories = None
@@ -152,7 +152,7 @@ class materialDialog(QDialog):
         ## LOAD UI
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
-        file = QFile(self.script_path + "/Dialog.ui")
+        file = QFile(self.script_path + "/ui/material_dialog.ui")
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -192,12 +192,12 @@ class materialDialog(QDialog):
 class AboutDialog(QDialog):
     def __init__(self):
         super(AboutDialog, self).__init__()
-        self.script_path = os.path.dirname(os.path.realpath(__file__))
+        self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         ## LOAD UI
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
-        file = QFile(self.script_path + "/About.ui")
+        file = QFile(self.script_path + "/ui/about.ui")
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()

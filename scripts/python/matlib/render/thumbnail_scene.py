@@ -1,8 +1,8 @@
 import hou
-import shaderBallScene
+from matlib.render import shaderball_scene
 import importlib
 
-importlib.reload(shaderBallScene)
+importlib.reload(shaderball_scene)
 
 
 class ThumbNailScene:
@@ -24,7 +24,7 @@ class ThumbNailScene:
         self.geo_node.parm("lights").set("*")
 
         if "Mantra" in renderer:
-            self.shaderBall = shaderBallScene.ShaderBallSetup()
+            self.shaderBall = shaderball_scene.ShaderBallSetup()
             self.shaderBall.setup(self.renderer, self.geo_node)
 
             self.build_scene()
@@ -34,7 +34,7 @@ class ThumbNailScene:
             self.comp.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Redshift" in renderer:
-            self.shaderBall = shaderBallScene.ShaderBallSetup()
+            self.shaderBall = shaderball_scene.ShaderBallSetup()
             self.shaderBall.setup(self.renderer, self.geo_node)
 
             self.build_scene()
@@ -44,7 +44,7 @@ class ThumbNailScene:
             self.rop.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Arnold" in renderer:
-            self.shaderBall = shaderBallScene.ShaderBallSetup()
+            self.shaderBall = shaderball_scene.ShaderBallSetup()
             self.shaderBall.setup(self.renderer, self.geo_node)
 
             self.build_scene()
@@ -54,7 +54,7 @@ class ThumbNailScene:
             self.shell.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Octane" in renderer:
-            self.shaderBall = shaderBallScene.ShaderBallSetup()
+            self.shaderBall = shaderball_scene.ShaderBallSetup()
             self.shaderBall.setup(self.renderer, self.geo_node)
 
             self.build_scene()
@@ -216,7 +216,7 @@ class ThumbNailScene:
             self.lgt_env.parm("light_intensity").set(0.3)
             self.lgt_env.parm("ry").set(17.6)
             self.lgt_env.parm("env_map").set(
-                "$EGMATLIB/img/photo_studio_01_4k_ACEScg.hdr"
+                "$EGMATLIB/scripts/python/matlib/res/img/photo_studio_01_4k_ACEScg.hdr"
             )
 
         elif "Arnold" in self.renderer:
@@ -263,7 +263,7 @@ class ThumbNailScene:
             self.lgt_env.parm("ar_intensity").set(0.2)
             self.lgt_env.parm("ar_samples").set(3)
             self.lgt_env.parm("ar_light_color_texture").set(
-                "$EGMATLIB/img/photo_studio_01_4k_ACEScg.tx"
+                "$EGMATLIB/scripts/python/matlib/res/img/photo_studio_01_4k_ACEScg.tx"
             )
 
         elif "Octane" in self.renderer:
@@ -313,7 +313,7 @@ class ThumbNailScene:
                 target.parm("maxsamples").set(200)
                 target.parm("textureEnvPower").set(0.2)
                 target.parm("textureEnvironmentFilename").set(
-                    "$EGMATLIB/img/photo_studio_01_4k_ACEScg.hdr"
+                    "$EGMATLIB/scripts/python/matlib/res/img/photo_studio_01_4k_ACEScg.hdr"
                 )
                 target.parm("colorSpace").set("NAMED_COLOR_SPACE_ACESCG")
                 target.setName("Octane_RenderTarget")
@@ -326,7 +326,7 @@ class ThumbNailScene:
                 target.parm("maxSamples2").set(200)
                 target.parm("power4").set(0.2)
                 target.parm("A_FILENAME4").set(
-                    "$EGMATLIB/img/photo_studio_01_4k_ACEScg.hdr"
+                    "$EGMATLIB/scripts/python/matlib/res/img/photo_studio_01_4k_ACEScg.hdr"
                 )
                 target.parm("colorSpace2").set("NAMED_COLOR_SPACE_ACESCG")
 
@@ -403,6 +403,15 @@ class ThumbNailScene:
             self.comp.parm("coppath").set("../../exr_to_png/OUT")
             self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
             self.comp.parm("convertcolorspace").set(0)
+
+            self.aces_1_3 = False
+            if "v1.3" in hou.getenv("OCIO").lower():
+                self.aces_1_3 = True
+            else:
+                for item in self.cop_file.parm("ocio_space").menuItems():
+                    if "encoded" in item.lower():
+                        self.aces_1_3 = True
+
             if self.aces_1_3:
                 self.comp.parm("convertcolorspace").set(3)
                 self.comp.parm("ocio_display").set("sRGB - Display")
@@ -533,7 +542,7 @@ f.close()
             if self.aces_1_3:
                 self.cop_file.parm("colorspace").set(3)  # OCIO
                 self.cop_file.parm("ocio_space").set("ACEScg")
-                self.cop_vop.setInput(0, self.cop_file)
+                self.cop_out.setInput(0, self.cop_file)
 
             else:
                 # Vopnet

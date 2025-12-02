@@ -5,17 +5,18 @@
  used by the application.  Note, that two definitions of the
  same interface or of the interfaces menu are not allowed
  in a single file. -->
-  <interface name="MatLib" label="MatLib" icon="MISC_python" showNetworkNavigationBar="false" help_url="">
-    <script><![CDATA[import MatLibPanel
+  <interface name="MatLib" label="MatLib" icon="MISC_python" showNetworkNavigationBar="false"
+    help_url="">
+    <script><![CDATA[import matlib
 import importlib
-importlib.reload(MatLibPanel)
-
+importlib.reload(matlib)
+importlib.reload(matlib.main_panel)
 
 def onCreateInterface():
-    matlib_widget = MatLibPanel.MatLibPanel()
+    matlib_widget = matlib.main_panel.MatLibPanel()
     return matlib_widget]]></script>
-    <includeInPaneTabMenu menu_position="99" create_separator="true"/>
-    <includeInToolbarMenu menu_position="415" create_separator="true"/>
+    <includeInPaneTabMenu menu_position="99" create_separator="true" />
+    <includeInToolbarMenu menu_position="415" create_separator="true" />
     <help><![CDATA[]]></help>
   </interface>
 </pythonPanelDocument>

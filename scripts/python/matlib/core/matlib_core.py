@@ -1,24 +1,18 @@
-import os
-
-# from debian import c
-
-import helpers
+from matlib.helpers import helpers
 import hou
 import json
-
-# import sys
-
+import os
 import uuid
 import datetime
 import time
 
-import thumbNailScene
-import Material
+from matlib.render import thumbnail_scene
+from matlib.core import material
 import importlib
 
-importlib.reload(Material)
+importlib.reload(material)
 importlib.reload(helpers)
-importlib.reload(thumbNailScene)
+importlib.reload(thumbnail_scene)
 
 ###################################
 ########### THE LIBRARY ###########
@@ -44,7 +38,7 @@ class MaterialLibrary:
             asset_data = self.data["assets"]
             self.assets = []
             for data in asset_data:
-                new_asset = Material.Material.from_dict(data)
+                new_asset = material.Material.from_dict(data)
                 self.assets.append(new_asset)
 
             self.categories = self.data["categories"]
@@ -284,7 +278,7 @@ class MaterialLibrary:
             date = str(datetime.datetime.now())
             date = date[:-7]
 
-            material = {
+            mat = {
                 "id": id,
                 "name": name,
                 "categories": cats,
@@ -296,7 +290,7 @@ class MaterialLibrary:
                 "usd": use_usd,
             }
 
-            new_mat = Material.Material.from_dict(material)
+            new_mat = material.Material.from_dict(mat)
             self.assets.append(new_mat)
             self.save()
 
@@ -649,30 +643,37 @@ class MaterialLibrary:
 
     def create_thumbnail(self, nodes, id):
         renderer = self.get_renderer_by_id(id)
-
         if renderer == "MatX":
             self.create_thumb_mtlx(nodes.children(), id)
+            print("DEBUG: MatX")
         elif renderer == "Mantra":
             self.create_thumb_mantra(nodes, id)
+            print("DEBUG: Mantra")
         else:
-            pass
+            print("DEBUG: No Renderer")
+
         return
 
     def create_thumb_mtlx(self, children, id):
         # Build path
+        print("DEBUG: Start Thumb")
         path = self.get_path() + self.settings.get_img_dir() + str(id) + ".exr"
+        print(path)
         # Create Thumbnail
         net = hou.node("/obj").createNode("lopnet")
 
         ref = net.createNode("reference::2.0")
-        ref.parm("filepath1").set(hou.getenv("EGMATLIB") + "/usd/shaderBallScene.usd")
+        ref.parm("filepath1").set(
+            hou.getenv("EGMATLIB")
+            + "/scripts/python/matlib/res/usd/shaderBallScene.usd"
+        )
 
         lib1 = net.createNode("materiallibrary")
         lib1.setFirstInput(ref)
         surf = lib1.createNode("mtlxstandard_surface")
         tex = lib1.createNode("mtlxtiledimage")
         tex.parm("file").set("color3")
-        tex.parm("file").set("$EGMATLIB/img/FloorTexture.rat")
+        tex.parm("file").set("$EGMATLIB/scripts/python/matlib/res/img/FloorTexture.rat")
         surf.setInput(1, tex, 0)
         surf.setGenericFlag(hou.nodeFlag.Material, True)
         lib1.parm("materials").set(1)
@@ -742,7 +743,7 @@ class MaterialLibrary:
         cop_file.parm("filename1").set(path)
 
         cop_out = copnet.createNode("rop_comp")
-
+        print("DEBUG: Nodes Created Step1")
         aces_1_3 = False
         cop_file.parm("colorspace").set(3)  # OCIO
 
@@ -802,12 +803,12 @@ class MaterialLibrary:
             + str(id)
             + self.settings.get_img_ext()
         )
-
+        print("DEBUG: Nodes Created Step2")
         cop_out.parm("copoutput").set(newpath)
         cop_out.parm("execute").pressButton()
 
         ############################
-
+        print("DEBUG: Nodes rendered ")
         net.destroy()
 
         if os.path.exists(path):
@@ -818,7 +819,7 @@ class MaterialLibrary:
     def create_thumb_mantra(self, node, id):
         # Create Thumbnail
 
-        sc = thumbNailScene.ThumbNailScene()
+        sc = thumbnail_scene.ThumbNailScene()
         sc.setup("Mantra")
         thumb = sc.get_node()
 
@@ -873,7 +874,7 @@ class MaterialLibrary:
                 return True
 
         # Create Thumbnail
-        sc = thumbNailScene.ThumbNailScene()
+        sc = thumbnail_scene.ThumbNailScene()
         sc.setup("Redshift")
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
@@ -928,7 +929,7 @@ class MaterialLibrary:
                 return True
 
         # Create Thumbnail
-        sc = thumbNailScene.ThumbNailScene()
+        sc = thumbnail_scene.ThumbNailScene()
         sc.setup("Octane")
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
@@ -983,7 +984,7 @@ class MaterialLibrary:
                 return True
 
         # Create Thumbnail
-        sc = thumbNailScene.ThumbNailScene()
+        sc = thumbnail_scene.ThumbNailScene()
         sc.setup("Arnold")
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())

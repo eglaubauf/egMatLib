@@ -54,7 +54,9 @@ class ShaderBallSetup:
 
         # Set Parms
         self.filecache.parm("loadfromdisk").set(1)
-        self.filecache.parm("file").set("$EGMATLIB/geo/ShaderBallScene.bgeo.sc")
+        self.filecache.parm("file").set(
+            "$EGMATLIB/scripts/python/matlib/res/geo/ShaderBallScene.bgeo.sc"
+        )
         self.filecache.parm("filemethod").set(1)
         self.filecache.parm("timedependent").set(0)
 
@@ -83,7 +85,9 @@ class ShaderBallSetup:
             self.mat.parm("basecolorb").set(1)
             self.mat.parm("basecolor_usePointColor").set(0)
             self.mat.parm("basecolor_useTexture").set(1)
-            self.mat.parm("basecolor_texture").set("$EGMATLIB/img/FloorTexture.rat")
+            self.mat.parm("basecolor_texture").set(
+                "$EGMATLIB/scripts/python/matlib/res/img/FloorTexture.rat"
+            )
 
             self.mat.parm("rough").set(0)
             self.mat.parm("reflect").set(0)
@@ -98,7 +102,9 @@ class ShaderBallSetup:
             rsmat.parm("refl_weight").set(0)
 
             tex = self.mat.createNode("redshift::TextureSampler")
-            tex.parm("tex0").set("$EGMATLIB/img/FloorTexture.exr")
+            tex.parm("tex0").set(
+                "$EGMATLIB//scripts/python/matlib/res/img/FloorTexture.exr"
+            )
 
             rsmat.setInput(0, tex, 0)
 
@@ -113,7 +119,9 @@ class ShaderBallSetup:
             amat.parm("specular").set(0)
 
             tex = self.mat.createNode("arnold::image")
-            tex.parm("filename").set("$EGMATLIB/img/FloorTexture.tx")
+            tex.parm("filename").set(
+                "$EGMATLIB//scripts/python/matlib/res/img/FloorTexture.tx"
+            )
 
             amat.setInput(0, tex, 0)
             out.setInput(0, amat, 0)
@@ -128,7 +136,9 @@ class ShaderBallSetup:
             omat.parm("specular").set(0)
 
             tex = self.mat.createNode("octane::NT_TEX_IMAGE")
-            tex.parm("A_FILENAME").set("$EGMATLIB/img/FloorTexture.exr")
+            tex.parm("A_FILENAME").set(
+                "$EGMATLIB/scripts/python/matlib/res/img/FloorTexture.exr"
+            )
 
             omat.setInput(1, tex, 0)
             self.mat.setName("Plane", True)

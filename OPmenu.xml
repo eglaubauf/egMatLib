@@ -48,26 +48,26 @@ return "Unavailable in this Context"
 <![CDATA[
 n = kwargs.get("node", None)
 if n.type().name() == "redshift_vopnet":
-    import MatLibPanel
-    MatLibPanel.saveMaterial(n)
+    import matlib
+    matlib.main_panel.saveMaterial(n)
 elif n.type().name() == "octane_vopnet":
-    import MatLibPanel
-    MatLibPanel.saveMaterial(n)
+    import matlib
+    matlib.main_panel.saveMaterial(n)
 elif n.type().name() == "materialbuilder":
-    import MatLibPanel
-    MatLibPanel.saveMaterial(n)
+    import matlib
+    matlib.main_panel.saveMaterial(n)
 elif n.type().name() == "principledshader::2.0":
-    import MatLibPanel
-    MatLibPanel.saveMaterial(n)
+    import matlib
+    matlib.main_panel.saveMaterial(n)
 elif n.type().name() == "arnold_materialbuilder":
-    import MatLibPanel
-    MatLibPanel.saveMaterial(n)
+    import matlib
+    matlib.main_panel.saveMaterial(n)
 elif n.type().name() == "subnet":
-    import MatLibPanel
-    MatLibPanel.saveMaterial(n)
+    import matlib
+    matlib.main_panel.saveMaterial(n)
 elif n.type().name() == "collect":
-    import MatLibPanel
-    MatLibPanel.saveMaterial(n)
+    import matlib
+    matlib.main_panel.saveMaterial(n)
 else:
     hou.ui.displayMessage('Please select Material Builder Nodes to save Material')
 

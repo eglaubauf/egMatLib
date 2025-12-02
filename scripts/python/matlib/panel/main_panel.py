@@ -6,15 +6,15 @@ import sys
 import subprocess
 
 import importlib
-import MatLibCore
-import MatLibDialogs
-import MatLibPrefs
-import egx_uiHelpers
+from matlib.core import matlib_core
+from matlib.dialogs import main_dialogs
+from matlib.prefs import main_prefs
+from matlib.helpers import ui_helpers
 
-importlib.reload(MatLibCore)
-importlib.reload(MatLibPrefs)
-importlib.reload(egx_uiHelpers)
-importlib.reload(MatLibDialogs)
+importlib.reload(matlib_core)
+importlib.reload(main_prefs)
+importlib.reload(ui_helpers)
+importlib.reload(main_dialogs)
 
 if hou.applicationVersion()[0] >= 21:
     from PySide6.QtGui import *
@@ -31,16 +31,16 @@ else:
 def saveMaterial(node):
     # Call from RC-Menus in Network Pane
     # Initialize
-    pref = MatLibPrefs.prefs()
+    pref = main_prefs.prefs()
     path = pref.get_dir() + "/"
     path = path.replace("\\", "/")
 
     # Save new Data to Library
-    library = MatLibCore.MaterialLibrary()
+    library = matlib_core.MaterialLibrary()
     library.load(path, pref)
 
     # Get Stuff from User
-    dialog = MatLibDialogs.usdDialog()
+    dialog = main_dialogs.usdDialog()
     r = dialog.exec_()
     if dialog.canceled or not r:
         return
@@ -70,8 +70,9 @@ class MatLibPanel(QWidget):
         super(MatLibPanel, self).__init__()
 
         # Initialize
-        self.script_path = os.path.dirname(os.path.realpath(__file__))
-        self.prefs = MatLibPrefs.prefs()
+        self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+        self.prefs = main_prefs.prefs()
         path = self.prefs.get_dir()
         if not path.endswith("/"):
             path = path + "/"
@@ -122,7 +123,9 @@ class MatLibPanel(QWidget):
         path = path.replace("\\", "/")
         new_folder = False
         if not os.path.exists(path + "/library.json"):
-            oldpath = hou.getenv("EGMATLIB") + "/def/library.json"
+            oldpath = (
+                hou.getenv("EGMATLIB") + "/scripts/python/matlib/res/def/library.json"
+            )
             shutil.copy(oldpath, path + "/library.json")
             new_folder = True
         if not os.path.exists(path + self.prefs.get_img_dir()):
@@ -134,7 +137,7 @@ class MatLibPanel(QWidget):
             hou.ui.displayMessage(msg)
         self.path = path
         # Create Library
-        self.library = MatLibCore.MaterialLibrary()
+        self.library = matlib_core.MaterialLibrary()
         self.library.load(path, self.prefs)
 
         self.draw_assets = self.library.get_assets()  # Filterered assets for Views
@@ -217,7 +220,7 @@ class MatLibPanel(QWidget):
         """Creates the panel-view on load"""
         ## Load UI from ui.file
         loader = QtUiTools.QUiLoader()
-        file = QFile(self.script_path + "/MatLib.ui")
+        file = QFile(self.script_path + "/ui/matlib.ui")
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -327,7 +330,7 @@ class MatLibPanel(QWidget):
         self.slide_iconsize.setVisible(False)
 
         # Set Up Clickable Slider
-        self.click_slider = egx_uiHelpers.ClickSlider()
+        self.click_slider = ui_helpers.ClickSlider()
         self.click_slider.setOrientation(Qt.Horizontal)
         self.click_slider.setMinimum(0)
         self.click_slider.setMaximum(512)
@@ -521,7 +524,7 @@ class MatLibPanel(QWidget):
     ###################################
 
     def show_about(self):
-        about = MatLibDialogs.AboutDialog()
+        about = main_dialogs.AboutDialog()
         about.exec_()
         return
 
@@ -529,7 +532,7 @@ class MatLibPanel(QWidget):
         if not self.library:
             hou.ui.displayMessage("Please open a library first")
             return
-        prefs = MatLibDialogs.PrefsDialog(self.library, self.prefs)
+        prefs = main_dialogs.PrefsDialog(self.library, self.prefs)
         prefs.exec_()
 
         if prefs.canceled:
@@ -1253,7 +1256,7 @@ class MatLibPanel(QWidget):
     def get_material_info_user(self, sel):
         """Query user for input upon material-save"""
         # Get Stuff from User
-        dialog = MatLibDialogs.usdDialog()
+        dialog = main_dialogs.usdDialog()
         r = dialog.exec_()
 
         if dialog.canceled or not r:
@@ -1295,18 +1298,23 @@ class MatLibPanel(QWidget):
     def render_thumbnail(self, id):
 
         # Move to correct context before rerendering assets
+        print("DEBUG: Start")
         if "MatX" in self.library.get_renderer_by_id(id):
             self.library.set_context(hou.node("/stage"))
         else:
             self.library.set_context(hou.node("/mat"))
 
         builder = self.library.import_asset_to_scene(id)
+        print(builder)
+        print(id)
         self.library.create_thumbnail(builder, id)
 
         if "stage" in self.library.context.path():
             builder.parent().destroy()
         else:
             builder.destroy()
+
+        print("DEBUG: Done")
 
         return
 
