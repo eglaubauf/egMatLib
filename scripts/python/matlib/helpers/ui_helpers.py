@@ -1,20 +1,11 @@
-import hou
-
-if hou.applicationVersion()[0] >= 21:
-    from PySide6.QtGui import *
-    from PySide6 import QtWidgets
-    from PySide6.QtCore import *
-    from PySide6 import QtUiTools
-else:
-    from PySide2 import QtCore
-    from PySide2 import QtWidgets
+from PySide6 import QtWidgets, QtCore, QtGui
 
 
 class ClickSlider(QtWidgets.QSlider):
-    def __init__(self):
+    def __init__(self) -> None:
         super(ClickSlider, self).__init__()
 
-    def mouseClickEvent(self, e):
+    def mouseClickEvent(self, e: QtGui.QMouseEvent):
         if e.button() == QtCore.Qt.LeftButton:
             e.accept()
             x = e.pos().x()
@@ -23,24 +14,24 @@ class ClickSlider(QtWidgets.QSlider):
             ) * x / self.width() + self.minimum()
 
             try:
-                stepSize = abs(self.value - value)
+
+                stepSize = int(abs(self.value() - value))
                 self.setPageStep(stepSize)
                 self.setSingleStep(stepSize)
-            except:
+            except Exception:
                 pass
         else:
             return super().mouseClickEvent(e)
 
-    def mouseMoveEvent(self, e):
-        e.accept()
-        x = e.pos().x()
+    def mouseMoveEvent(self, ev: QtGui.QMouseEvent) -> None:
+        ev.accept()
+        x = ev.pos().x()
         value = (self.maximum() - self.minimum()) * x / self.width() + self.minimum()
 
         try:
-            stepSize = abs(self.value - value)
-
+            stepSize = int(abs(self.value() - value))
             self.setPageStep(stepSize)
             self.setSingleStep(stepSize)
-        except:
+        except Exception:
             pass
-        self.setValue(value)
+        self.setValue(int(value))
