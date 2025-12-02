@@ -1,14 +1,15 @@
-from matlib.helpers import helpers
-import hou
 import json
 import os
 import uuid
 import datetime
 import time
+import importlib
+import hou
 
+from matlib.helpers import helpers
 from matlib.render import thumbnail_scene
 from matlib.core import material
-import importlib
+
 
 from matlib.prefs.main_prefs import Prefs
 
@@ -26,7 +27,7 @@ class MaterialLibrary:
         self.path = ""
         self.thumbsize = -1
         self.rendersize = -1
-        self.renderOnImport = False
+        self.render_on_import = False
         self.data = {}
 
         self.context: hou.Node = hou.node("/stage")
@@ -46,7 +47,7 @@ class MaterialLibrary:
             self.tags = self.data["tags"]
             self.thumbsize = self.data["thumbsize"]
             self.rendersize = self.data["rendersize"]
-            self.renderOnImport = self.data["renderOnImport"]
+            self.render_on_import = self.data["render_on_import"]
 
         self.settings = prefs
 
@@ -61,9 +62,9 @@ class MaterialLibrary:
         self.data["tags"] = self.tags
         self.data["thumbsize"] = self.thumbsize
         self.data["rendersize"] = self.rendersize
-        self.data["renderOnImport"] = self.renderOnImport
+        self.data["render_on_import"] = self.render_on_import
 
-        with open(self.path + ("/library.json"), "w") as lib_json:
+        with open(self.path + ("/library.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self.data, lib_json, indent=4)
 
     def check_exists_in_lib(self, path: str) -> bool:
@@ -103,81 +104,83 @@ class MaterialLibrary:
     def set_thumbsize(self, val: int) -> None:
         self.thumbsize = val
 
-    def set_renderSize(self, val: int) -> None:
+    def set_rendersize(self, val: int) -> None:
         self.rendersize = val
 
-    def get_renderSize(self) -> int:
+    def get_rendersize(self) -> int:
         return self.rendersize
 
     def get_context(self) -> hou.Node:
         return self.context
 
-    def get_renderOnImport(self) -> bool:
-        return self.renderOnImport
+    def get_render_on_import(self) -> bool:
+        return self.render_on_import
 
-    def set_renderOnImport(self, val: bool) -> None:
-        self.renderOnImport = val
+    def set_render_on_import(self, val: bool) -> None:
+        self.render_on_import = val
 
-    def set_asset_name(self, mat_id: str, name: str) -> None:
-        """Sets the Name for the given Asset (id)"""
-        asset = self.get_asset_by_id(mat_id)
+    def set_asset_name(self, asset_id: str, name: str) -> None:
+        """Sets the Name for the given Asset (asset_id)"""
+        asset = self.get_asset_by_id(asset_id)
         asset.set_name(name)
 
-    def get_asset_by_id(self, mat_id: str) -> None | material.Material:
+    def get_asset_by_id(self, asset_id: str) -> None | material.Material:
         """Returns the Asset for the given id"""
         for asset in self.assets:
-            if type(mat_id) is int:
-                if int(mat_id) == asset.get_id():
+            if isinstance(asset_id, int):
+                if int(asset_id) == asset.get_id():
                     return asset
             else:
-                if mat_id == asset.get_id():
+                if asset_id == asset.get_id():
                     return asset
         return None
 
-    def set_asset_cat(self, id: str, cat: str) -> None:
-        """Sets the category for the given material (id)"""
+    def set_asset_cat(self, asset_id: str, cat: str) -> None:
+        """Sets the category for the given material (asset_id)"""
         self.check_add_category(cat)
-        asset = self.get_asset_by_id(id)
+        asset = self.get_asset_by_id(asset_id)
         asset.set_categories(cat)
 
-    def set_asset_tag(self, id: str, tag: str) -> None:
-        """Sets the tag for the given material (id)"""
-        asset = self.get_asset_by_id(id)
+    def set_asset_tag(self, asset_id: str, tag: str) -> None:
+        """Sets the tag for the given material (asset_id)"""
+        asset = self.get_asset_by_id(asset_id)
         asset.set_tags(tag)
 
-    def set_asset_fav(self, id: str, fav: bool) -> None:
-        """Sets the fav for the given material (id)"""
-        asset = self.get_asset_by_id(id)
+    def set_asset_fav(self, asset_id: str, fav: bool) -> None:
+        """Sets the fav for the given material (asset_id)"""
+        asset = self.get_asset_by_id(asset_id)
         asset.set_fav(fav)
 
-    def get_asset_fav(self, id: str) -> bool:
-        """Gets the fav for the given material (id) as 0/1"""
-        asset = self.get_asset_by_id(id)
+    def get_asset_fav(self, asset_id: str) -> bool:
+        """Gets the fav for the given material (asset_id) as 0/1"""
+        asset = self.get_asset_by_id(asset_id)
         return asset.get_fav()
 
-    def update_asset_date(self, id: str) -> None:
-        asset = self.get_asset_by_id(id)
+    def update_asset_date(self, asset_id: str) -> None:
+        asset = self.get_asset_by_id(asset_id)
         asset.set_date()
 
-    def remove_asset(self, id: str) -> None:
+    def remove_asset(self, asset_id: str) -> None:
         """Removes a material from this Library and Disk"""
         for asset in self.assets:
-            if id == asset.get_id():
+            if asset_id == asset.get_id():
                 self.assets.remove(asset)
 
                 # Remove Files from Disk
                 asset_file_path = os.path.join(
                     self.path,
                     self.settings.get_asset_dir(),
-                    str(id) + self.settings.get_ext(),
+                    str(asset_id) + self.settings.get_ext(),
                 )
                 img_file_path = os.path.join(
                     self.path,
                     self.settings.get_img_dir(),
-                    str(id) + self.settings.get_img_ext(),
+                    str(asset_id) + self.settings.get_img_ext(),
                 )
                 interface_file_path = os.path.join(
-                    self.path, self.settings.get_asset_dir(), str(id) + ".interface"
+                    self.path,
+                    self.settings.get_asset_dir(),
+                    str(asset_id) + ".interface",
                 )
 
                 if os.path.exists(asset_file_path):
@@ -295,43 +298,43 @@ class MaterialLibrary:
             self.assets.append(new_mat)
             self.save()
 
-    def get_renderer_by_id(self, id: str) -> str:
+    def get_renderer_by_id(self, asset_id: str) -> str:
         """Return the Renderer for this Material as a string"""
         for mat in self.assets:
-            if type(id) is int:
-                if int(id) == mat.get_id():
+            if isinstance(asset_id, int):
+                if int(asset_id) == mat.get_id():
                     return mat.get_renderer()
             else:
-                if id == mat.get_id():
+                if asset_id == mat.get_id():
                     return mat.get_renderer()
         return ""
 
-    def check_materialBuilder_by_id(self, id: str) -> int | None:
+    def check_materialbuilder_by_id(self, asset_id: str) -> int | None:
         """Return if the Material is a Builder (Mantra) as a 0/1"""
         for mat in self.assets:
-            if type(id) is int:
-                if int(id) == mat.get_id():
+            if isinstance(asset_id, int):
+                if int(asset_id) == mat.get_id():
                     return mat.get_builder()
             else:
-                if id == mat.get_id():
+                if asset_id == mat.get_id():
                     return mat.get_builder()
         return None
 
     def update_context(self) -> None:
         self.context = self.get_current_network_node()
 
-    def import_asset_to_scene(self, id: str) -> None | hou.Node:
+    def import_asset_to_scene(self, asset_id: str) -> None | hou.Node:
         """Import a Material to the Nework Editor/Scene"""
         file_name = (
             self.get_path()
             + self.settings.get_asset_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_ext()
         )
 
-        mat = self.get_asset_by_id(id)
+        mat = self.get_asset_by_id(asset_id)
 
-        renderer = self.get_renderer_by_id(id)
+        renderer = self.get_renderer_by_id(asset_id)
         builder = None
 
         # Import to current context
@@ -380,7 +383,10 @@ class MaterialLibrary:
                     import_path = hou.node("/stage").createNode("materiallibrary")
 
         parms_file_name = (
-            self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
+            self.get_path()
+            + self.settings.get_asset_dir()
+            + str(asset_id)
+            + ".interface"
         )
 
         # Create temporary storage of nodes
@@ -390,7 +396,7 @@ class MaterialLibrary:
         if renderer == "Redshift":
             # Interface Check
             if os.path.exists(parms_file_name):
-                interface_file = open(parms_file_name, "r")
+                interface_file = open(parms_file_name, "r", encoding="utf-8")
                 code = interface_file.read()
                 exec(code)
 
@@ -408,7 +414,7 @@ class MaterialLibrary:
         elif renderer == "Octane":
             # Interface Check
             if os.path.exists(parms_file_name):
-                interface_file = open(parms_file_name, "r")
+                interface_file = open(parms_file_name, "r", encoding="utf-8")
                 code = interface_file.read()
                 exec(code)
 
@@ -427,8 +433,8 @@ class MaterialLibrary:
             # Interface Check
             if os.path.exists(parms_file_name):
                 # Only load parms if MatBuilder
-                if self.check_materialBuilder_by_id(id):
-                    interface_file = open(parms_file_name, "r")
+                if self.check_materialbuilder_by_id(asset_id):
+                    interface_file = open(parms_file_name, "r", encoding="utf-8")
                     code = interface_file.read()
                     exec(code)
 
@@ -449,7 +455,7 @@ class MaterialLibrary:
             # CreateBuilder
             # Interface Check
             if os.path.exists(parms_file_name):
-                interface_file = open(parms_file_name, "r")
+                interface_file = open(parms_file_name, "r", encoding="utf-8")
                 code = interface_file.read()
                 exec(code)
 
@@ -466,7 +472,7 @@ class MaterialLibrary:
         elif renderer == "MatX":
             # Interface Check
             if os.path.exists(parms_file_name):
-                interface_file = open(parms_file_name, "r")
+                interface_file = open(parms_file_name, "r", encoding="utf-8")
                 code = interface_file.read()
                 exec(code)
 
@@ -484,7 +490,7 @@ class MaterialLibrary:
             return None
 
         # If node is Principled Shader
-        if renderer == "Mantra" and not self.check_materialBuilder_by_id(id):
+        if renderer == "Mantra" and not self.check_materialbuilder_by_id(asset_id):
             n = builder.children()[0]
             hou.moveNodesTo((n,), builder.parent())  # type: ignore
             builder.destroy()
@@ -507,7 +513,7 @@ class MaterialLibrary:
 
         return builder
 
-    def save_node(self, node: hou.Node, id: str, update: bool) -> bool:
+    def save_node(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Save Node wrapper for different Material Types"""
         # Check against NodeType
         val = False
@@ -516,7 +522,7 @@ class MaterialLibrary:
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
             ):
-                val = self.save_node_redshift(node, id, update)
+                val = self.save_node_redshift(node, asset_id, update)
         elif (
             node.type().name() == "materialbuilder"
             or node.type().name() == "principledshader::2.0"
@@ -528,7 +534,7 @@ class MaterialLibrary:
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
             ):
-                val = self.save_node_mantra(node, id, update)
+                val = self.save_node_mantra(node, asset_id, update)
         elif node.type().name() == "arnold_materialbuilder":
             if hou.getenv("OCIO") is None:
                 hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
@@ -536,7 +542,7 @@ class MaterialLibrary:
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
             ):
-                val = self.save_node_arnold(node, id, update)
+                val = self.save_node_arnold(node, asset_id, update)
         elif node.type().name() == "octane_vopnet":
             if hou.getenv("OCIO") is None:
                 hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
@@ -544,7 +550,7 @@ class MaterialLibrary:
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
             ):
-                val = self.save_node_octane(node, id, update)
+                val = self.save_node_octane(node, asset_id, update)
         elif node.type().name() == "subnet":
             # Hope for the best that it actually is a MtlX Subnet
             if hou.getenv("OCIO") is None:
@@ -553,7 +559,7 @@ class MaterialLibrary:
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
             ):
-                val = self.save_node_mtlX(node, id, update)
+                val = self.save_node_mtlx(node, asset_id, update)
         elif node.type().name() == "collect":
             if hou.getenv("OCIO") is None:
                 hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
@@ -561,22 +567,25 @@ class MaterialLibrary:
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
             ):
-                val = self.save_node_collect(node, id, update)
+                val = self.save_node_collect(node, asset_id, update)
         else:
             hou.ui.displayMessage("Selected Node is not a Material Builder")  # type: ignore
         return val
 
-    def save_node_collect(self, node: hou.Node, id: str, update: bool) -> bool:
+    def save_node_collect(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Saves the attached network from a collect node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
             self.get_path()
             + self.settings.get_asset_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_ext()
         )
         parms_file_name = (
-            self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
+            self.get_path()
+            + self.settings.get_asset_dir()
+            + str(asset_id)
+            + ".interface"
         )
 
         nodetree = helpers.getConnectedNodes(node)
@@ -588,37 +597,40 @@ class MaterialLibrary:
         hou.copyNodesTo((nodetree), sub_tmp)  # type: ignore
         children = sub_tmp.children()
 
-        interface_file = open(parms_file_name, "w")
+        interface_file = open(parms_file_name, "w", encoding="utf-8")
         interface_file.write(sub_tmp.asCode())
 
         sub_tmp.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
         sub_tmp.destroy()
 
-        # If this is not a manual update and renderOnImport is off, finish here
+        # If this is not a manual update and render_on_import is off, finish here
         if not update:
-            if not self.renderOnImport:
+            if not self.render_on_import:
                 return True
 
-        return self.create_thumb_mtlx(nodetree, id)
+        return self.create_thumb_mtlx(nodetree, asset_id)
 
-    def save_node_mtlX(self, node: hou.Node, id: str, update: bool) -> bool:
+    def save_node_mtlx(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Saves the MtlX node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
             self.get_path()
             + self.settings.get_asset_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_ext()
         )
 
         # interface-stuff
         parms_file_name = (
-            self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
+            self.get_path()
+            + self.settings.get_asset_dir()
+            + str(asset_id)
+            + ".interface"
         )
 
         children = node.children()
 
-        interface_file = open(parms_file_name, "w")
+        interface_file = open(parms_file_name, "w", encoding="utf-8")
         interface_file.write(node.asCode())
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
@@ -626,25 +638,25 @@ class MaterialLibrary:
         if "subnet" in node.type().name():
             children = [node]
 
-        # If this is not a manual update and renderOnImport is off, finish here
+        # If this is not a manual update and render_on_import is off, finish here
         if not update:
-            if not self.renderOnImport:
+            if not self.render_on_import:
                 return True
 
-        return self.create_thumb_mtlx(children, id)
+        return self.create_thumb_mtlx(children, asset_id)
 
-    def create_thumbnail(self, node: hou.Node, id: str) -> None:
-        renderer = self.get_renderer_by_id(id)
+    def create_thumbnail(self, node: hou.Node, asset_id: str) -> None:
+        renderer = self.get_renderer_by_id(asset_id)
         if renderer == "MatX":
-            self.create_thumb_mtlx(node.children(), id)
+            self.create_thumb_mtlx(node.children(), asset_id)
         elif renderer == "Mantra":
-            self.create_thumb_mantra(node, id)
+            self.create_thumb_mantra(node, asset_id)
         else:
             pass
 
-    def create_thumb_mtlx(self, children: list[hou.Node], id: str) -> bool:
+    def create_thumb_mtlx(self, children: list[hou.Node], asset_id: str) -> bool:
         # Build path
-        path = self.get_path() + self.settings.get_img_dir() + str(id) + ".exr"
+        path = self.get_path() + self.settings.get_img_dir() + str(asset_id) + ".exr"
 
         # Create Thumbnail
         net = hou.node("/obj").createNode("lopnet")
@@ -785,7 +797,7 @@ class MaterialLibrary:
         newpath = (
             self.get_path()
             + self.settings.get_img_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_img_ext()
         )
 
@@ -799,7 +811,7 @@ class MaterialLibrary:
 
         return True
 
-    def create_thumb_mantra(self, node: hou.Node, id: str) -> bool:
+    def create_thumb_mantra(self, node: hou.Node, asset_id: str) -> bool:
         # Create Thumbnail
 
         sc = thumbnail_scene.ThumbNailScene()
@@ -809,7 +821,7 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.get_path() + self.settings.get_img_dir() + str(id)
+        path = self.get_path() + self.settings.get_img_dir() + str(asset_id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path + ".exr")
@@ -829,31 +841,34 @@ class MaterialLibrary:
             os.remove(path + ".exr")
         return True
 
-    def save_node_redshift(self, node: hou.Node, id: str, update: bool) -> bool:
+    def save_node_redshift(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Saves the Redshift node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
             self.get_path()
             + self.settings.get_asset_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_ext()
         )
 
         # interface-stuff
         parms_file_name = (
-            self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
+            self.get_path()
+            + self.settings.get_asset_dir()
+            + str(asset_id)
+            + ".interface"
         )
         children = node.children()
 
-        interface_file = open(parms_file_name, "w")
+        interface_file = open(parms_file_name, "w", encoding="utf-8")
         # interface_file.write(node.parmTemplateGroup().asCode())
         interface_file.write(node.asCode())
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
-        # If this is not a manual update and renderOnImport is off, finish here
+        # If this is not a manual update and render_on_import is off, finish here
         if not update:
-            if not self.renderOnImport:
+            if not self.render_on_import:
                 return True
 
         # Create Thumbnail
@@ -866,7 +881,7 @@ class MaterialLibrary:
         path = (
             self.get_path()
             + self.settings.get_img_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_img_ext()
         )
 
@@ -885,30 +900,33 @@ class MaterialLibrary:
         thumb.destroy()
         return True
 
-    def save_node_octane(self, node: hou.Node, id: str, update: bool) -> bool:
+    def save_node_octane(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         # Filepath where to save stuff
         file_name = (
             self.get_path()
             + self.settings.get_asset_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_ext()
         )
 
         # interface-stuff
         parms_file_name = (
-            self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
+            self.get_path()
+            + self.settings.get_asset_dir()
+            + str(asset_id)
+            + ".interface"
         )
         children = node.children()
 
-        interface_file = open(parms_file_name, "w")
+        interface_file = open(parms_file_name, "w", encoding="utf-8")
         # interface_file.write(node.parmTemplateGroup().asCode())
         interface_file.write(node.asCode())
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
-        # If this is not a manual update and renderOnImport is off, finish here
+        # If this is not a manual update and render_on_import is off, finish here
         if not update:
-            if not self.renderOnImport:
+            if not self.render_on_import:
                 return True
 
         # Create Thumbnail
@@ -920,7 +938,7 @@ class MaterialLibrary:
         path = (
             self.get_path()
             + self.settings.get_img_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_img_ext()
         )
 
@@ -940,30 +958,35 @@ class MaterialLibrary:
         thumb.destroy()
         return True
 
-    def save_node_arnold(self, node: hou.Node, id: str, update: bool) -> bool:  # ARNOLD
+    def save_node_arnold(
+        self, node: hou.Node, asset_id: str, update: bool
+    ) -> bool:  # ARNOLD
         """Saves the Arnold node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
             self.get_path()
             + self.settings.get_asset_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_ext()
         )
 
         # interface-stuff
         parms_file_name = (
-            self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
+            self.get_path()
+            + self.settings.get_asset_dir()
+            + str(asset_id)
+            + ".interface"
         )
         children = node.children()
 
-        interface_file = open(parms_file_name, "w")
+        interface_file = open(parms_file_name, "w", encoding="utf-8")
         interface_file.write(node.asCode())
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
-        # If this is not a manual update and renderOnImport is off, finish here
+        # If this is not a manual update and render_on_import is off, finish here
         if not update:
-            if not self.renderOnImport:
+            if not self.render_on_import:
                 return True
 
         # Create Thumbnail
@@ -973,7 +996,7 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.get_path() + self.settings.get_img_dir() + str(id)
+        path = self.get_path() + self.settings.get_img_dir() + str(asset_id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path + ".exr")
@@ -1003,13 +1026,13 @@ class MaterialLibrary:
 
         return True
 
-    def save_node_mantra(self, node, id, update):
+    def save_node_mantra(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Saves the Mantra node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
             self.get_path()
             + self.settings.get_asset_dir()
-            + str(id)
+            + str(asset_id)
             + self.settings.get_ext()
         )
 
@@ -1024,11 +1047,14 @@ class MaterialLibrary:
 
         # interface-stuff
         parms_file_name = (
-            self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
+            self.get_path()
+            + self.settings.get_asset_dir()
+            + str(asset_id)
+            + ".interface"
         )
         children = node.children()
 
-        interface_file = open(parms_file_name, "w")
+        interface_file = open(parms_file_name, "w", encoding="utf-8")
         interface_file.write(node.asCode())
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
@@ -1037,10 +1063,10 @@ class MaterialLibrary:
         if builder != "":
             builder.destroy()
 
-        # If this is not a manual update and renderOnImport is off, finish here
+        # If this is not a manual update and render_on_import is off, finish here
         if not update:
-            if not self.renderOnImport:
+            if not self.render_on_import:
                 return True
-        self.create_thumb_mantra(node, id)
+        self.create_thumb_mantra(node, asset_id)
 
         return True
