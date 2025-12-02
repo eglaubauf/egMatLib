@@ -1,11 +1,12 @@
-from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 import os
-import hou
 import shutil
 import sys
 import subprocess
-
 import importlib
+from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
+
+import hou
+
 from matlib.core import matlib_core
 from matlib.dialogs import (
     about_dialog,
@@ -17,19 +18,17 @@ from matlib.prefs import main_prefs
 from matlib.helpers import ui_helpers
 
 # Set Develop flag to reload everthing properly
-develop = True
-if develop:
-    importlib.reload(matlib_core)
-    importlib.reload(main_prefs)
-    importlib.reload(ui_helpers)
+importlib.reload(matlib_core)
+importlib.reload(main_prefs)
+importlib.reload(ui_helpers)
 
-    importlib.reload(material_dialog)
-    importlib.reload(about_dialog)
-    importlib.reload(prefs_dialog)
-    importlib.reload(usd_dialog)
+importlib.reload(material_dialog)
+importlib.reload(about_dialog)
+importlib.reload(prefs_dialog)
+importlib.reload(usd_dialog)
 
 
-def saveMaterial(node: hou.Node) -> None:
+def save_material(node: hou.Node) -> None:
     # Call from RC-Menus in Network Pane
     # TODO: Move
     # Initialize
@@ -52,8 +51,8 @@ def saveMaterial(node: hou.Node) -> None:
         library.check_add_category(dialog.categories)
     if dialog.tags:
         library.check_add_tags(dialog.tags)
-    for asset in hou.selectedNodes():
-        library.add_asset(asset, dialog.categories, dialog.tags, dialog.fav)
+
+    library.add_asset(node, dialog.categories, dialog.tags, dialog.fav)
 
     library.save()
 
@@ -61,8 +60,8 @@ def saveMaterial(node: hou.Node) -> None:
     for pane_tab in hou.ui.paneTabs():  # type: ignore
         if pane_tab.type() == hou.paneTabType.PythonPanel:
             if pane_tab.label() == "MatLib":
-                egMatLibPanel = pane_tab.activeInterfaceRootWidget()
-                egMatLibPanel.update_external()
+                panel = pane_tab.activeInterfaceRootWidget()
+                panel.update_external()
                 return
 
 
@@ -79,14 +78,16 @@ class MatLibPanel(QtWidgets.QWidget):
             path = path + "/"
 
         self.library = None
-        self.createView()
+        self.createview()
 
         self.selected_cat = None
         self.filter = ""
 
         self.active_row = None
-        self.lastSelectedItems = []
-
+        self.last_selected_items = []
+        self.draw_assets = []
+        self.active = False
+        self.active_item = None
         self.edit = False
 
         if os.path.exists(path):
@@ -158,62 +159,63 @@ class MatLibPanel(QtWidgets.QWidget):
         self.update_cat_view()
 
     def update_ui(self) -> None:
-        if self.cb_Mantra.isChecked():
-            self.radio_USD.setDisabled(False)
+        if self.cb_mantra.isChecked():
+            self.radio_usd.setDisabled(False)
             self.radio_current.setDisabled(False)
-        if self.cb_MatX.isChecked():
-            self.radio_USD.setDisabled(False)
+        if self.cb_matx.isChecked():
+            self.radio_usd.setDisabled(False)
             self.radio_current.setDisabled(False)
-        if self.cb_Arnold.isChecked():
+        if self.cb_arnold.isChecked():
             self.radio_default.setChecked(True)
-            self.radio_USD.setDisabled(True)
+            self.radio_usd.setDisabled(True)
             self.radio_current.setDisabled(True)
-        if self.cb_Redshift.isChecked():
+        if self.cb_redshift.isChecked():
             self.radio_default.setChecked(True)
-            self.radio_USD.setDisabled(True)
+            self.radio_usd.setDisabled(True)
             self.radio_current.setDisabled(True)
-        if self.cb_Octane.isChecked():
+        if self.cb_octane.isChecked():
             self.radio_default.setChecked(True)
-            self.radio_USD.setDisabled(True)
+            self.radio_usd.setDisabled(True)
             self.radio_current.setDisabled(True)
 
-    def toggle_catView(self) -> None:
-        if self.action_catView.isChecked():
+    def toggle_catview(self) -> None:
+        if self.action_catview.isChecked():
             self.cat_list.setVisible(True)
-            self.action_catView.setChecked(True)
+            self.action_catview.setChecked(True)
         else:
             self.cat_list.setVisible(False)
-            self.action_catView.setChecked(False)
+            self.action_catview.setChecked(False)
 
-    def toggle_catView_rc(self) -> None:
-        if not self.action_catView.isChecked():
+    def toggle_catview_rc(self) -> None:
+        if not self.action_catview.isChecked():
             self.cat_list.setVisible(True)
-            self.action_catView.setChecked(True)
+            self.action_catview.setChecked(True)
         else:
             self.cat_list.setVisible(False)
-            self.action_catView.setChecked(False)
+            self.action_catview.setChecked(False)
 
-    def toggle_detailsView(self) -> None:
-        self.details_widget = self.ui.findChild(QtWidgets.QWidget, "details_widget")
+    def toggle_detailsview(self) -> None:
+        details_widget = self.ui.findChild(QtWidgets.QWidget, "details_widget")
 
         if self.action_detailsview.isChecked():
-            self.details_widget.setHidden(False)
+            details_widget.setHidden(False)
             self.action_detailsview.setChecked(True)
         else:
-            self.details_widget.setHidden(True)
+            details_widget.setHidden(True)
             self.action_detailsview.setChecked(False)
 
-    def toggle_detailsView_rc(self) -> None:
+    def toggle_detailsview_rc(self) -> None:
+        details_widget = self.ui.findChild(QtWidgets.QWidget, "details_widget")
 
         if not self.action_detailsview.isChecked():
-            self.details_widget.setHidden(False)
+            details_widget.setHidden(False)
             self.action_detailsview.setChecked(True)
         else:
-            self.details_widget.setHidden(True)
+            details_widget.setHidden(True)
             self.action_detailsview.setChecked(False)
 
     # View Stuff
-    def createView(self) -> None:
+    def createview(self) -> None:
         """Creates the panel-view on load"""
         # Load UI from ui.file
         loader = QtUiTools.QUiLoader()
@@ -232,13 +234,13 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_prefs.triggered.connect(self.show_prefs)
 
         self.menu_view = self.ui.findChild(QtWidgets.QMenu, "menu_view")
-        self.action_catView = self.ui.findChild(QtGui.QAction, "action_show_cat")
-        self.action_catView.triggered.connect(self.toggle_catView)
+        self.action_catview = self.ui.findChild(QtGui.QAction, "action_show_cat")
+        self.action_catview.triggered.connect(self.toggle_catview)
 
         self.action_detailsview = self.ui.findChild(
             QtGui.QAction, "action_show_details"
         )
-        self.action_detailsview.triggered.connect(self.toggle_detailsView)
+        self.action_detailsview.triggered.connect(self.toggle_detailsview)
 
         self.action_cleanup_db = self.ui.findChild(QtGui.QAction, "action_cleanup_db")
         self.action_cleanup_db.triggered.connect(self.cleanup_db)
@@ -298,32 +300,32 @@ class MatLibPanel(QtWidgets.QWidget):
         self.btn_update.clicked.connect(self.user_update_asset)
 
         # Options
-        self.cb_FavsOnly = self.ui.findChild(QtWidgets.QCheckBox, "cb_FavsOnly")
-        self.cb_FavsOnly.stateChanged.connect(self.update_views)
+        self.cb_favsonly = self.ui.findChild(QtWidgets.QCheckBox, "cb_FavsOnly")
+        self.cb_favsonly.stateChanged.connect(self.update_views)
 
         # Material
-        self.cb_Redshift = self.ui.findChild(QtWidgets.QRadioButton, "cb_Redshift")
-        self.cb_Mantra = self.ui.findChild(QtWidgets.QRadioButton, "cb_Mantra")
-        self.cb_Arnold = self.ui.findChild(QtWidgets.QRadioButton, "cb_Arnold")
-        self.cb_Octane = self.ui.findChild(QtWidgets.QRadioButton, "cb_Octane")
-        self.cb_MatX = self.ui.findChild(QtWidgets.QRadioButton, "cb_MatX")
+        self.cb_redshift = self.ui.findChild(QtWidgets.QRadioButton, "cb_Redshift")
+        self.cb_mantra = self.ui.findChild(QtWidgets.QRadioButton, "cb_Mantra")
+        self.cb_arnold = self.ui.findChild(QtWidgets.QRadioButton, "cb_Arnold")
+        self.cb_octane = self.ui.findChild(QtWidgets.QRadioButton, "cb_Octane")
+        self.cb_matx = self.ui.findChild(QtWidgets.QRadioButton, "cb_MatX")
 
-        self.cb_showCat = self.ui.findChild(QtWidgets.QCheckBox, "cb_showCat")
+        self.cb_showcat = self.ui.findChild(QtWidgets.QCheckBox, "cb_showCat")
 
-        self.cb_FavsOnly.stateChanged.connect(self.update_views)
+        self.cb_favsonly.stateChanged.connect(self.update_views)
 
-        self.cb_Redshift.toggled.connect(self.update_views)
-        self.cb_Mantra.toggled.connect(self.update_views)
-        self.cb_Arnold.toggled.connect(self.update_views)
-        self.cb_Octane.toggled.connect(self.update_views)
-        self.cb_MatX.toggled.connect(self.update_views)
+        self.cb_redshift.toggled.connect(self.update_views)
+        self.cb_mantra.toggled.connect(self.update_views)
+        self.cb_arnold.toggled.connect(self.update_views)
+        self.cb_octane.toggled.connect(self.update_views)
+        self.cb_matx.toggled.connect(self.update_views)
 
         # Context Options
         self.radio_current = self.ui.findChild(QtWidgets.QRadioButton, "radio_current")
         self.radio_current.toggled.connect(self.update_context)
 
-        self.radio_USD = self.ui.findChild(QtWidgets.QRadioButton, "radio_USD")
-        self.radio_USD.toggled.connect(self.update_context)
+        self.radio_usd = self.ui.findChild(QtWidgets.QRadioButton, "radio_USD")
+        self.radio_usd.toggled.connect(self.update_context)
 
         self.radio_default = self.ui.findChild(QtWidgets.QRadioButton, "radio_default")
         self.radio_default.toggled.connect(self.update_context)
@@ -349,7 +351,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
         self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
 
-        # TODO: Hide Menus for now - FUTURE
         self.a_folder = self.ui.findChild(QtGui.QAction, "action_import_folder")
         self.a_folder.setDisabled(True)
         self.a_folder.setVisible(False)
@@ -363,11 +364,11 @@ class MatLibPanel(QtWidgets.QWidget):
         # self.menu_import.setVisible(False)
 
         # set main layout and attach to widget
-        mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addWidget(self.ui)
-        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
+        mainlayout = QtWidgets.QVBoxLayout()
+        mainlayout.addWidget(self.ui)
+        mainlayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
 
-        self.setLayout(mainLayout)
+        self.setLayout(mainlayout)
 
         # Cleanup UI
         self.setStyleSheet("""  font-family: Lato; """)
@@ -378,7 +379,7 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_context(self) -> None:
         if not self.library:
             return
-        if self.radio_USD.isChecked():
+        if self.radio_usd.isChecked():
             self.library.set_context(hou.node("/stage"))
         elif self.radio_current.isChecked():
             curr_node = self.get_current_network_node()
@@ -401,52 +402,50 @@ class MatLibPanel(QtWidgets.QWidget):
     def thumblist_rc_menu(self) -> None:
         cmenu = QtWidgets.QMenu(self)
 
-        importAct = cmenu.addAction("Import to Scene")
-        toggleFav = cmenu.addAction("Toggle Favorite")
-        renderAct = cmenu.addAction("Rerender Thumbnail")
-        renderAllAct = cmenu.addAction("Render All Thumbnails")
-        thumbViewport = cmenu.addAction("Thumbnail from Viewport")
+        action_import = cmenu.addAction("Import to Scene")
+        action_toggle_fav = cmenu.addAction("Toggle Favorite")
+        action_render = cmenu.addAction("Rerender Thumbnail")
+        action_renderall = cmenu.addAction("Render All Thumbnails")
+        action_thumb_viewport = cmenu.addAction("Thumbnail from Viewport")
         cmenu.addSeparator()
-        delAct = cmenu.addAction("Delete Entry")
+        action_delete = cmenu.addAction("Delete Entry")
         cmenu.addSeparator()
-        toggle_cats = cmenu.addAction("Toggle Cat View")
-        toggle_details = cmenu.addAction("Toggle Details View")
+        action_toggle_cats = cmenu.addAction("Toggle Cat View")
+        action_toggle_details = cmenu.addAction("Toggle Details View")
         action = cmenu.exec_(QtGui.QCursor.pos())
 
-        if action == delAct:
+        if action == action_delete:
             self.delete_asset()
-        elif action == renderAct:
+        elif action == action_render:
             self.update_single_asset()
-        elif action == importAct:
+        elif action == action_import:
             self.import_assets()
-        elif action == renderAllAct:
+        elif action == action_renderall:
             self.update_all_assets()
-        elif action == thumbViewport:
-            self.update_single_asset(True)
-        elif action == toggleFav:
+        elif action == action_thumb_viewport:
+            self.update_single_asset()
+        elif action == action_toggle_fav:
             self.toggle_fav()
-        elif action == toggle_details:
-            self.toggle_detailsView_rc()
-        elif action == toggle_cats:
-            self.toggle_catView_rc()
+        elif action == action_toggle_details:
+            self.toggle_detailsview_rc()
+        elif action == action_toggle_cats:
+            self.toggle_catview_rc()
 
         self.update_views()
 
     def catlist_rc_menu(self) -> None:
         cmenu = QtWidgets.QMenu(self)
 
-        removeAct = cmenu.addAction("Remove Category")
-        renameAct = cmenu.addAction("Rename Entry")
-        addAct = cmenu.addAction("Add Category")
+        action_remove = cmenu.addAction("Remove Category")
+        action_rename = cmenu.addAction("Rename Entry")
+        action_add = cmenu.addAction("Add Category")
         action = cmenu.exec_(QtGui.QCursor.pos())
 
-        if action == removeAct:
+        if action == action_remove:
             self.rmv_category_user()
-            pass
-        elif action == renameAct:
+        elif action == action_rename:
             self.rename_category_user()
-            pass
-        elif action == addAct:
+        elif action == action_add:
             self.add_category_user()
         return
 
@@ -487,15 +486,6 @@ class MatLibPanel(QtWidgets.QWidget):
         choice = hou.ui.displayMessage(msg, buttons)  # type: ignore
         if choice < 0 or choice == len(buttons) - 1:
             return
-        # TODO: FUTURE
-        # elif choice == 0:
-        #     self.h = importMantra.Controller()
-        #     self.h.show()
-        #     self.h.finished.connect(self.import_files_finished)
-        # else:
-        #     self.h = importMatX.Controller()
-        #     self.h.show()
-        #     self.h.finished.connect(self.import_files_finished)
 
     def import_files_finished(self) -> None:
         # finalize import by adding the created materials to the library
@@ -543,10 +533,10 @@ class MatLibPanel(QtWidgets.QWidget):
         asset_files = os.listdir(asset_path)
 
         for img in img_thumbs:
-            id = img.split(".")[0]
+            asset_id = img.split(".")[0]
             # found = False
             for asset in assets:
-                if asset.get_id() == int(id):
+                if asset.get_id() == int(asset_id):
                     # found = True
                     break
             # if not found:
@@ -559,12 +549,12 @@ class MatLibPanel(QtWidgets.QWidget):
             #             pass
 
         for m in asset_files:
-            id = m.split(".")[0]
-            if "img" in id:
+            asset_id = m.split(".")[0]
+            if "img" in asset_id:
                 return
             # found = False
             for asset in assets:
-                if asset.get_id() == int(id):
+                if asset.get_id() == int(asset_id):
                     # found = True
                     break
             # if not found:
@@ -624,8 +614,7 @@ class MatLibPanel(QtWidgets.QWidget):
                 if not os.path.exists(img_path):
                     mark_render = 1
                     print(
-                        "Image for Asset %d missing on disk. Needs Rendering."
-                        % asset.get_id()
+                        f"Image for Asset { asset.get_id()} missing on disk. Needs Rendering."
                     )
 
         mats_path = os.path.join(self.path, self.prefs.get_asset_dir())
@@ -640,8 +629,7 @@ class MatLibPanel(QtWidgets.QWidget):
                         break
                 if not mark_found:
                     print(
-                        "Lonely File at %s found. Removing from disk"
-                        % os.path.join(mats_path, f)
+                        f"Lonely File at {os.path.join(mats_path, f)} found. Removing from disk"
                     )
                     os.remove(os.path.join(mats_path, f))
                     mark_lone = 1
@@ -702,7 +690,7 @@ class MatLibPanel(QtWidgets.QWidget):
         elif sys.platform == "darwin":  # MacOS
             opener = "open"
             subprocess.call([opener, lib_dir])
-        else:  # Windows
+        elif sys.platform == "win32":  # MacOS:  # Windows
             os.startfile(lib_dir)
 
     # User Adds Category with Button
@@ -766,37 +754,37 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def user_update_cats(self) -> None:
         """Apply change in Detail view to Library"""
-        items = self.lastSelectedItems
+        items = self.last_selected_items
         for item in items:
-            id = self.get_id_from_thumblist(item)
+            asset_id = self.get_id_from_thumblist(item)
             txt = self.line_cat.text()
             pos = txt.find(",")
             if pos != -1:
                 txt = txt[:pos]
-            self.library.set_asset_cat(id, txt)
+            self.library.set_asset_cat(asset_id, txt)
 
         self.library.save()
 
     def user_update_name(self) -> None:
         """Apply change in Detail view to Library"""
-        items = self.lastSelectedItems
+        items = self.last_selected_items
         for item in items:
-            id = self.get_id_from_thumblist(item)
-            self.library.set_asset_name(id, self.line_name.text())
+            asset_id = self.get_id_from_thumblist(item)
+            self.library.set_asset_name(asset_id, self.line_name.text())
         self.library.save()
 
     def user_update_tags(self) -> None:
         """Apply change in Detail view to Library"""
         # if not self.edit:
         #     return
-        items = self.lastSelectedItems
+        items = self.last_selected_items
         for item in items:
-            id = self.get_id_from_thumblist(item)
+            asset_id = self.get_id_from_thumblist(item)
             txt = self.line_tags.text()
             pos = txt.find(",")
             if pos != -1:
                 txt = txt[-pos]
-            self.library.set_asset_tag(id, txt)
+            self.library.set_asset_tag(asset_id, txt)
 
         self.library.save()
 
@@ -807,14 +795,14 @@ class MatLibPanel(QtWidgets.QWidget):
         if not items:
             return
 
-        ids = []
+        asset_ids = []
         for item in items:
-            id = self.get_id_from_thumblist(item)
-            ids.append(id)
+            asset_id = self.get_id_from_thumblist(item)
+            asset_ids.append(asset_id)
             if self.box_fav.checkState() is QtCore.Qt.Checked:
-                self.library.set_asset_fav(id, True)
+                self.library.set_asset_fav(asset_id, True)
             else:
-                self.library.set_asset_fav(id, False)
+                self.library.set_asset_fav(asset_id, False)
 
         index = self.thumblist.selectedIndexes()
 
@@ -825,10 +813,10 @@ class MatLibPanel(QtWidgets.QWidget):
             self.thumblist.setCurrentItem(item)
 
     def user_update_date(self) -> None:
-        items = self.lastSelectedItems
+        items = self.last_selected_items
         for item in items:
-            id = self.get_id_from_thumblist(item)
-            self.library.update_asset_date(id)
+            asset_id = self.get_id_from_thumblist(item)
+            self.library.update_asset_date(asset_id)
 
     # Update Views Section
     # Update Details view
@@ -846,8 +834,8 @@ class MatLibPanel(QtWidgets.QWidget):
         if items is not None:
             # Check all Selected assets for same Cat and Tag Values
             for x, item in enumerate(items):
-                id = self.get_id_from_thumblist(item)
-                curr_asset = self.library.get_asset_by_id(id)
+                asset_id = self.get_id_from_thumblist(item)
+                curr_asset = self.library.get_asset_by_id(asset_id)
 
                 if x == 0:
                     cat = curr_asset.get_categories()
@@ -861,10 +849,10 @@ class MatLibPanel(QtWidgets.QWidget):
                     if tags != curr_asset.get_tags():
                         tag_flag = True
 
-        id = self.get_id_from_thumblist(item)
+        asset_id = self.get_id_from_thumblist(item)
 
         for asset in self.library.get_assets():
-            if asset.get_id() == id:
+            if asset.get_id() == asset_id:
                 # set name
                 self.line_name.setText(asset.get_name())
                 # set cat
@@ -963,22 +951,22 @@ class MatLibPanel(QtWidgets.QWidget):
                 if asset.get_id() == -1:
                     continue
                 # Show only Favs
-                if self.cb_FavsOnly.checkState() is QtCore.Qt.Checked:
+                if self.cb_favsonly.checkState() is QtCore.Qt.Checked:
                     if asset.get_fav() == 0:
                         continue
-                if self.cb_Redshift.isChecked():
+                if self.cb_redshift.isChecked():
                     if asset.get_renderer() != "Redshift":
                         continue
-                elif self.cb_Mantra.isChecked():
+                elif self.cb_mantra.isChecked():
                     if asset.get_renderer() != "Mantra":
                         continue
-                elif self.cb_Arnold.isChecked():
+                elif self.cb_arnold.isChecked():
                     if asset.get_renderer() != "Arnold":
                         continue
-                elif self.cb_Octane.isChecked():
+                elif self.cb_octane.isChecked():
                     if asset.get_renderer() != "Octane":
                         continue
-                elif self.cb_MatX.isChecked():
+                elif self.cb_matx.isChecked():
                     if asset.get_renderer() != "MatX":
                         continue
 
@@ -1103,10 +1091,11 @@ class MatLibPanel(QtWidgets.QWidget):
     # Library Stuffs
     # Rerender All Visible assets
     def update_all_assets(self) -> None:
+        """Rerenders all assets in the library - The UI is blocked for the duration of the render"""
         if not self.library:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        """Rerenders all assets in the library - The UI is blocked for the duration of the render"""
+
         if not hou.ui.displayConfirmation(
             """This can take a long time to render. Houdini will not be responsive during that time.
             Do you want continue rendering all visible assets?"""  # type: ignore
@@ -1116,14 +1105,14 @@ class MatLibPanel(QtWidgets.QWidget):
         for i in range(self.thumblist.count()):
             item = self.thumblist.item(i)
 
-            id = self.get_id_from_thumblist(item)
-            self.render_thumbnail(id)
+            asset_id = self.get_id_from_thumblist(item)
+            self.render_thumbnail(asset_id)
 
         self.update_thumb_view()
         hou.ui.displayMessage("Updating all Thumbnails finished")  # type: ignore
 
     # Rerender Selected Asset
-    def update_single_asset(self, vp=False) -> None:
+    def update_single_asset(self) -> None:
         """Rerenders a single Asset in the library - The UI is blocked for the duration of the render"""
         items = self.get_selected_items_from_thumblist()
         if not items:
@@ -1132,8 +1121,8 @@ class MatLibPanel(QtWidgets.QWidget):
         for item in items:
             if not item:
                 return
-            id = self.get_id_from_thumblist(item)
-            self.render_thumbnail(id)
+            asset_id = self.get_id_from_thumblist(item)
+            self.render_thumbnail(asset_id)
 
         # self.update_thumb_view() :EGL
         if call:
@@ -1161,8 +1150,8 @@ class MatLibPanel(QtWidgets.QWidget):
             if not item:
                 return
 
-            id = self.get_id_from_thumblist(item)
-            self.library.remove_asset(id)
+            asset_id = self.get_id_from_thumblist(item)
+            self.library.remove_asset(asset_id)
 
         # Update View
         self.update_thumb_view()
@@ -1184,7 +1173,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not items:
             hou.ui.displayMessage("No material selected")  # type: ignore
             return None
-        self.lastSelectedItems = items
+        self.last_selected_items = items
         return items
 
     def get_selected_items_from_thumblist_silent(
@@ -1194,7 +1183,7 @@ class MatLibPanel(QtWidgets.QWidget):
         items = self.thumblist.selectedItems()
         if not items:
             return None
-        self.lastSelectedItems = items
+        self.last_selected_items = items
         return items
 
     #  Saves a material to the Library
@@ -1251,21 +1240,21 @@ class MatLibPanel(QtWidgets.QWidget):
             hou.ui.displayMessage("No Asset selected")  # type: ignore
             return
 
-        id = self.get_id_from_thumblist(item)
+        asset_id = self.get_id_from_thumblist(item)
 
-        return self.library.import_asset_to_scene(id)
+        return self.library.import_asset_to_scene(asset_id)
 
-    def render_thumbnail(self, id: str) -> None:
+    def render_thumbnail(self, asset_id: str) -> None:
         # Move to correct context before rerendering assets
-        if "MatX" in self.library.get_renderer_by_id(id):
+        if "MatX" in self.library.get_renderer_by_id(asset_id):
             self.library.set_context(hou.node("/stage"))
         else:
             self.library.set_context(hou.node("/mat"))
 
-        builder = self.library.import_asset_to_scene(id)
+        builder = self.library.import_asset_to_scene(asset_id)
         if not builder:
             return
-        self.library.create_thumbnail(builder, id)
+        self.library.create_thumbnail(builder, asset_id)
 
         if "stage" in self.library.context.path():
             builder.parent().destroy()
@@ -1280,7 +1269,9 @@ class MatLibPanel(QtWidgets.QWidget):
             QtCore.QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
         )
         self.thumblist.setGridSize(
-            QtCore.QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
+            QtCore.QSize(
+                self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40
+            )
         )
 
         self.update_views()
