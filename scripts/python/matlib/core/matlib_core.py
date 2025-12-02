@@ -10,29 +10,30 @@ from matlib.render import thumbnail_scene
 from matlib.core import material
 import importlib
 
+from matlib.prefs.main_prefs import Prefs
+
 importlib.reload(material)
 importlib.reload(helpers)
 importlib.reload(thumbnail_scene)
 
-###################################
-########### THE LIBRARY ###########
-###################################
-
 
 class MaterialLibrary:
-    def __init__(self):
-        self.assets = None
-        self.categories = None
-        self.tags = None
-        self.settings = None
-        self.path = None
-        # self.USD = False
+    def __init__(self) -> None:
+        self.assets = []
+        self.categories = [""]
+        self.tags = [""]
+        self.settings = {}
+        self.path = ""
+        self.thumbsize = -1
+        self.rendersize = -1
+        self.renderOnImport = False
+        self.data = {}
 
-        self.context = hou.node("/stage")
+        self.context: hou.Node = hou.node("/stage")
 
-    def load(self, path, prefs):
+    def load(self, path: str, prefs: Prefs) -> None:
         self.path = path
-        with open(self.path + ("/library.json")) as lib_json:
+        with open(self.path + ("/library.json"), encoding="utf_8") as lib_json:
             self.data = json.load(lib_json)
 
             asset_data = self.data["assets"]
@@ -48,9 +49,8 @@ class MaterialLibrary:
             self.renderOnImport = self.data["renderOnImport"]
 
         self.settings = prefs
-        return
 
-    def save(self):
+    def save(self) -> None:
         # Update actual config
         asset_list = []
         for curr_asset in self.assets:
@@ -65,15 +65,14 @@ class MaterialLibrary:
 
         with open(self.path + ("/library.json"), "w") as lib_json:
             json.dump(self.data, lib_json, indent=4)
-        return
 
-    def check_exists_in_lib(self, path):
+    def check_exists_in_lib(self, path: str) -> bool:
         for asset in self.assets:
             if asset.get_path() == path:
                 return True
         return False
 
-    def run_dir(self, path, entries):
+    def run_dir(self, path: str, entries: list) -> list[str]:
         for file in os.listdir(path):
             if os.path.isdir(os.path.join(path, file)):
                 self.run_dir(os.path.join(path, file), entries)
@@ -83,84 +82,84 @@ class MaterialLibrary:
                     entries.append(usd_file)
         return entries
 
-    def set_context(self, context):
+    def set_context(self, context: hou.Node) -> None:
         self.context = context
 
-    def get_path(self):
+    def get_path(self) -> str:
         return self.path
 
-    def get_assets(self):
+    def get_assets(self) -> list:
         return self.assets
 
-    def get_categories(self):
+    def get_categories(self) -> list:
         return self.categories
 
-    def get_tags(self):
+    def get_tags(self) -> list:
         return self.tags
 
-    def get_thumbsize(self):
+    def get_thumbsize(self) -> int:
         return self.thumbsize
 
-    def set_thumbsize(self, val):
+    def set_thumbsize(self, val: int) -> None:
         self.thumbsize = val
 
-    def set_renderSize(self, val):
+    def set_renderSize(self, val: int) -> None:
         self.rendersize = val
 
-    def get_renderSize(self):
+    def get_renderSize(self) -> int:
         return self.rendersize
 
-    def get_context(self):
+    def get_context(self) -> hou.Node:
         return self.context
 
-    def get_renderOnImport(self):
+    def get_renderOnImport(self) -> bool:
         return self.renderOnImport
 
-    def set_renderOnImport(self, val):
+    def set_renderOnImport(self, val: bool) -> None:
         self.renderOnImport = val
 
-    def set_asset_name(self, id, name):
+    def set_asset_name(self, mat_id: str, name: str) -> None:
         """Sets the Name for the given Asset (id)"""
-        asset = self.get_asset_by_id(id)
+        asset = self.get_asset_by_id(mat_id)
         asset.set_name(name)
 
-    def get_asset_by_id(self, id):
+    def get_asset_by_id(self, mat_id: str) -> None | material.Material:
         """Returns the Asset for the given id"""
         for asset in self.assets:
-            if type(id) is int:
-                if int(id) == asset.get_id():
+            if type(mat_id) is int:
+                if int(mat_id) == asset.get_id():
                     return asset
             else:
-                if id == asset.get_id():
+                if mat_id == asset.get_id():
                     return asset
         return None
 
-    def set_asset_cat(self, id, cat):
+    def set_asset_cat(self, id: str, cat: str) -> None:
         """Sets the category for the given material (id)"""
         self.check_add_category(cat)
         asset = self.get_asset_by_id(id)
         asset.set_categories(cat)
 
-    def set_asset_tag(self, id, tag):
+    def set_asset_tag(self, id: str, tag: str) -> None:
         """Sets the tag for the given material (id)"""
         asset = self.get_asset_by_id(id)
         asset.set_tags(tag)
 
-    def set_asset_fav(self, id, fav):
+    def set_asset_fav(self, id: str, fav: bool) -> None:
         """Sets the fav for the given material (id)"""
         asset = self.get_asset_by_id(id)
         asset.set_fav(fav)
 
-    def get_asset_fav(self, id):
+    def get_asset_fav(self, id: str) -> bool:
         """Gets the fav for the given material (id) as 0/1"""
         asset = self.get_asset_by_id(id)
         return asset.get_fav()
 
-    def update_asset_date(self, id):
+    def update_asset_date(self, id: str) -> None:
         asset = self.get_asset_by_id(id)
         asset.set_date()
 
-    def remove_asset(self, id):
+    def remove_asset(self, id: str) -> None:
         """Removes a material from this Library and Disk"""
         for asset in self.assets:
             if id == asset.get_id():
@@ -191,7 +190,7 @@ class MaterialLibrary:
                 self.save()
                 return
 
-    def check_add_category(self, cat):
+    def check_add_category(self, cat: str) -> None:
         """Checks if this category exists and adds it if needed"""
         cats = cat.split(",")
         for c in cats:
@@ -200,31 +199,30 @@ class MaterialLibrary:
                 if c not in self.categories:
                     self.categories.append(c)
 
-    def check_add_tags(self, tags):
+    def check_add_tags(self, tag: str) -> None:
         """Checks if this tag exists and adds it if needed"""
-        tags = tags.split(",")
+        tags = tag.split(",")
         for t in tags:
             t = t.replace(" ", "")
             if t != "":
                 if t not in self.tags:
                     self.tags.append(t)
 
-    def get_current_network_node(self):
+    def get_current_network_node(self) -> None | hou.Node:
         """Return thre current Node in the Network Editor"""
-        for pt in hou.ui.paneTabs():
+        for pt in hou.ui.paneTabs():  # type: ignore
             if pt.type() == hou.paneTabType.NetworkEditor:
                 return pt.currentNode()
         return None
 
-    def remove_category(self, cat):
+    def remove_category(self, cat: str) -> None:
         """Removes the given category from the library (and also in all assets)"""
         self.categories.remove(cat)
         # check assets against category and remove there also:
         for asset in self.assets:
             asset.remove_category(cat)
-        return
 
-    def rename_category(self, old, new):
+    def rename_category(self, old: str, new: str) -> None:
         """Renames the given category in the library (and also in all assets)"""
         # Update Categories with that name
         for count, current in enumerate(self.categories):
@@ -234,23 +232,26 @@ class MaterialLibrary:
         for asset in self.assets:
             asset.rename_category(old, new)
 
-    def add_asset(self, node, cats, tags, fav, use_usd=0):
+    def add_asset(
+        self, node: hou.Node, cat: str, tag: str, fav: bool, use_usd: int = 0
+    ) -> None:
         """Add a Material to this Library"""
-        id = uuid.uuid1().time
-        if self.save_node(node, id, False):
+        node_id = str(uuid.uuid1().time)
+        if self.save_node(node, node_id, False):
             # Format
             name = node.name()
             name.replace(" ", "")
 
-            cats = cats.split(",")
+            cats = cat.split(",")
             for c in cats:
                 c.replace(" ", "")
 
-            tags = tags.split(",")
+            tags = tag.split(",")
             for t in tags:
                 t.replace(" ", "")
 
             renderer = ""
+            builder = 0
             if node.type().name() == "redshift_vopnet":
                 renderer = "Redshift"
                 builder = 1
@@ -279,7 +280,7 @@ class MaterialLibrary:
             date = date[:-7]
 
             mat = {
-                "id": id,
+                "id": node_id,
                 "name": name,
                 "categories": cats,
                 "tags": tags,
@@ -294,7 +295,7 @@ class MaterialLibrary:
             self.assets.append(new_mat)
             self.save()
 
-    def get_renderer_by_id(self, id):
+    def get_renderer_by_id(self, id: str) -> str:
         """Return the Renderer for this Material as a string"""
         for mat in self.assets:
             if type(id) is int:
@@ -303,9 +304,9 @@ class MaterialLibrary:
             else:
                 if id == mat.get_id():
                     return mat.get_renderer()
-        return None
+        return ""
 
-    def check_materialBuilder_by_id(self, id):
+    def check_materialBuilder_by_id(self, id: str) -> int | None:
         """Return if the Material is a Builder (Mantra) as a 0/1"""
         for mat in self.assets:
             if type(id) is int:
@@ -316,10 +317,10 @@ class MaterialLibrary:
                     return mat.get_builder()
         return None
 
-    def update_context(self):
+    def update_context(self) -> None:
         self.context = self.get_current_network_node()
 
-    def import_asset_to_scene(self, id):
+    def import_asset_to_scene(self, id: str) -> None | hou.Node:
         """Import a Material to the Nework Editor/Scene"""
         file_name = (
             self.get_path()
@@ -335,41 +336,34 @@ class MaterialLibrary:
 
         # Import to current context
         import_path = None
-        use_USD = False
 
         # This checks if USD has been selected in the panel and imports accordingly
         if self.context == hou.node("/stage"):
             import_path = self.context.createNode("materiallibrary")
-            use_USD = True
+
         elif self.context.path() == "/mat":
             import_path = hou.node("/mat")
             # override if Material was saved in USD Mode
             if mat.get_usd():
                 import_path = hou.node("/stage").createNode("materiallibrary")
-                use_USD = True
+
         else:
             # Radio is set to Current Network
             parent = self.get_current_network_node().parent()
-
             # If Stage or LOPnet
             if parent.type().name() == "stage" or parent.type().name() == "lopnet":
                 import_path = parent.createNode("materiallibrary")
-                use_USD = True
-
             elif parent.type().name() == "materiallibrary":
                 import_path = parent
-                use_USD = True
             # If oldschool matbuilder or matbld in lops
             elif parent.type().name() == "materialbuilder":
                 if "stage" in parent.path() or "lopnet" in parent.path():
                     import_path = parent
-                    use_USD = True
                 else:
                     import_path = parent
                     # override if Material was saved in USD Mode
                     if mat.get_usd():
                         import_path = hou.node("/stage").createNode("materiallibrary")
-                        use_USD = True
             elif parent.type().name() == "matnet":
                 import_path = parent
             elif parent.type().name() == "mat":
@@ -384,7 +378,6 @@ class MaterialLibrary:
                 # override if Material was saved in USD Mode
                 if mat.get_usd():
                     import_path = hou.node("/stage").createNode("materiallibrary")
-                    use_USD = True
 
         parms_file_name = (
             self.get_path() + self.settings.get_asset_dir() + str(id) + ".interface"
@@ -486,18 +479,18 @@ class MaterialLibrary:
         # Import file from disk
         try:
             builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
-        except:
-            hou.ui.displayMessage("Failure on Import. Please Try again.")
-            return
+        except OSError:
+            hou.ui.displayMessage("Failure on Import. Please Try again.")  # type: ignore
+            return None
 
         # If node is Principled Shader
         if renderer == "Mantra" and not self.check_materialBuilder_by_id(id):
             n = builder.children()[0]
-            hou.moveNodesTo((n,), builder.parent())
+            hou.moveNodesTo((n,), builder.parent())  # type: ignore
             builder.destroy()
             builder = hou.selectedNodes()[0]
         else:
-            new_mat = hou.moveNodesTo((builder,), import_path)
+            new_mat = hou.moveNodesTo((builder,), import_path)  # type: ignore
             new_mat[0].moveToGoodPosition()
             builder = new_mat[0]
 
@@ -514,16 +507,15 @@ class MaterialLibrary:
 
         return builder
 
-    def save_node(self, node, id, update):
+    def save_node(self, node: hou.Node, id: str, update: bool) -> bool:
         """Save Node wrapper for different Material Types"""
         # Check against NodeType
         val = False
-        print("Starting Render")
         if node.type().name() == "redshift_vopnet":
             # Interruptable
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
-            ) as operation:
+            ):
                 val = self.save_node_redshift(node, id, update)
         elif (
             node.type().name() == "materialbuilder"
@@ -531,50 +523,50 @@ class MaterialLibrary:
         ):
             # Interruptable
             if hou.getenv("OCIO") is None:
-                hou.ui.displayMessage("Please set $OCIO first")
+                hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
                 return False
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
-            ) as operation:
+            ):
                 val = self.save_node_mantra(node, id, update)
         elif node.type().name() == "arnold_materialbuilder":
             if hou.getenv("OCIO") is None:
-                hou.ui.displayMessage("Please set $OCIO first")
+                hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
                 return False
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
-            ) as operation:
+            ):
                 val = self.save_node_arnold(node, id, update)
         elif node.type().name() == "octane_vopnet":
             if hou.getenv("OCIO") is None:
-                hou.ui.displayMessage("Please set $OCIO first")
+                hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
                 return False
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
-            ) as operation:
+            ):
                 val = self.save_node_octane(node, id, update)
         elif node.type().name() == "subnet":
             # Hope for the best that it actually is a MtlX Subnet
             if hou.getenv("OCIO") is None:
-                hou.ui.displayMessage("Please set $OCIO first")
+                hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
                 return False
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
-            ) as operation:
+            ):
                 val = self.save_node_mtlX(node, id, update)
         elif node.type().name() == "collect":
             if hou.getenv("OCIO") is None:
-                hou.ui.displayMessage("Please set $OCIO first")
+                hou.ui.displayMessage("Please set $OCIO first")  # type: ignore
                 return False
             with hou.InterruptableOperation(
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
-            ) as operation:
+            ):
                 val = self.save_node_collect(node, id, update)
         else:
-            hou.ui.displayMessage("Selected Node is not a Material Builder")
+            hou.ui.displayMessage("Selected Node is not a Material Builder")  # type: ignore
         return val
 
-    def save_node_collect(self, node, id, update):
+    def save_node_collect(self, node: hou.Node, id: str, update: bool) -> bool:
         """Saves the attached network from a collect node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
@@ -593,7 +585,7 @@ class MaterialLibrary:
         children = sub_tmp.children()
         for n in children:
             n.destroy()
-        hou.copyNodesTo((nodetree), sub_tmp)
+        hou.copyNodesTo((nodetree), sub_tmp)  # type: ignore
         children = sub_tmp.children()
 
         interface_file = open(parms_file_name, "w")
@@ -609,7 +601,7 @@ class MaterialLibrary:
 
         return self.create_thumb_mtlx(nodetree, id)
 
-    def save_node_mtlX(self, node, id, update):
+    def save_node_mtlX(self, node: hou.Node, id: str, update: bool) -> bool:
         """Saves the MtlX node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
@@ -632,7 +624,7 @@ class MaterialLibrary:
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
         if "subnet" in node.type().name():
-            children = (node,)
+            children = [node]
 
         # If this is not a manual update and renderOnImport is off, finish here
         if not update:
@@ -641,24 +633,19 @@ class MaterialLibrary:
 
         return self.create_thumb_mtlx(children, id)
 
-    def create_thumbnail(self, nodes, id):
+    def create_thumbnail(self, node: hou.Node, id: str) -> None:
         renderer = self.get_renderer_by_id(id)
         if renderer == "MatX":
-            self.create_thumb_mtlx(nodes.children(), id)
-            print("DEBUG: MatX")
+            self.create_thumb_mtlx(node.children(), id)
         elif renderer == "Mantra":
-            self.create_thumb_mantra(nodes, id)
-            print("DEBUG: Mantra")
+            self.create_thumb_mantra(node, id)
         else:
-            print("DEBUG: No Renderer")
+            pass
 
-        return
-
-    def create_thumb_mtlx(self, children, id):
+    def create_thumb_mtlx(self, children: list[hou.Node], id: str) -> bool:
         # Build path
-        print("DEBUG: Start Thumb")
         path = self.get_path() + self.settings.get_img_dir() + str(id) + ".exr"
-        print(path)
+
         # Create Thumbnail
         net = hou.node("/obj").createNode("lopnet")
 
@@ -685,7 +672,7 @@ class MaterialLibrary:
         lib = net.createNode("materiallibrary")
         lib.setFirstInput(lib1)
 
-        nodes = hou.copyNodesTo((children), lib)
+        nodes = hou.copyNodesTo((children), lib)  # type: ignore
         collect = 0
         for n in nodes:
             if n.type().name() == "collect":
@@ -729,10 +716,8 @@ class MaterialLibrary:
         rop.parm("soho_foreground").set(1)
         rop.parm("execute").pressButton()
 
+        # Copnet Setup
         copnet = rop.parent().createNode("cop2net")
-
-        ############################
-        # CopNet Setup
         copnet.setName("exr_to_png")
 
         cop_file = copnet.createNode("file")
@@ -743,7 +728,7 @@ class MaterialLibrary:
         cop_file.parm("filename1").set(path)
 
         cop_out = copnet.createNode("rop_comp")
-        print("DEBUG: Nodes Created Step1")
+
         aces_1_3 = False
         cop_file.parm("colorspace").set(3)  # OCIO
 
@@ -803,12 +788,10 @@ class MaterialLibrary:
             + str(id)
             + self.settings.get_img_ext()
         )
-        print("DEBUG: Nodes Created Step2")
+
         cop_out.parm("copoutput").set(newpath)
         cop_out.parm("execute").pressButton()
 
-        ############################
-        print("DEBUG: Nodes rendered ")
         net.destroy()
 
         if os.path.exists(path):
@@ -816,7 +799,7 @@ class MaterialLibrary:
 
         return True
 
-    def create_thumb_mantra(self, node, id):
+    def create_thumb_mantra(self, node: hou.Node, id: str) -> bool:
         # Create Thumbnail
 
         sc = thumbnail_scene.ThumbNailScene()
@@ -844,9 +827,9 @@ class MaterialLibrary:
         thumb.destroy()
         if os.path.exists(path + ".exr"):
             os.remove(path + ".exr")
-        return
+        return True
 
-    def save_node_redshift(self, node, id, update):
+    def save_node_redshift(self, node: hou.Node, id: str, update: bool) -> bool:
         """Saves the Redshift node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
@@ -902,7 +885,7 @@ class MaterialLibrary:
         thumb.destroy()
         return True
 
-    def save_node_octane(self, node, id, update):
+    def save_node_octane(self, node: hou.Node, id: str, update: bool) -> bool:
         # Filepath where to save stuff
         file_name = (
             self.get_path()
@@ -954,10 +937,10 @@ class MaterialLibrary:
         thumb.parm("render").pressButton()
 
         # CleanUp
-        # thumb.destroy()
+        thumb.destroy()
         return True
 
-    def save_node_arnold(self, node, id, update):  # ARNOLD
+    def save_node_arnold(self, node: hou.Node, id: str, update: bool) -> bool:  # ARNOLD
         """Saves the Arnold node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
@@ -1036,7 +1019,7 @@ class MaterialLibrary:
             builder = hou.node("/mat").createNode("materialbuilder")
             for c in builder.children():
                 c.destroy()
-            hou.copyNodesTo((node,), builder)
+            hou.copyNodesTo((node,), builder)  # type: ignore
             node = builder
 
         # interface-stuff
