@@ -1,13 +1,14 @@
-import hou
 import os
 import re
 
+import hou
 
-def getChildrenRecursive(nodes: list[hou.Node]) -> hou.Node | None:
+
+def get_children_recursive(nodes: list[hou.Node]) -> hou.Node | None:
     for node in nodes.children():
         if node.type().name() == "subnet":
             for n in node.children():
-                return getChildrenRecursive(n)
+                return get_children_recursive(n)
         elif node.type().name() == "geo":
             n = node.children()
             for sop in n:
@@ -15,18 +16,18 @@ def getChildrenRecursive(nodes: list[hou.Node]) -> hou.Node | None:
                     return sop
 
 
-def getConnectedNodes(node: hou.Node) -> list[hou.Node]:
+def get_connected_nodes(node: hou.Node) -> list[hou.Node]:
     nodes = []
     nodes.append(node)
     selected = []
-    in_nodes = getConnectedInputNodes(nodes, selected)
+    in_nodes = get_connected_input_nodes(nodes, selected)
     selected = []
-    out_nodes = getConnectedOutputNodes(nodes, selected)
-    all = in_nodes + out_nodes
-    return all
+    out_nodes = get_connected_output_nodes(nodes, selected)
+    all_nodes = in_nodes + out_nodes
+    return all_nodes
 
 
-def getConnectedInputNodes(
+def get_connected_input_nodes(
     nodes: list[hou.Node], selected: list[hou.Node]
 ) -> list[hou.Node]:
     for node in nodes:
@@ -34,11 +35,11 @@ def getConnectedInputNodes(
             continue
         else:
             selected.append(node)
-            getConnectedInputNodes(node.inputs(), selected)
+            get_connected_input_nodes(node.inputs(), selected)
     return selected
 
 
-def getConnectedOutputNodes(
+def get_connected_output_nodes(
     nodes: list[hou.Node], selected: list[hou.Node]
 ) -> list[hou.Node]:
     for node in nodes:
@@ -46,14 +47,14 @@ def getConnectedOutputNodes(
             continue
         else:
             selected.append(node)
-            getConnectedOutputNodes(node.outputs(), selected)
+            get_connected_output_nodes(node.outputs(), selected)
     return selected
 
 
-def breakMaterialRefs() -> None:
-    selNodes = hou.selectedNodes()
+def break_materialrefs() -> None:
+    sel_nodes = hou.selectedNodes()
 
-    for node in selNodes:
+    for node in sel_nodes:
         # Create Geometry
         lops = node.children()
 
@@ -74,7 +75,7 @@ def breakMaterialRefs() -> None:
                             parm.set(parm.evalAsString())
 
 
-def saveSelectedHDA():
+def save_selected_hda() -> None:
     sel = hou.selectedNodes()
 
     for node in sel:
@@ -84,7 +85,7 @@ def saveSelectedHDA():
         node.matchCurrentDefinition()
 
 
-def showAllNodes() -> None:
+def show_all_nodes() -> None:
     # Get All Nodes
     sel = hou.selectedNodes()
     if not sel:
@@ -97,7 +98,7 @@ def showAllNodes() -> None:
         n.setGenericFlag(hou.nodeFlag.Visible, True)
 
 
-def fixFBXMats() -> None:
+def fix_fbx_mats() -> None:
     sel = hou.selectedNodes()
 
     for mat in sel:
@@ -146,12 +147,12 @@ def fixFBXMats() -> None:
                     mat.parm("occlusion_texture").set(path)
 
 
-def networkBox() -> None:
+def networkbox() -> None:
     sel = hou.selectedNodes()
-    nBox = sel[0].parent().createNetworkBox()
+    nbox = sel[0].parent().createNetworkBox()
 
     for node in sel:
-        nBox.addItem(node)
+        nbox.addItem(node)
 
     sticky = sel[0].parent().createStickyNote()
     sticky.setColor(hou.Color(1, 1, 1))
@@ -160,21 +161,21 @@ def networkBox() -> None:
     sticky.setText(msg)
     sticky.setSize(hou.Vector2(4, 2))
     sticky.setDrawBackground(False)
-    nBox.addStickyNote(sticky)
+    nbox.addStickyNote(sticky)
 
     pos = sel[0].position()
     pos[0] += 5
     pos[1] += 2
     sticky.setPosition(pos)
-    nBox.setBounds(hou.BoundingRect(0, 0, 0.01, 0.01))
-    nBox.fitAroundContents()
+    nbox.setBounds(hou.BoundingRect(0, 0, 0.01, 0.01))
+    nbox.fitAroundContents()
 
 
 def container():
     parm_pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.Parm)  # type: ignore
     parmnode = parm_pane.currentNode()
-    container = parmnode.parent()
-    return container
+    parm_container = parmnode.parent()
+    return parm_container
 
 
 # Find Parms Ref This
@@ -186,9 +187,9 @@ def find_parm(parmname: str) -> None:
 
     parm_pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.Parm)  # type: ignore
     parmnode = parm_pane.currentNode()
-    container = parmnode.parent()
+    parm_container = parmnode.parent()
 
-    nodes = container.allSubChildren()
+    nodes = parm_container.allSubChildren()
     pattern = ""
     pattern_count = 0
 
@@ -270,13 +271,13 @@ def texture_lookup(files: list[str] | str) -> dict:
     if files == "":
         return mapped
 
-    if type(files) is list:
+    if isinstance(files, list):
         strings = files
     else:
         strings = files.split(";")
 
     # Get all Entries
-    for i, s in enumerate(strings):
+    for s in strings:
         # Remove Spaces
         s = s.rstrip(" ")
         s = s.lstrip(" ")
