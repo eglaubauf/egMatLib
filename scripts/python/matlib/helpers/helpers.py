@@ -3,7 +3,7 @@ import os
 import re
 
 
-def getChildrenRecursive(nodes):
+def getChildrenRecursive(nodes: list[hou.Node]) -> hou.Node | None:
     for node in nodes.children():
         if node.type().name() == "subnet":
             for n in node.children():
@@ -15,7 +15,7 @@ def getChildrenRecursive(nodes):
                     return sop
 
 
-def getConnectedNodes(node):
+def getConnectedNodes(node: hou.Node) -> list[hou.Node]:
     nodes = []
     nodes.append(node)
     selected = []
@@ -26,7 +26,9 @@ def getConnectedNodes(node):
     return all
 
 
-def getConnectedInputNodes(nodes, selected):
+def getConnectedInputNodes(
+    nodes: list[hou.Node], selected: list[hou.Node]
+) -> list[hou.Node]:
     for node in nodes:
         if node is None:
             continue
@@ -36,7 +38,9 @@ def getConnectedInputNodes(nodes, selected):
     return selected
 
 
-def getConnectedOutputNodes(nodes, selected):
+def getConnectedOutputNodes(
+    nodes: list[hou.Node], selected: list[hou.Node]
+) -> list[hou.Node]:
     for node in nodes:
         if node is None:
             continue
@@ -46,7 +50,7 @@ def getConnectedOutputNodes(nodes, selected):
     return selected
 
 
-def breakMaterialRefs():
+def breakMaterialRefs() -> None:
     selNodes = hou.selectedNodes()
 
     for node in selNodes:
@@ -80,7 +84,7 @@ def saveSelectedHDA():
         node.matchCurrentDefinition()
 
 
-def showAllNodes():
+def showAllNodes() -> None:
     # Get All Nodes
     sel = hou.selectedNodes()
     if not sel:
@@ -93,7 +97,7 @@ def showAllNodes():
         n.setGenericFlag(hou.nodeFlag.Visible, True)
 
 
-def fixFBXMats():
+def fixFBXMats() -> None:
     sel = hou.selectedNodes()
 
     for mat in sel:
@@ -142,9 +146,8 @@ def fixFBXMats():
                     mat.parm("occlusion_texture").set(path)
 
 
-def networkBox():
+def networkBox() -> None:
     sel = hou.selectedNodes()
-    newNodes = []
     nBox = sel[0].parent().createNetworkBox()
 
     for node in sel:
@@ -152,10 +155,10 @@ def networkBox():
 
     sticky = sel[0].parent().createStickyNote()
     sticky.setColor(hou.Color(1, 1, 1))
-    choice, msg = hou.ui.readInput('Name:')
+    choice, msg = hou.ui.readInput("Name:")  # type: ignore
     sticky.setTextSize(1)
     sticky.setText(msg)
-    sticky.setSize(hou.Vector2(4,2))
+    sticky.setSize(hou.Vector2(4, 2))
     sticky.setDrawBackground(False)
     nBox.addStickyNote(sticky)
 
@@ -163,25 +166,25 @@ def networkBox():
     pos[0] += 5
     pos[1] += 2
     sticky.setPosition(pos)
-    nBox.setBounds(hou.BoundingRect(0,0,.01,.01))
+    nBox.setBounds(hou.BoundingRect(0, 0, 0.01, 0.01))
     nBox.fitAroundContents()
 
 
 def container():
-    parm_pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.Parm)
+    parm_pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.Parm)  # type: ignore
     parmnode = parm_pane.currentNode()
     container = parmnode.parent()
     return container
 
 
 # Find Parms Ref This
-def find_parm(parmname):
-    if parmname == None:
-        text = hou.ui.readInput("Search text:", buttons=("Search", "Cancel"))[1]
+def find_parm(parmname: str) -> None:
+    if parmname is None:
+        text = hou.ui.readInput("Search text:", buttons=("Search", "Cancel"))[1]  # type: ignore
     else:
         text = parmname
 
-    parm_pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.Parm)
+    parm_pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.Parm)  # type: ignore
     parmnode = parm_pane.currentNode()
     container = parmnode.parent()
 
@@ -209,31 +212,32 @@ def find_parm(parmname):
                 )
     print("--------------------------")
 
-    hou.ui.copyTextToClipboard(pattern)
+    hou.ui.copyTextToClipboard(pattern)  # type: ignore
 
 
-def sanitize_usd_path(path):
+def sanitize_usd_path(path: str) -> str:
     clean_path = path.replace(" ", "_")
     clean_path = clean_path.replace("-", "_")
     clean_path = re.sub("[^a-z^A-Z^0-9]", "_", path)
     return clean_path
 
-def subframe_splits(node):
-    if node.parm('trange').evalAsString() != 'off':
-        if node.parm('f3').evalAsFloat() < 1 :
+
+def subframe_splits(node: hou.Node) -> str:
+    if node.parm("trange").evalAsString() != "off":
+        if node.parm("f3").evalAsFloat() < 1:
 
             front = str(int(hou.frame())).zfill(4)
-            back = str(round((hou.frame() - int(hou.frame()))*100.0)/100.0)
+            back = str(round((hou.frame() - int(hou.frame())) * 100.0) / 100.0)
             back = back[2:]
-            back = back.ljust(2, '0')
-            return '.' + front + '.' + back
+            back = back.ljust(2, "0")
+            return "." + front + "." + back
         else:
-            return '.' + str(int(hou.frame())).zfill(4)
-    return ''
+            return "." + str(int(hou.frame())).zfill(4)
+    return ""
 
 
 # Make Key Value Pairs for Filenames
-def texture_lookup( files):
+def texture_lookup(files: list[str] | str) -> dict:
     # Keys for Texture Lookup. Add as it pleases
     diffuse_lookup = [
         "base_color",
@@ -253,18 +257,18 @@ def texture_lookup( files):
     ao_lookup = ["ao", "ambient", "occlusion"]
 
     mapped = {
-            "basecolor": None,
-            "roughness": None,
-            "normal": None,
-            "metallic": None,
-            "reflect": None,
-            "displace": None,
-            "bump": None,
-            "ao": None,
-        }
+        "basecolor": "",
+        "roughness": "",
+        "normal": "",
+        "metallic": "",
+        "reflect": "",
+        "displace": "",
+        "bump": "",
+        "ao": "",
+    }
 
     if files == "":
-        return
+        return mapped
 
     if type(files) is list:
         strings = files
@@ -280,7 +284,7 @@ def texture_lookup( files):
         # Get Name of File
         name = s.split(".")
         k = name[0].rfind("/")
-        name = name[0][k + 1 :]
+        name = name[0][k + 1 :]  # type: ignore
 
         for d in diffuse_lookup:
             if d in name.lower():
@@ -312,9 +316,9 @@ def texture_lookup( files):
 
         for d in height_lookup:
             if d in name.lower():
-                #if height_displace:  # User sets Height as Displacement
+                # if height_displace:  # User sets Height as Displacement
                 mapped["displace"] = s
-                ##else:
+                # else:
                 #    mapped["bump"] = s
 
         for d in ao_lookup:
