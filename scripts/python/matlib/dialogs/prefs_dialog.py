@@ -23,7 +23,7 @@ class PrefsDialog(QtWidgets.QDialog):
         self.line_workdir = self.ui.findChild(QtWidgets.QLineEdit, "line_workdir")
         self.line_thumbsize = self.ui.findChild(QtWidgets.QLineEdit, "line_thumbsize")
         self.line_rendersize = self.ui.findChild(QtWidgets.QLineEdit, "line_rendersize")
-        self.cbx_renderOnImport = self.ui.findChild(
+        self.cbx_render_on_import = self.ui.findChild(
             QtWidgets.QCheckBox, "cbx_renderOnImport"
         )
 
@@ -35,20 +35,20 @@ class PrefsDialog(QtWidgets.QDialog):
         self.fill_values()
 
         # set main layout and attach to widget
-        mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addWidget(self.ui)
-        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
+        mainlayout = QtWidgets.QVBoxLayout()
+        mainlayout.addWidget(self.ui)
+        mainlayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
 
-        self.setLayout(mainLayout)
+        self.setLayout(mainlayout)
 
     # Apply Prefs Change
     def confirm(self):
         self.prefs.set_dir(self.line_workdir.text())
         self.prefs.save()
 
-        self.library.set_renderSize(int(self.line_rendersize.text()))
+        self.library.set_rendersize(int(self.line_rendersize.text()))
         self.library.set_thumbsize(int(self.line_thumbsize.text()))
-        self.library.set_renderOnImport(int(self.cbx_renderOnImport.isChecked()))
+        self.library.set_render_on_import(int(self.cbx_render_on_import.isChecked()))
 
         self.library.save()
         self.accept()
@@ -61,11 +61,11 @@ class PrefsDialog(QtWidgets.QDialog):
     # Fill UI
     def fill_values(self) -> None:
         self.directory = self.prefs.get_dir()
-        self.rendersize = self.library.get_renderSize()
+        self.rendersize = self.library.get_rendersize()
         self.thumbsize = self.library.get_thumbsize()
-        self.renderOnImport = self.library.get_renderOnImport()
+        self.render_on_import = self.library.get_render_on_import()
 
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setText(str(self.rendersize))
         self.line_thumbsize.setText(str(self.thumbsize))
-        self.cbx_renderOnImport.setChecked(self.renderOnImport)
+        self.cbx_render_on_import.setChecked(self.render_on_import)

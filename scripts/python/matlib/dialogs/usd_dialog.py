@@ -21,11 +21,11 @@ class UsdDialog(QtWidgets.QDialog):
         file.close()
 
         # set main layout and attach to widget
-        mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addWidget(self.ui)
-        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
+        mainlayout = QtWidgets.QVBoxLayout()
+        mainlayout.addWidget(self.ui)
+        mainlayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
 
-        self.setLayout(mainLayout)
+        self.setLayout(mainlayout)
 
         # Link Slots & Signals
         self.line_cats = self.ui.findChild(QtWidgets.QLineEdit, "line_categories")

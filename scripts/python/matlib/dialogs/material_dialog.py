@@ -3,9 +3,9 @@ import os
 from PySide6 import QtWidgets, QtCore, QtUiTools
 
 
-class materialDialog(QtWidgets.QDialog):
+class MaterialDialog(QtWidgets.QDialog):
     def __init__(self):
-        super(materialDialog, self).__init__()
+        super(MaterialDialog, self).__init__()
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         # Set Vars
@@ -13,6 +13,7 @@ class materialDialog(QtWidgets.QDialog):
         self.tags = None
         self.fav = False
         self.canceled = False
+        self.usd = False
 
         # Load UI from ui.file
         loader = QtUiTools.QUiLoader()
@@ -22,11 +23,11 @@ class materialDialog(QtWidgets.QDialog):
         file.close()
 
         # set main layout and attach to widget
-        mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addWidget(self.ui)
-        mainLayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
+        mainlayout = QtWidgets.QVBoxLayout()
+        mainlayout.addWidget(self.ui)
+        mainlayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
 
-        self.setLayout(mainLayout)
+        self.setLayout(mainlayout)
 
         # Link Slots & Signals
         # FILTER UI
@@ -48,6 +49,8 @@ class materialDialog(QtWidgets.QDialog):
         self.accept()
 
     # Cancel Material Creation
-    def destroy(self, destroyWindow=True, destroySubWindows=True) -> None:
+    def destroy(
+        self, destroyWindow: bool = True, destroySubWindows: bool = True
+    ) -> None:
         self.canceled = True
         self.close()
