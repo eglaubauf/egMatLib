@@ -60,7 +60,7 @@ class Material:
         return material_dict
 
     def get_id(self) -> str:
-        return self.mat_id
+        return str(self.mat_id)
 
     def get_name(self) -> str:
         return self.name
