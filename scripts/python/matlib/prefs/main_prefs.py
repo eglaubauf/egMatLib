@@ -2,7 +2,7 @@ import json
 import hou
 
 
-class prefs:
+class Prefs:
     def __init__(self) -> None:
         self.path: str = hou.getenv("EGMATLIB")
         self.show_buttons = False
