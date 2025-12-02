@@ -1,12 +1,14 @@
 import hou
 
 
-class ShaderBallSetup:
+class ShaderBallSetup:  # See if we can remove the class here
 
     def __init__(self):
         pass
 
-    def setup(self, renderer="Mantra", parent=hou.node("/obj")):
+    def setup(
+        self, renderer: str = "Mantra", parent: hou.Node = hou.node("/obj")
+    ) -> None:
 
         self.geo_node = parent.createNode("geo")
         self.filecache = self.geo_node.createNode("filecache::2.0")
@@ -75,7 +77,7 @@ class ShaderBallSetup:
 
         self.geo_node.layoutChildren()
 
-    def apply_initial_materials(self, renderer):
+    def apply_initial_materials(self, renderer: str) -> None:
 
         if "Mantra" in renderer:
             self.mat = self.matnet.createNode("principledshader::2.0")
@@ -143,10 +145,5 @@ class ShaderBallSetup:
             omat.setInput(1, tex, 0)
             self.mat.setName("Plane", True)
 
-    def apply_materials(self, material):
-
-        pass
-
-    def get_geo_node(self):
-
+    def get_geo_node(self) -> hou.Node:
         return self.geo_node

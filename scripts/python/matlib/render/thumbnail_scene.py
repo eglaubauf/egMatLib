@@ -10,7 +10,7 @@ class ThumbNailScene:
     def __init__(self):
         pass
 
-    def setup(self, renderer="Mantra"):
+    def setup(self, renderer: str = "Mantra") -> hou.Node:
 
         # Render Independemt Setup
         self.geo_node = hou.node("/obj").createNode("subnet")
@@ -65,7 +65,7 @@ class ThumbNailScene:
 
         return self.geo_node
 
-    def build_parm_templates(self):
+    def build_parm_templates(self) -> None:
         # Add Parms on top
         name = "Thumbnail_" + self.renderer
         self.geo_node.setName(name, True)
@@ -116,7 +116,7 @@ class ThumbNailScene:
         data_template = hou.ButtonParmTemplate("render", "Render", script_callback=None)
         self.geo_node.addSpareParmTuple(data_template)
 
-    def build_scene(self):
+    def build_scene(self) -> None:
 
         self.ropnet = self.geo_node.createNode("ropnet")
         self.copnet = self.geo_node.createNode("cop2net")
@@ -128,7 +128,7 @@ class ThumbNailScene:
 
         self.geo_node.layoutChildren()
 
-    def build_lights(self):
+    def build_lights(self) -> None:
 
         if "Mantra" in self.renderer:
             # Lights
@@ -332,7 +332,7 @@ class ThumbNailScene:
 
             target.setName("Octane_RenderTarget")
 
-    def build_cam(self):
+    def build_cam(self) -> None:
         # Cam
         self.cam = self.geo_node.createNode("cam")
 
@@ -370,7 +370,7 @@ class ThumbNailScene:
             hou.hscript("Redshift_cameraSpareParameters -C 1")
             self.geo_node.setSelected(True, True)
 
-    def build_rops(self):
+    def build_rops(self) -> None:
 
         if "Mantra" in self.renderer:
             # RopNet Setup
@@ -505,7 +505,7 @@ f.close()
                 self.geo_node.parm("path"), follow_parm_reference=False
             )
 
-    def build_cops(self):
+    def build_cops(self) -> None:
         if "Mantra" in self.renderer or "Arnold" in self.renderer:
             # CopNet Setup
             self.copnet.setName("exr_to_png")
@@ -575,5 +575,5 @@ f.close()
             self.cop_out.setGenericFlag(hou.nodeFlag.Render, True)
             self.cop_out.setName("OUT", True)
 
-    def get_node(self):
+    def get_node(self) -> hou.Node:
         return self.geo_node
