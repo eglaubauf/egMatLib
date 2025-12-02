@@ -15,9 +15,9 @@ class ClickSlider(QtWidgets.QSlider):
 
             try:
 
-                stepSize = int(abs(self.value() - value))
-                self.setPageStep(stepSize)
-                self.setSingleStep(stepSize)
+                stepsize = int(abs(self.value() - value))
+                self.setPageStep(stepsize)
+                self.setSingleStep(stepsize)
             except Exception:
                 pass
         else:
@@ -29,9 +29,9 @@ class ClickSlider(QtWidgets.QSlider):
         value = (self.maximum() - self.minimum()) * x / self.width() + self.minimum()
 
         try:
-            stepSize = int(abs(self.value() - value))
-            self.setPageStep(stepSize)
-            self.setSingleStep(stepSize)
+            stepsize = int(abs(self.value() - value))
+            self.setPageStep(stepsize)
+            self.setSingleStep(stepsize)
         except Exception:
             pass
         self.setValue(int(value))
