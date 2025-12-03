@@ -142,7 +142,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.library = matlib_core.MaterialLibrary()
         self.library.load(path, self.prefs)
 
-        self.draw_assets = self.library.get_assets()  # Filterered assets for Views
+        self.draw_assets = self.library.assets  # Filterered assets for Views
         self.update_views()
 
     def update_external(self) -> None:
@@ -269,12 +269,12 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.thumblist = self.ui.findChild(QtWidgets.QListWidget, "listw_matview")
         # self.thumblist.setIconSize(
-        #     QtCore.QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
+        #     QtCore.QSize(self.library.thumbsize, self.library.thumbsize)
         # )
         self.thumblist.doubleClicked.connect(self.import_asset)
         self.thumblist.itemPressed.connect(self.update_details_view)
         # self.thumblist.setGridSize(
-        #     QtCore.QSize(self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40)
+        #     QtCore.QSize(self.library.thumbsize + 10, self.library.thumbsize + 40)
         # )
         self.thumblist.setContentsMargins(0, 0, 0, 0)
         self.thumblist.setSortingEnabled(True)
@@ -345,7 +345,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.slider_layout.addWidget(self.click_slider)
         self.click_slider.valueChanged.connect(self.slide)
         if self.library:
-            self.click_slider.setValue(self.library.get_thumbsize())
+            self.click_slider.setValue(self.library.thumbsize)
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
@@ -514,18 +514,16 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Update Thumblist Grid
         self.thumblist.setIconSize(
-            QtCore.QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
+            QtCore.QSize(self.library.thumbsize, self.library.thumbsize)
         )
         self.thumblist.setGridSize(
-            QtCore.QSize(
-                self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40
-            )
+            QtCore.QSize(self.library.thumbsize + 10, self.library.thumbsize + 40)
         )
         self.update_views()
 
     # Remove image thumbs and .asset-files not used in material library.
     def cleanup_files(self) -> None:
-        assets = self.library.get_assets()
+        assets = self.library.assets
         img_path = os.path.join(self.path, self.prefs.get_img_dir())
         asset_path = os.path.join(self.path, self.prefs.get_asset_dir())
 
@@ -567,7 +565,7 @@ class MatLibPanel(QtWidgets.QWidget):
             #             pass
 
         for asset in assets:
-            path = asset.get_path()
+            path = asset.path
             if not os.path.exists(path):
                 try:
                     # os.remove(os.path.join(asset_path, m))
@@ -582,7 +580,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.library:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        assets = self.library.get_assets()
+        assets = self.library.assets
         mark_rmv = 0
         mark_render = 0
 
@@ -602,7 +600,7 @@ class MatLibPanel(QtWidgets.QWidget):
                     str(asset.mat_id) + self.prefs.get_img_ext(),
                 )
 
-                # asset_path = asset.get_path()
+                # asset_path = asset.path
                 if not os.path.exists(interface_path):
                     print("Asset %d missing on disk. Removing.", asset.mat_id)
                     mark_rmv = 1
@@ -651,7 +649,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.library:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        assets = self.library.get_assets()
+        assets = self.library.assets
 
         for asset in assets:
             if asset.mat_id > 0:
@@ -661,7 +659,7 @@ class MatLibPanel(QtWidgets.QWidget):
                     str(asset.mat_id) + self.prefs.get_img_ext(),
                 )
                 # print(img_path)
-                asset_path = asset.get_path()
+                asset_path = asset.path
 
                 # Only check for img and asset for backwards compatibility
                 if os.path.exists(img_path) and os.path.exists(asset_path):
@@ -770,7 +768,7 @@ class MatLibPanel(QtWidgets.QWidget):
         items = self.last_selected_items
         for item in items:
             asset_id = self.get_id_from_thumblist(item)
-            self.library.set_asset_name(asset_id, self.line_name.text())
+            self.library.set_asset_name_by_id(asset_id, self.line_name.text())
         self.library.save()
 
     def user_update_tags(self) -> None:
@@ -851,7 +849,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         asset_id = self.get_id_from_thumblist(item)
 
-        for asset in self.library.get_assets():
+        for asset in self.library.assets:
             if asset.mat_id == asset_id:
                 # set name
                 self.line_name.setText(asset.name)
@@ -892,7 +890,7 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_cat_view(self) -> None:
         """Update cat view"""
         self.cat_list.clear()
-        for cat in self.library.get_categories():
+        for cat in self.library.categories:
             item = QtWidgets.QListWidgetItem(cat)
             self.cat_list.addItem(item)
 
@@ -911,11 +909,11 @@ class MatLibPanel(QtWidgets.QWidget):
         """Filter Thumbview for selected Category"""
         # Filter Thumbnail View
         self.draw_assets = []
-        for asset in self.library.get_assets():
+        for asset in self.library.assets:
             if self.selected_cat in asset.categories:
                 self.draw_assets.append(asset)
         if not self.selected_cat:
-            self.draw_assets = self.library.get_assets()
+            self.draw_assets = self.library.assets
 
     # Filter assets in Thumblist for Category
     def filter_view_filter(self) -> None:
@@ -971,7 +969,7 @@ class MatLibPanel(QtWidgets.QWidget):
                         continue
 
                 img = (
-                    self.library.get_path()
+                    self.library.path
                     + self.prefs.get_img_dir()
                     + str(asset.mat_id)
                     + self.prefs.get_img_ext()
@@ -984,17 +982,17 @@ class MatLibPanel(QtWidgets.QWidget):
                     # Draw Star Icon on Top if Favorite
                     if asset.fav:
                         pm = QtGui.QPixmap(
-                            self.library.get_thumbsize(), self.library.get_thumbsize()
+                            self.library.thumbsize, self.library.thumbsize
                         )
 
                         pm1 = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             aspectMode=QtCore.Qt.KeepAspectRatio,
                         )
                         pm2 = QtGui.QPixmap.fromImage(QtGui.QImage(favicon)).scaled(
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             aspectMode=QtCore.Qt.KeepAspectRatio,
                         )
                         painter = QtGui.QPainter(pm)
@@ -1002,8 +1000,8 @@ class MatLibPanel(QtWidgets.QWidget):
                         painter.fillRect(
                             0,
                             0,
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             QtGui.QColor(0, 0, 0, 0),
                         )
                         painter.setCompositionMode(
@@ -1012,16 +1010,16 @@ class MatLibPanel(QtWidgets.QWidget):
                         painter.drawPixmap(
                             0,
                             0,
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             pm1,
                         )
 
                         painter.drawPixmap(
                             0,
                             0,
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             pm2,
                         )
                         painter.end()
@@ -1029,15 +1027,15 @@ class MatLibPanel(QtWidgets.QWidget):
 
                     else:
                         pm = QtGui.QPixmap(
-                            self.library.get_thumbsize(), self.library.get_thumbsize()
+                            self.library.thumbsize, self.library.thumbsize
                         )
                         painter = QtGui.QPainter(pm)
                         painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
                         painter.fillRect(
                             0,
                             0,
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             QtGui.QColor(0, 0, 0, 0),
                         )
                         painter.setCompositionMode(
@@ -1045,15 +1043,15 @@ class MatLibPanel(QtWidgets.QWidget):
                         )
 
                         pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             aspectMode=QtCore.Qt.KeepAspectRatio,
                         )
                         painter.drawPixmap(
                             0,
                             0,
-                            self.library.get_thumbsize(),
-                            self.library.get_thumbsize(),
+                            self.library.thumbsize,
+                            self.library.thumbsize,
                             pixmap,
                         )
                         painter.end()
@@ -1075,14 +1073,14 @@ class MatLibPanel(QtWidgets.QWidget):
         """Creates the default icon if something goes wrong"""
         # Generate Default Icon
         default_img = QtGui.QImage(
-            self.library.get_thumbsize(),
-            self.library.get_thumbsize(),
+            self.library.thumbsize,
+            self.library.thumbsize,
             QtGui.QImage.Format_RGB16,
         )
         default_img.fill(QtGui.QColor(0, 0, 0))
         pixmap = QtGui.QPixmap.fromImage(default_img).scaled(
-            self.library.get_thumbsize(),
-            self.library.get_thumbsize(),
+            self.library.thumbsize,
+            self.library.thumbsize,
             aspectMode=QtCore.Qt.KeepAspectRatio,
         )
         default_icon = QtGui.QIcon(pixmap)
@@ -1263,15 +1261,13 @@ class MatLibPanel(QtWidgets.QWidget):
 
     # Set IconSize via Slider
     def slide(self) -> None:
-        self.library.set_thumbsize(self.click_slider.value())
+        self.library.thumbsize = self.click_slider.value()
         # Update Thumblist Grid
         self.thumblist.setIconSize(
-            QtCore.QSize(self.library.get_thumbsize(), self.library.get_thumbsize())
+            QtCore.QSize(self.library.thumbsize, self.library.thumbsize)
         )
         self.thumblist.setGridSize(
-            QtCore.QSize(
-                self.library.get_thumbsize() + 10, self.library.get_thumbsize() + 40
-            )
+            QtCore.QSize(self.library.thumbsize + 10, self.library.thumbsize + 40)
         )
 
         self.update_views()

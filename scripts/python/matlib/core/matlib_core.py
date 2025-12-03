@@ -20,53 +20,49 @@ importlib.reload(thumbnail_scene)
 
 class MaterialLibrary:
     def __init__(self) -> None:
-        self.assets = []
-        self.categories = [""]
-        self.tags = [""]
+        self._assets = []
+        self._categories = [""]
+        self._tags = [""]
         self.settings = {}
-        self.path = ""
-        self.thumbsize = -1
-        self.rendersize = -1
-        self.render_on_import = False
-        self.data = {}
+        self._path = ""
+        self._thumbsize = -1
+        self._rendersize = -1
+        self._render_on_import = False
+        self._data = {}
 
-        self.context: hou.Node = hou.node("/stage")
+        self._context: hou.Node = hou.node("/stage")
 
     def load(self, path: str, prefs: Prefs) -> None:
-        self.path = path
-        with open(self.path + ("/library.json"), encoding="utf_8") as lib_json:
-            self.data = json.load(lib_json)
+        self._path = path
+        with open(self._path + ("/library.json"), encoding="utf_8") as lib_json:
+            self._data = json.load(lib_json)
 
-            asset_data = self.data["assets"]
-            self.assets = []
-            for data in asset_data:
-                new_asset = material.Material.from_dict(data)
-                self.assets.append(new_asset)
+            asset_data = self._data["assets"]
+            self.assets = [material.Material.from_dict(data) for data in asset_data]
 
-            self.categories = self.data["categories"]
-            self.tags = self.data["tags"]
-            self.thumbsize = self.data["thumbsize"]
-            self.rendersize = self.data["rendersize"]
-            self.render_on_import = self.data["render_on_import"]
+            self.categories = self._data["categories"]
+            self.tags = self._data["tags"]
+            self.thumbsize = self._data["thumbsize"]
+            self.rendersize = self._data["rendersize"]
+            self.render_on_import = self._data["render_on_import"]
 
         self.settings = prefs
 
     def save(self) -> None:
-        # Update actual config
-        asset_list = [curr_asset.get_as_dict() for curr_asset in self.assets]
+        """Save data to disk as json"""
 
-        self.data["assets"] = asset_list
-        self.data["categories"] = self.categories
-        self.data["tags"] = self.tags
-        self.data["thumbsize"] = self.thumbsize
-        self.data["rendersize"] = self.rendersize
-        self.data["render_on_import"] = self.render_on_import
+        self._data["assets"] = [curr_asset.get_as_dict() for curr_asset in self._assets]
+        self._data["categories"] = self._categories
+        self._data["tags"] = self.tags
+        self._data["thumbsize"] = self.thumbsize
+        self._data["rendersize"] = self.rendersize
+        self._data["render_on_import"] = self.render_on_import
 
-        with open(self.path + ("/library.json"), "w", encoding="utf-8") as lib_json:
-            json.dump(self.data, lib_json, indent=4)
+        with open(self._path + ("/library.json"), "w", encoding="utf-8") as lib_json:
+            json.dump(self._data, lib_json, indent=4)
 
     def check_exists_in_lib(self, path: str) -> bool:
-        return any(asset.get_path() == path for asset in self.assets)
+        return any(asset.path == path for asset in self.assets)
 
     def run_dir(self, path: str, entries: list) -> list[str]:
         for file in os.listdir(path):
@@ -78,43 +74,55 @@ class MaterialLibrary:
                     entries.append(usd_file)
         return entries
 
-    def set_context(self, context: hou.Node) -> None:
-        self.context = context
+    @property
+    def path(self) -> str:
+        return self._path
 
-    def get_path(self) -> str:
-        return self.path
+    @property
+    def assets(self) -> list:
+        return self._assets
 
-    def get_assets(self) -> list:
-        return self.assets
+    @property
+    def categories(self) -> list:
+        return self._categories
 
-    def get_categories(self) -> list:
-        return self.categories
+    @property
+    def tags(self) -> list:
+        return self._tags
 
-    def get_tags(self) -> list:
-        return self.tags
+    @property
+    def thumbsize(self) -> int:
+        return self._thumbsize
 
-    def get_thumbsize(self) -> int:
-        return self.thumbsize
+    @thumbsize.setter
+    def thumbsize(self, val: int) -> None:
+        self._thumbsize = val
 
-    def set_thumbsize(self, val: int) -> None:
-        self.thumbsize = val
+    @property
+    def rendersize(self) -> int:
+        return self._rendersize
 
-    def set_rendersize(self, val: int) -> None:
-        self.rendersize = val
+    @rendersize.setter
+    def rendersize(self, val: int) -> None:
+        self._rendersize = val
 
-    def get_rendersize(self) -> int:
-        return self.rendersize
+    @property
+    def context(self) -> hou.Node:
+        return self._context
 
-    def get_context(self) -> hou.Node:
-        return self.context
+    @context.setter
+    def context(self, context: hou.Node) -> None:
+        self._context = context
 
-    def get_render_on_import(self) -> bool:
-        return self.render_on_import
+    @property
+    def render_on_import(self) -> bool:
+        return self._render_on_import
 
-    def set_render_on_import(self, val: bool) -> None:
-        self.render_on_import = val
+    @render_on_import.setter
+    def render_on_import(self, val: bool) -> None:
+        self._render_on_import = val
 
-    def set_asset_name(self, asset_id: str, name: str) -> None:
+    def set_asset_name_by_id(self, asset_id: str, name: str) -> None:
         """Sets the Name for the given Asset (asset_id)"""
         asset = self.get_asset_by_id(asset_id)
         asset.name = name
@@ -189,8 +197,8 @@ class MaterialLibrary:
         cats = cat.split(",")
         for c in cats:
             c = c.replace(" ", "")
-            if c != "" and c not in self.categories:
-                self.categories.append(c)
+            if c != "" and c not in self._categories:
+                self._categories.append(c)
 
     def check_add_tags(self, tag: str) -> None:
         """Checks if this tag exists and adds it if needed"""
@@ -209,7 +217,7 @@ class MaterialLibrary:
 
     def remove_category(self, cat: str) -> None:
         """Removes the given category from the library (and also in all assets)"""
-        self.categories.remove(cat)
+        self._categories.remove(cat)
         # check assets against category and remove there also:
         for asset in self.assets:
             asset.remove_category(cat)
@@ -217,9 +225,9 @@ class MaterialLibrary:
     def rename_category(self, old: str, new: str) -> None:
         """Renames the given category in the library (and also in all assets)"""
         # Update Categories with that name
-        for count, current in enumerate(self.categories):
+        for count, current in enumerate(self._categories):
             if current == old:
-                self.categories[count] = new
+                self._categories[count] = new
         # Update all Categories with that name in all assets
         for asset in self.assets:
             asset.rename_category(old, new)
@@ -315,7 +323,7 @@ class MaterialLibrary:
     def import_asset_to_scene(self, asset_id: str) -> None | hou.Node:
         """Import a Material to the Nework Editor/Scene"""
         file_name = (
-            self.get_path()
+            self.path
             + self.settings.get_asset_dir()
             + str(asset_id)
             + self.settings.get_ext()
@@ -372,10 +380,7 @@ class MaterialLibrary:
                     import_path = hou.node("/stage").createNode("materiallibrary")
 
         parms_file_name = (
-            self.get_path()
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + ".interface"
+            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
         )
 
         # Create temporary storage of nodes
@@ -565,16 +570,13 @@ class MaterialLibrary:
         """Saves the attached network from a collect node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.get_path()
+            self.path
             + self.settings.get_asset_dir()
             + str(asset_id)
             + self.settings.get_ext()
         )
         parms_file_name = (
-            self.get_path()
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + ".interface"
+            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
         )
 
         nodetree = helpers.getConnectedNodes(node)
@@ -603,7 +605,7 @@ class MaterialLibrary:
         """Saves the MtlX node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.get_path()
+            self.path
             + self.settings.get_asset_dir()
             + str(asset_id)
             + self.settings.get_ext()
@@ -611,10 +613,7 @@ class MaterialLibrary:
 
         # interface-stuff
         parms_file_name = (
-            self.get_path()
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + ".interface"
+            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
         )
 
         children = node.children()
@@ -645,7 +644,7 @@ class MaterialLibrary:
 
     def create_thumb_mtlx(self, children: list[hou.Node], asset_id: str) -> bool:
         # Build path
-        path = self.get_path() + self.settings.get_img_dir() + str(asset_id) + ".exr"
+        path = self.path + self.settings.get_img_dir() + str(asset_id) + ".exr"
 
         # Create Thumbnail
         net = hou.node("/obj").createNode("lopnet")
@@ -784,7 +783,7 @@ class MaterialLibrary:
             cop_out.setInput(0, cop_vop)
 
         newpath = (
-            self.get_path()
+            self.path
             + self.settings.get_img_dir()
             + str(asset_id)
             + self.settings.get_img_ext()
@@ -810,7 +809,7 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.get_path() + self.settings.get_img_dir() + str(asset_id)
+        path = self.path + self.settings.get_img_dir() + str(asset_id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path + ".exr")
@@ -834,7 +833,7 @@ class MaterialLibrary:
         """Saves the Redshift node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.get_path()
+            self.path
             + self.settings.get_asset_dir()
             + str(asset_id)
             + self.settings.get_ext()
@@ -842,10 +841,7 @@ class MaterialLibrary:
 
         # interface-stuff
         parms_file_name = (
-            self.get_path()
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + ".interface"
+            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
         )
         children = node.children()
 
@@ -868,7 +864,7 @@ class MaterialLibrary:
 
         # Build path
         path = (
-            self.get_path()
+            self.path
             + self.settings.get_img_dir()
             + str(asset_id)
             + self.settings.get_img_ext()
@@ -892,7 +888,7 @@ class MaterialLibrary:
     def save_node_octane(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         # Filepath where to save stuff
         file_name = (
-            self.get_path()
+            self.path
             + self.settings.get_asset_dir()
             + str(asset_id)
             + self.settings.get_ext()
@@ -900,10 +896,7 @@ class MaterialLibrary:
 
         # interface-stuff
         parms_file_name = (
-            self.get_path()
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + ".interface"
+            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
         )
         children = node.children()
 
@@ -925,7 +918,7 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
         # Build path
         path = (
-            self.get_path()
+            self.path
             + self.settings.get_img_dir()
             + str(asset_id)
             + self.settings.get_img_ext()
@@ -953,7 +946,7 @@ class MaterialLibrary:
         """Saves the Arnold node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.get_path()
+            self.path
             + self.settings.get_asset_dir()
             + str(asset_id)
             + self.settings.get_ext()
@@ -961,10 +954,7 @@ class MaterialLibrary:
 
         # interface-stuff
         parms_file_name = (
-            self.get_path()
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + ".interface"
+            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
         )
         children = node.children()
 
@@ -985,7 +975,7 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.get_path() + self.settings.get_img_dir() + str(asset_id)
+        path = self.path + self.settings.get_img_dir() + str(asset_id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path + ".exr")
@@ -1019,7 +1009,7 @@ class MaterialLibrary:
         """Saves the Mantra node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.get_path()
+            self.path
             + self.settings.get_asset_dir()
             + str(asset_id)
             + self.settings.get_ext()
@@ -1036,10 +1026,7 @@ class MaterialLibrary:
 
         # interface-stuff
         parms_file_name = (
-            self.get_path()
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + ".interface"
+            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
         )
         children = node.children()
 

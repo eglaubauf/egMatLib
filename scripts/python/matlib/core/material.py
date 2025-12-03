@@ -17,16 +17,16 @@ class Material:
         mat_id: str = "",
     ):
 
-        self.__name = name
-        self.__fav = fav
-        self.__renderer = renderer
+        self._name = name
+        self._fav = fav
+        self._renderer = renderer
         self.date = date
-        self.__builder = builder
-        self.__usd = usd
+        self._builder = builder
+        self._usd = usd
 
-        self.__cats = [""] if not cats else cats
-        self.__tags = [""] if not tags else tags
-        self.__mat_id = str(uuid.uuid1().time) if mat_id == "" else mat_id
+        self._cats = [""] if not cats else cats
+        self._tags = [""] if not tags else tags
+        self._mat_id = str(uuid.uuid1().time) if mat_id == "" else mat_id
 
     @classmethod
     def from_dict(cls, material_dict: dict) -> Material:
@@ -45,80 +45,80 @@ class Material:
 
     def get_as_dict(self) -> dict:
         material_dict = {
-            "id": self.__mat_id,
-            "name": self.__name,
-            "categories": self.__cats,
-            "tags": self.__tags,
-            "favorite": self.__fav,
-            "date": self.__date,
-            "renderer": self.__renderer,
-            "usd": self.__usd,
-            "builder": self.__builder,
+            "id": self._mat_id,
+            "name": self._name,
+            "categories": self._cats,
+            "tags": self._tags,
+            "favorite": self._fav,
+            "date": self._date,
+            "renderer": self._renderer,
+            "usd": self._usd,
+            "builder": self._builder,
         }
 
         return material_dict
 
     @property
     def mat_id(self) -> str:
-        return str(self.__mat_id)
+        return str(self._mat_id)
 
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
 
     @name.setter
     def name(self, new_name: str) -> None:
-        self.__name = new_name
+        self._name = new_name
 
     @property
     def date(self) -> str:
-        return self.__date
+        return self._date
 
     @date.setter
     def date(self, date: str = "") -> None:
-        self.__date = date if date != "" else str(datetime.datetime.now())[:-7]
+        self._date = date if date != "" else str(datetime.datetime.now())[:-7]
 
     @property
     def fav(self) -> bool:
-        return self.__fav
+        return self._fav
 
     @fav.setter
     def fav(self, fav: bool) -> None:
-        self.__fav = fav
+        self._fav = fav
 
     @property
     def renderer(self) -> str:
-        return self.__renderer
+        return self._renderer
 
     @property
     def builder(self) -> int:
-        return self.__builder
+        return self._builder
 
     @property
     def tags(self) -> list[str]:
-        return self.__tags
+        return self._tags
 
     @tags.setter
     def tags(self, tags: str) -> None:
         tag = tags.split(",")
         for c in tag:
             c = c.replace(" ", "")
-        self.__tags = tag
+        self._tags = tag
 
     @property
     def usd(self) -> int:
-        return self.__usd
+        return self._usd
 
     @property
     def categories(self) -> list[str]:
-        return self.__cats
+        return self._cats
 
     @categories.setter
     def categories(self, cats: str) -> None:
         cat = cats.split(",")
         for c in cat:
             c = c.replace(" ", "")
-        self.__cats = cat
+        self._cats = cat
 
     def remove_category(self, cat: str) -> None:
         if cat in self.cats:

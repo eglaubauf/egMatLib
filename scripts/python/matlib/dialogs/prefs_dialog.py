@@ -46,9 +46,9 @@ class PrefsDialog(QtWidgets.QDialog):
         self.prefs.set_dir(self.line_workdir.text())
         self.prefs.save()
 
-        self.library.set_rendersize(int(self.line_rendersize.text()))
-        self.library.set_thumbsize(int(self.line_thumbsize.text()))
-        self.library.set_render_on_import(int(self.cbx_render_on_import.isChecked()))
+        self.library.rendersize = int(self.line_rendersize.text())
+        self.library.thumbsize = int(self.line_thumbsize.text())
+        self.library.render_on_import = int(self.cbx_render_on_import.isChecked())
 
         self.library.save()
         self.accept()
@@ -61,9 +61,9 @@ class PrefsDialog(QtWidgets.QDialog):
     # Fill UI
     def fill_values(self) -> None:
         self.directory = self.prefs.get_dir()
-        self.rendersize = self.library.get_rendersize()
-        self.thumbsize = self.library.get_thumbsize()
-        self.render_on_import = self.library.get_render_on_import()
+        self.rendersize = self.library.rendersize
+        self.thumbsize = self.library.thumbsize
+        self.render_on_import = self.library.render_on_import
 
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setText(str(self.rendersize))
