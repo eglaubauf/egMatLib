@@ -1,9 +1,9 @@
-import json
 import os
 import uuid
 import datetime
 import time
 import importlib
+import json
 import hou
 
 from matlib.helpers import helpers
@@ -53,9 +53,7 @@ class MaterialLibrary:
 
     def save(self) -> None:
         # Update actual config
-        asset_list = []
-        for curr_asset in self.assets:
-            asset_list.append(curr_asset.get_as_dict())
+        asset_list = [curr_asset.get_as_dict() for curr_asset in self.assets]
 
         self.data["assets"] = asset_list
         self.data["categories"] = self.categories
@@ -68,10 +66,7 @@ class MaterialLibrary:
             json.dump(self.data, lib_json, indent=4)
 
     def check_exists_in_lib(self, path: str) -> bool:
-        for asset in self.assets:
-            if asset.get_path() == path:
-                return True
-        return False
+        return any(asset.get_path() == path for asset in self.assets)
 
     def run_dir(self, path: str, entries: list) -> list[str]:
         for file in os.listdir(path):
@@ -122,17 +117,13 @@ class MaterialLibrary:
     def set_asset_name(self, asset_id: str, name: str) -> None:
         """Sets the Name for the given Asset (asset_id)"""
         asset = self.get_asset_by_id(asset_id)
-        asset.set_name(name)
+        asset.name = name
 
     def get_asset_by_id(self, asset_id: str) -> None | material.Material:
         """Returns the Asset for the given id"""
         for asset in self.assets:
-            if isinstance(asset_id, int):
-                if int(asset_id) == asset.get_id():
-                    return asset
-            else:
-                if asset_id == asset.get_id():
-                    return asset
+            if str(asset_id) == str(asset.mat_id):
+                return asset
         return None
 
     def set_asset_cat(self, asset_id: str, cat: str) -> None:
@@ -149,12 +140,12 @@ class MaterialLibrary:
     def set_asset_fav(self, asset_id: str, fav: bool) -> None:
         """Sets the fav for the given material (asset_id)"""
         asset = self.get_asset_by_id(asset_id)
-        asset.set_fav(fav)
+        asset.fav = fav
 
     def get_asset_fav(self, asset_id: str) -> bool:
         """Gets the fav for the given material (asset_id) as 0/1"""
         asset = self.get_asset_by_id(asset_id)
-        return asset.get_fav()
+        return asset.fav
 
     def update_asset_date(self, asset_id: str) -> None:
         asset = self.get_asset_by_id(asset_id)
@@ -163,7 +154,7 @@ class MaterialLibrary:
     def remove_asset(self, asset_id: str) -> None:
         """Removes a material from this Library and Disk"""
         for asset in self.assets:
-            if asset_id == asset.get_id():
+            if asset_id == asset.mat_id:
                 self.assets.remove(asset)
 
                 # Remove Files from Disk
@@ -198,18 +189,16 @@ class MaterialLibrary:
         cats = cat.split(",")
         for c in cats:
             c = c.replace(" ", "")
-            if c != "":
-                if c not in self.categories:
-                    self.categories.append(c)
+            if c != "" and c not in self.categories:
+                self.categories.append(c)
 
     def check_add_tags(self, tag: str) -> None:
         """Checks if this tag exists and adds it if needed"""
         tags = tag.split(",")
         for t in tags:
             t = t.replace(" ", "")
-            if t != "":
-                if t not in self.tags:
-                    self.tags.append(t)
+            if t != "" and t not in self.tags:
+                self.tags.append(t)
 
     def get_current_network_node(self) -> None | hou.Node:
         """Return thre current Node in the Network Editor"""
@@ -302,22 +291,22 @@ class MaterialLibrary:
         """Return the Renderer for this Material as a string"""
         for mat in self.assets:
             if isinstance(asset_id, int):
-                if int(asset_id) == mat.get_id():
-                    return mat.get_renderer()
+                if int(asset_id) == mat.mat_id:
+                    return mat.renderer
             else:
-                if asset_id == mat.get_id():
-                    return mat.get_renderer()
+                if asset_id == mat.mat_id:
+                    return mat.renderer
         return ""
 
     def check_materialbuilder_by_id(self, asset_id: str) -> int | None:
         """Return if the Material is a Builder (Mantra) as a 0/1"""
         for mat in self.assets:
             if isinstance(asset_id, int):
-                if int(asset_id) == mat.get_id():
-                    return mat.get_builder()
+                if int(asset_id) == mat.mat_id:
+                    return mat.builder
             else:
-                if asset_id == mat.get_id():
-                    return mat.get_builder()
+                if asset_id == mat.mat_id:
+                    return mat.builder
         return None
 
     def update_context(self) -> None:
@@ -347,7 +336,7 @@ class MaterialLibrary:
         elif self.context.path() == "/mat":
             import_path = hou.node("/mat")
             # override if Material was saved in USD Mode
-            if mat.get_usd():
+            if mat.usd:
                 import_path = hou.node("/stage").createNode("materiallibrary")
 
         else:
@@ -365,7 +354,7 @@ class MaterialLibrary:
                 else:
                     import_path = parent
                     # override if Material was saved in USD Mode
-                    if mat.get_usd():
+                    if mat.usd:
                         import_path = hou.node("/stage").createNode("materiallibrary")
             elif parent.type().name() == "matnet":
                 import_path = parent
@@ -379,7 +368,7 @@ class MaterialLibrary:
             else:
                 import_path = parent.createNode("matnet")
                 # override if Material was saved in USD Mode
-                if mat.get_usd():
+                if mat.usd:
                     import_path = hou.node("/stage").createNode("materiallibrary")
 
         parms_file_name = (
@@ -405,7 +394,7 @@ class MaterialLibrary:
             else:
                 builder = hou.node(import_path).createNode("redshift_vopnet")
 
-            builder.setName(mat.get_name(), unique_name=True)
+            builder.setName(mat.name, unique_name=True)
             builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in RS-VopNet
             for node in builder.children():
@@ -423,7 +412,7 @@ class MaterialLibrary:
             else:
                 builder = hou.node(import_path).createNode("octane_vopnet")
 
-            builder.setName(mat.get_name(), unique_name=True)
+            builder.setName(mat.name, unique_name=True)
             builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in Octane-VopNet
             for node in builder.children():
@@ -445,7 +434,7 @@ class MaterialLibrary:
             else:
                 builder = hou.node(import_path).createNode("materialbuilder")
 
-            builder.setName(mat.get_name(), unique_name=True)
+            builder.setName(mat.name, unique_name=True)
             builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in MaterialBuilder
             for node in builder.children():
@@ -463,7 +452,7 @@ class MaterialLibrary:
             else:
                 builder = hou.node(import_path).createNode("arnold_materialbuilder")
 
-            builder.setName(mat.get_name(), unique_name=True)
+            builder.setName(mat.name, unique_name=True)
             builder.setGenericFlag(hou.nodeFlag.Material, True)
             # Delete Default children in Arnold MaterialBuilder
             for node in builder.children():
@@ -477,7 +466,7 @@ class MaterialLibrary:
                 exec(code)
 
                 builder = import_path.createNode("subnet")
-                builder.setName(mat.get_name(), unique_name=True)
+                builder.setName(mat.name, unique_name=True)
                 builder.setGenericFlag(hou.nodeFlag.Material, True)
                 for n in builder.children():
                     n.destroy()

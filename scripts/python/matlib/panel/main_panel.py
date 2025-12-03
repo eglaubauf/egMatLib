@@ -536,11 +536,11 @@ class MatLibPanel(QtWidgets.QWidget):
             asset_id = img.split(".")[0]
             # found = False
             for asset in assets:
-                if asset.get_id() == int(asset_id):
+                if asset.mat_id == int(asset_id):
                     # found = True
                     break
             # if not found:
-            #     if asset.get_id() > 0:
+            #     if asset.mat_id > 0:
             #         try:
             #             os.remove(os.path.join(img_path, img))
             #             print("File: " + os.path.join(img_path, img) + " removed")
@@ -554,11 +554,11 @@ class MatLibPanel(QtWidgets.QWidget):
                 return
             # found = False
             for asset in assets:
-                if asset.get_id() == int(asset_id):
+                if asset.mat_id == int(asset_id):
                     # found = True
                     break
             # if not found:
-            #     if asset.get_id() > 0:
+            #     if asset.mat_id > 0:
             #         try:
             #             os.remove(os.path.join(asset_path, m))
             #             print("File: " + os.path.join(asset_path, m) + " removed")
@@ -572,7 +572,7 @@ class MatLibPanel(QtWidgets.QWidget):
                 try:
                     # os.remove(os.path.join(asset_path, m))
                     print("File: " + path + " removed")
-                    self.library.remove_asset(asset.get_id())
+                    self.library.remove_asset(asset.mat_id)
                 except OSError:
                     pass
         self.update_thumb_view()
@@ -587,34 +587,34 @@ class MatLibPanel(QtWidgets.QWidget):
         mark_render = 0
 
         for asset in assets:
-            if asset.get_id() > 0:
+            if asset.mat_id > 0:
                 interface_path = os.path.join(
                     self.path,
                     self.prefs.get_asset_dir(),
-                    str(asset.get_id()) + ".interface",
+                    str(asset.mat_id) + ".interface",
                 )
                 mat_path = os.path.join(
-                    self.path, self.prefs.get_asset_dir(), str(asset.get_id()) + ".mat"
+                    self.path, self.prefs.get_asset_dir(), str(asset.mat_id) + ".mat"
                 )
                 img_path = os.path.join(
                     self.path,
                     self.prefs.get_img_dir(),
-                    str(asset.get_id()) + self.prefs.get_img_ext(),
+                    str(asset.mat_id) + self.prefs.get_img_ext(),
                 )
 
                 # asset_path = asset.get_path()
                 if not os.path.exists(interface_path):
-                    print("Asset %d missing on disk. Removing.", asset.get_id())
+                    print("Asset %d missing on disk. Removing.", asset.mat_id)
                     mark_rmv = 1
-                    self.library.remove_asset(asset.get_id())
+                    self.library.remove_asset(asset.mat_id)
                 if not os.path.exists(mat_path):
-                    print("Asset %d missing on disk. Removing.", asset.get_id())
+                    print("Asset %d missing on disk. Removing.", asset.mat_id)
                     mark_rmv = 1
-                    self.library.remove_asset(asset.get_id())
+                    self.library.remove_asset(asset.mat_id)
                 if not os.path.exists(img_path):
                     mark_render = 1
                     print(
-                        f"Image for Asset { asset.get_id()} missing on disk. Needs Rendering."
+                        f"Image for Asset { asset.mat_id} missing on disk. Needs Rendering."
                     )
 
         mats_path = os.path.join(self.path, self.prefs.get_asset_dir())
@@ -654,11 +654,11 @@ class MatLibPanel(QtWidgets.QWidget):
         assets = self.library.get_assets()
 
         for asset in assets:
-            if asset.get_id() > 0:
+            if asset.mat_id > 0:
                 img_path = os.path.join(
                     self.path,
                     self.prefs.get_img_dir(),
-                    str(asset.get_id()) + self.prefs.get_img_ext(),
+                    str(asset.mat_id) + self.prefs.get_img_ext(),
                 )
                 # print(img_path)
                 asset_path = asset.get_path()
@@ -669,11 +669,11 @@ class MatLibPanel(QtWidgets.QWidget):
                     continue
                 else:
                     if not os.path.exists(img_path):
-                        print("Render Thumbnail for Asset " + asset.get_name())
-                        self.render_thumbnail(asset.get_id())
+                        print("Render Thumbnail for Asset " + asset.name)
+                        self.render_thumbnail(asset.mat_id)
                     elif not os.path.exists(asset_path):
                         print("Asset missing on disk. Removing.")
-                        self.library.remove_asset(asset.get_id())
+                        self.library.remove_asset(asset.mat_id)
                     self.update_thumb_view()
         return
 
@@ -838,41 +838,41 @@ class MatLibPanel(QtWidgets.QWidget):
                 curr_asset = self.library.get_asset_by_id(asset_id)
 
                 if x == 0:
-                    cat = curr_asset.get_categories()
-                    tags = curr_asset.get_tags()
+                    cat = curr_asset.categories
+                    tags = curr_asset.tags
                     # fav = curr_asset.get_fav()
                 else:
                     # Check Categories
-                    if cat != curr_asset.get_categories():
+                    if cat != curr_asset.categories:
                         cat_flag = True
                     # Check Tags
-                    if tags != curr_asset.get_tags():
+                    if tags != curr_asset.tags:
                         tag_flag = True
 
         asset_id = self.get_id_from_thumblist(item)
 
         for asset in self.library.get_assets():
-            if asset.get_id() == asset_id:
+            if asset.mat_id == asset_id:
                 # set name
-                self.line_name.setText(asset.get_name())
+                self.line_name.setText(asset.name)
                 # set cat
                 if cat_flag:
                     self.line_cat.setText("Multiple Values")
                 else:
-                    self.line_cat.setText(", ".join(asset.get_categories()))
+                    self.line_cat.setText(", ".join(asset.categories))
                 # set tag
                 if tag_flag:
                     self.line_tags.setText("Multiple Values")
                 else:
-                    self.line_tags.setText(", ".join(asset.get_tags()))
+                    self.line_tags.setText(", ".join(asset.tags))
                 # set fav
-                if asset.get_fav() == 1:
+                if asset.fav == 1:
                     self.box_fav.setCheckState(QtCore.Qt.Checked)
                 else:
                     self.box_fav.setCheckState(QtCore.Qt.Unchecked)
                 # set id
-                self.line_id.setText(str(asset.get_id()))
-                self.line_date.setText(str(asset.get_date()))
+                self.line_id.setText(str(asset.mat_id))
+                self.line_date.setText(str(asset.date))
         return
 
     # Update the Views when selection changes
@@ -912,7 +912,7 @@ class MatLibPanel(QtWidgets.QWidget):
         # Filter Thumbnail View
         self.draw_assets = []
         for asset in self.library.get_assets():
-            if self.selected_cat in asset.get_categories():
+            if self.selected_cat in asset.categories:
                 self.draw_assets.append(asset)
         if not self.selected_cat:
             self.draw_assets = self.library.get_assets()
@@ -928,11 +928,11 @@ class MatLibPanel(QtWidgets.QWidget):
             # Filter for tags
             curr_filter = self.filter[1:]
             for asset in self.draw_assets:
-                if curr_filter in asset.get_tags():
+                if curr_filter in asset.tags:
                     tmp.append(asset)
         else:
             for asset in self.draw_assets:
-                if self.filter in asset.get_name():
+                if self.filter in asset.name:
                     tmp.append(asset)
         self.draw_assets = tmp
 
@@ -948,32 +948,32 @@ class MatLibPanel(QtWidgets.QWidget):
         if self.draw_assets:
             for asset in self.draw_assets:
                 # Pass Empty Default material
-                if asset.get_id() == -1:
+                if asset.mat_id == -1:
                     continue
                 # Show only Favs
                 if self.cb_favsonly.checkState() is QtCore.Qt.Checked:
-                    if asset.get_fav() == 0:
+                    if asset.fav == 0:
                         continue
                 if self.cb_redshift.isChecked():
-                    if asset.get_renderer() != "Redshift":
+                    if asset.renderer != "Redshift":
                         continue
                 elif self.cb_mantra.isChecked():
-                    if asset.get_renderer() != "Mantra":
+                    if asset.renderer != "Mantra":
                         continue
                 elif self.cb_arnold.isChecked():
-                    if asset.get_renderer() != "Arnold":
+                    if asset.renderer != "Arnold":
                         continue
                 elif self.cb_octane.isChecked():
-                    if asset.get_renderer() != "Octane":
+                    if asset.renderer != "Octane":
                         continue
                 elif self.cb_matx.isChecked():
-                    if asset.get_renderer() != "MatX":
+                    if asset.renderer != "MatX":
                         continue
 
                 img = (
                     self.library.get_path()
                     + self.prefs.get_img_dir()
-                    + str(asset.get_id())
+                    + str(asset.mat_id)
                     + self.prefs.get_img_ext()
                 )
 
@@ -982,7 +982,7 @@ class MatLibPanel(QtWidgets.QWidget):
                 icon = None
                 if os.path.isfile(img):
                     # Draw Star Icon on Top if Favorite
-                    if asset.get_fav():
+                    if asset.fav:
                         pm = QtGui.QPixmap(
                             self.library.get_thumbsize(), self.library.get_thumbsize()
                         )
@@ -1062,11 +1062,11 @@ class MatLibPanel(QtWidgets.QWidget):
                     icon = self.default_icon()
 
                 # Create entry in Thumblist
-                # img_name = self.get_usd_by_id(asset.get_id())
-                item = QtWidgets.QListWidgetItem(icon, asset.get_name())
+                # img_name = self.get_usd_by_id(asset.mat_id)
+                item = QtWidgets.QListWidgetItem(icon, asset.name)
 
                 item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom)
-                item.setData(QtCore.Qt.UserRole, asset.get_id())  # Store ID with Thumb
+                item.setData(QtCore.Qt.UserRole, asset.mat_id)  # Store ID with Thumb
                 self.thumblist.addItem(item)
                 self.thumblist.sortItems()
 

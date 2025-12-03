@@ -17,17 +17,16 @@ class Material:
         mat_id: str = "",
     ):
 
-        self.name = name
-        self.fav = fav
-        self.renderer = renderer
+        self.__name = name
+        self.__fav = fav
+        self.__renderer = renderer
         self.date = date
-        self.builder = builder
-        self.usd = usd
+        self.__builder = builder
+        self.__usd = usd
 
-        self.cats = [""] if not cats else cats
-        self.tags = [""] if not tags else tags
-        self.mat_id = str(uuid.uuid1().time) if mat_id == "" else mat_id
-        self.date = self.set_date() if date == "" else date
+        self.__cats = [""] if not cats else cats
+        self.__tags = [""] if not tags else tags
+        self.__mat_id = str(uuid.uuid1().time) if mat_id == "" else mat_id
 
     @classmethod
     def from_dict(cls, material_dict: dict) -> Material:
@@ -46,55 +45,80 @@ class Material:
 
     def get_as_dict(self) -> dict:
         material_dict = {
-            "id": self.mat_id,
-            "name": self.name,
-            "categories": self.cats,
-            "tags": self.tags,
-            "favorite": self.fav,
-            "date": self.date,
-            "renderer": self.renderer,
-            "usd": self.usd,
-            "builder": self.builder,
+            "id": self.__mat_id,
+            "name": self.__name,
+            "categories": self.__cats,
+            "tags": self.__tags,
+            "favorite": self.__fav,
+            "date": self.__date,
+            "renderer": self.__renderer,
+            "usd": self.__usd,
+            "builder": self.__builder,
         }
 
         return material_dict
 
-    def get_id(self) -> str:
-        return str(self.mat_id)
+    @property
+    def mat_id(self) -> str:
+        return str(self.__mat_id)
 
-    def get_name(self) -> str:
-        return self.name
+    @property
+    def name(self) -> str:
+        return self.__name
 
-    def set_name(self, new_name: str) -> None:
-        self.name = new_name
+    @name.setter
+    def name(self, new_name: str) -> None:
+        self.__name = new_name
 
-    def set_date(self) -> str:
-        date = str(datetime.datetime.now())
-        return date[:-7]
+    @property
+    def date(self) -> str:
+        return self.__date
 
-    def get_date(self) -> str:
-        return self.date
+    @date.setter
+    def date(self, date: str = "") -> None:
+        self.__date = date if date != "" else str(datetime.datetime.now())[:-7]
 
-    def get_fav(self) -> bool:
-        return self.fav
+    @property
+    def fav(self) -> bool:
+        return self.__fav
 
-    def set_fav(self, fav: bool) -> None:
-        self.fav = fav
+    @fav.setter
+    def fav(self, fav: bool) -> None:
+        self.__fav = fav
 
-    def get_tags(self) -> list[str]:
-        return self.tags
+    @property
+    def renderer(self) -> str:
+        return self.__renderer
 
-    def get_usd(self) -> int:
-        return self.usd
+    @property
+    def builder(self) -> int:
+        return self.__builder
 
-    def get_categories(self) -> list[str]:
-        return self.cats
+    @property
+    def tags(self) -> list[str]:
+        return self.__tags
 
-    def set_categories(self, cats: str) -> None:
+    @tags.setter
+    def tags(self, tags: str) -> None:
+        tag = tags.split(",")
+        for c in tag:
+            c = c.replace(" ", "")
+        self.__tags = tag
+
+    @property
+    def usd(self) -> int:
+        return self.__usd
+
+    @property
+    def categories(self) -> list[str]:
+        return self.__cats
+
+    @categories.setter
+    def categories(self, cats: str) -> None:
         cat = cats.split(",")
         for c in cat:
             c = c.replace(" ", "")
-        self.cats = cat
+        self.__cats = cat
 
     def remove_category(self, cat: str) -> None:
         if cat in self.cats:
@@ -104,15 +128,3 @@ class Material:
         for cat in self.cats:
             if old in cat:
                 cat = new
-
-    def set_tags(self, tags: str) -> None:
-        tag = tags.split(",")
-        for c in tag:
-            c = c.replace(" ", "")
-        self.tags = tag
-
-    def get_renderer(self) -> str:
-        return self.renderer
-
-    def get_builder(self) -> int:
-        return self.builder
