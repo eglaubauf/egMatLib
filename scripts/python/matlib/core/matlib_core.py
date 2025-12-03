@@ -38,10 +38,10 @@ class MaterialLibrary:
             self._data = json.load(lib_json)
 
             asset_data = self._data["assets"]
-            self.assets = [material.Material.from_dict(data) for data in asset_data]
+            self._assets = [material.Material.from_dict(data) for data in asset_data]
 
-            self.categories = self._data["categories"]
-            self.tags = self._data["tags"]
+            self._categories = self._data["categories"]
+            self._tags = self._data["tags"]
             self.thumbsize = self._data["thumbsize"]
             self.rendersize = self._data["rendersize"]
             self.render_on_import = self._data["render_on_import"]

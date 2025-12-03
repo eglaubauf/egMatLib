@@ -380,16 +380,16 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.library:
             return
         if self.radio_usd.isChecked():
-            self.library.set_context(hou.node("/stage"))
+            self.library.context = hou.node("/stage")
         elif self.radio_current.isChecked():
             curr_node = self.get_current_network_node()
             if curr_node is None:
-                self.library.set_context(hou.node("/stage"))
+                self.library.context = hou.node("/stage")
                 return
             else:
-                self.library.set_context(curr_node)
+                self.library.context = curr_node
         elif self.radio_default.isChecked():
-            self.library.set_context(hou.node("/mat"))
+            self.library.context = hou.node("/mat")
 
     def get_current_network_node(self) -> hou.Node | None:
         """Return thre current Node in the Network Editor"""
@@ -1245,9 +1245,9 @@ class MatLibPanel(QtWidgets.QWidget):
     def render_thumbnail(self, asset_id: str) -> None:
         # Move to correct context before rerendering assets
         if "MatX" in self.library.get_renderer_by_id(asset_id):
-            self.library.set_context(hou.node("/stage"))
+            self.library.context = hou.node("/stage")
         else:
-            self.library.set_context(hou.node("/mat"))
+            self.library.context = hou.node("/mat")
 
         builder = self.library.import_asset_to_scene(asset_id)
         if not builder:
