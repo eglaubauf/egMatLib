@@ -10,30 +10,23 @@ def get_children_recursive(nodes: list[hou.Node]) -> hou.Node | None:
             for n in node.children():
                 return get_children_recursive(n)
         elif node.type().name() == "geo":
-            n = node.children()
-            for sop in n:
+            for sop in node.children():
                 if sop.isGenericFlagSet(hou.nodeFlag.Display):
                     return sop
 
 
 def get_connected_nodes(node: hou.Node) -> list[hou.Node]:
-    nodes = []
-    nodes.append(node)
-    selected = []
-    in_nodes = get_connected_input_nodes(nodes, selected)
-    selected = []
-    out_nodes = get_connected_output_nodes(nodes, selected)
-    all_nodes = in_nodes + out_nodes
-    return all_nodes
+    nodes = [node]
+    in_nodes = get_connected_input_nodes(nodes, selected=[])
+    out_nodes = get_connected_output_nodes(nodes, selected=[])
+    return in_nodes + out_nodes
 
 
 def get_connected_input_nodes(
     nodes: list[hou.Node], selected: list[hou.Node]
 ) -> list[hou.Node]:
     for node in nodes:
-        if node is None:
-            continue
-        else:
+        if node is not None:
             selected.append(node)
             get_connected_input_nodes(node.inputs(), selected)
     return selected
@@ -43,9 +36,7 @@ def get_connected_output_nodes(
     nodes: list[hou.Node], selected: list[hou.Node]
 ) -> list[hou.Node]:
     for node in nodes:
-        if node is None:
-            continue
-        else:
+        if node is not None:
             selected.append(node)
             get_connected_output_nodes(node.outputs(), selected)
     return selected
@@ -55,9 +46,7 @@ def break_materialrefs() -> None:
     sel_nodes = hou.selectedNodes()
 
     for node in sel_nodes:
-        # Create Geometry
         lops = node.children()
-
         for lop in lops:
             if lop.type().name() == "materiallibrary":
                 mats = lop.children()
@@ -77,7 +66,6 @@ def break_materialrefs() -> None:
 
 def save_selected_hda() -> None:
     sel = hou.selectedNodes()
-
     for node in sel:
         if node.type().definition() is None or node.matchesCurrentDefinition():
             continue
@@ -88,10 +76,7 @@ def save_selected_hda() -> None:
 def show_all_nodes() -> None:
     # Get All Nodes
     sel = hou.selectedNodes()
-    if not sel:
-        all_nodes = hou.node("/obj").allSubChildren()
-    else:
-        all_nodes = sel
+    all_nodes = sel if sel else hou.node("/obj").allSubChildren()
 
     # Hide all
     for n in all_nodes:
@@ -99,9 +84,7 @@ def show_all_nodes() -> None:
 
 
 def fix_fbx_mats() -> None:
-    sel = hou.selectedNodes()
-
-    for mat in sel:
+    for mat in hou.selectedNodes():
         # Move Reflect Tex
         if "metal" in mat.parm("reflect_texture").evalAsString():
             mat.parm("metallic_useTexture").set(1)
