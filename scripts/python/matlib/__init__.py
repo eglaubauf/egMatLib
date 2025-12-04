@@ -1,1 +1,1 @@
-from matlib.panel import main_panel
+from matlib.panel import panel

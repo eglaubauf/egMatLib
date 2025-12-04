@@ -11,7 +11,7 @@ from matlib.render import thumbnail_scene
 from matlib.core import material
 
 
-from matlib.prefs.main_prefs import Prefs
+from matlib.prefs import prefs
 
 importlib.reload(material)
 importlib.reload(helpers)
@@ -32,7 +32,7 @@ class MaterialLibrary:
 
         self._context: hou.Node = hou.node("/stage")
 
-    def load(self, path: str, prefs: Prefs) -> None:
+    def load(self, path: str, prefs: prefs) -> None:
         self._path = path
         with open(self._path + ("/library.json"), encoding="utf_8") as lib_json:
             self._data = json.load(lib_json)

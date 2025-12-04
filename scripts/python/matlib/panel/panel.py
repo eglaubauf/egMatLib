@@ -7,19 +7,19 @@ from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 
 import hou
 
-from matlib.core import matlib_core
+from matlib.core import models
 from matlib.dialogs import (
     about_dialog,
     material_dialog,
     prefs_dialog,
     usd_dialog,
 )
-from matlib.prefs import main_prefs
+from matlib.prefs import prefs
 from matlib.helpers import ui_helpers
 
 # Set Develop flag to reload everthing properly
-importlib.reload(matlib_core)
-importlib.reload(main_prefs)
+importlib.reload(models)
+importlib.reload(prefs)
 importlib.reload(ui_helpers)
 
 importlib.reload(material_dialog)
@@ -35,7 +35,7 @@ class MatLibPanel(QtWidgets.QWidget):
         # Initialize
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-        self.prefs = main_prefs.Prefs()
+        self.prefs = prefs.Prefs()
         path = self.prefs.dir
         if not path.endswith("/"):
             path = path + "/"
@@ -102,7 +102,7 @@ class MatLibPanel(QtWidgets.QWidget):
             hou.ui.displayMessage(msg)  # type: ignore
         self.path = path
         # Create Library
-        self.library = matlib_core.MaterialLibrary()
+        self.library = models.MaterialLibrary()
         self.library.load(path, self.prefs)
 
         self.draw_assets = self.library.assets  # Filterered assets for Views

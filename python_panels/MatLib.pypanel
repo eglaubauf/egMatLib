@@ -10,10 +10,10 @@
     <script><![CDATA[import matlib
 import importlib
 importlib.reload(matlib)
-importlib.reload(matlib.main_panel)
+importlib.reload(matlib.panel)
 
 def onCreateInterface():
-    matlib_widget = matlib.main_panel.MatLibPanel()
+    matlib_widget = matlib.panel.MatLibPanel()
     return matlib_widget]]></script>
     <includeInPaneTabMenu menu_position="99" create_separator="true" />
     <includeInToolbarMenu menu_position="415" create_separator="true" />

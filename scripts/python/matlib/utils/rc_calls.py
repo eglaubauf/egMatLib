@@ -1,6 +1,6 @@
 import hou
-from matlib.prefs import main_prefs
-from matlib.core import matlib_core
+from matlib.prefs import prefs
+from matlib.core import models
 from matlib.dialogs import usd_dialog
 
 
@@ -8,10 +8,10 @@ def save_material(node: hou.Node) -> None:
     # Call from RC-Menus in Network Pane
     # TODO: Move
     # Initialize
-    pref = main_prefs.Prefs()
+    pref = prefs.Prefs()
 
     # Save new Data to Library
-    library = matlib_core.MaterialLibrary()
+    library = models.MaterialLibrary()
     library.load(pref.dir, pref)
 
     # Get Stuff from User
