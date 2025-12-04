@@ -3,6 +3,9 @@ import os
 from PySide6 import QtWidgets, QtCore, QtUiTools
 
 
+# TODO: Remove references to library and make shure this is a view only
+
+
 class PrefsDialog(QtWidgets.QDialog):
     def __init__(self, library, prefs) -> None:
         super(PrefsDialog, self).__init__()
