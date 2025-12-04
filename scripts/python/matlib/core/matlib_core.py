@@ -168,17 +168,17 @@ class MaterialLibrary:
                 # Remove Files from Disk
                 asset_file_path = os.path.join(
                     self.path,
-                    self.settings.get_asset_dir(),
-                    str(asset_id) + self.settings.get_ext(),
+                    self.settings.asset_dir,
+                    str(asset_id) + self.settings.ext,
                 )
                 img_file_path = os.path.join(
                     self.path,
-                    self.settings.get_img_dir(),
-                    str(asset_id) + self.settings.get_img_ext(),
+                    self.settings.img_dir,
+                    str(asset_id) + self.settings.img_ext,
                 )
                 interface_file_path = os.path.join(
                     self.path,
-                    self.settings.get_asset_dir(),
+                    self.settings.asset_dir,
                     str(asset_id) + ".interface",
                 )
 
@@ -323,10 +323,7 @@ class MaterialLibrary:
     def import_asset_to_scene(self, asset_id: str) -> None | hou.Node:
         """Import a Material to the Nework Editor/Scene"""
         file_name = (
-            self.path
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + self.settings.get_ext()
+            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
         )
 
         mat = self.get_asset_by_id(asset_id)
@@ -380,7 +377,7 @@ class MaterialLibrary:
                     import_path = hou.node("/stage").createNode("materiallibrary")
 
         parms_file_name = (
-            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
+            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
         )
 
         # Create temporary storage of nodes
@@ -570,13 +567,10 @@ class MaterialLibrary:
         """Saves the attached network from a collect node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.path
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + self.settings.get_ext()
+            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
         )
         parms_file_name = (
-            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
+            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
         )
 
         nodetree = helpers.getConnectedNodes(node)
@@ -605,15 +599,12 @@ class MaterialLibrary:
         """Saves the MtlX node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.path
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + self.settings.get_ext()
+            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
         )
 
         # interface-stuff
         parms_file_name = (
-            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
+            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
         )
 
         children = node.children()
@@ -644,7 +635,7 @@ class MaterialLibrary:
 
     def create_thumb_mtlx(self, children: list[hou.Node], asset_id: str) -> bool:
         # Build path
-        path = self.path + self.settings.get_img_dir() + str(asset_id) + ".exr"
+        path = self.path + self.settings.img_dir + str(asset_id) + ".exr"
 
         # Create Thumbnail
         net = hou.node("/obj").createNode("lopnet")
@@ -783,10 +774,7 @@ class MaterialLibrary:
             cop_out.setInput(0, cop_vop)
 
         newpath = (
-            self.path
-            + self.settings.get_img_dir()
-            + str(asset_id)
-            + self.settings.get_img_ext()
+            self.path + self.settings.img_dir + str(asset_id) + self.settings.img_ext
         )
 
         cop_out.parm("copoutput").set(newpath)
@@ -809,11 +797,11 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.path + self.settings.get_img_dir() + str(asset_id)
+        path = self.path + self.settings.img_dir + str(asset_id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path + ".exr")
-        thumb.parm("cop_out_img").set(path + self.settings.get_img_ext())
+        thumb.parm("cop_out_img").set(path + self.settings.img_ext)
         exclude = "* ^" + thumb.name()
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
@@ -833,15 +821,12 @@ class MaterialLibrary:
         """Saves the Redshift node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.path
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + self.settings.get_ext()
+            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
         )
 
         # interface-stuff
         parms_file_name = (
-            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
+            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
         )
         children = node.children()
 
@@ -863,12 +848,7 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = (
-            self.path
-            + self.settings.get_img_dir()
-            + str(asset_id)
-            + self.settings.get_img_ext()
-        )
+        path = self.path + self.settings.img_dir + str(asset_id) + self.settings.img_ext
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path)
@@ -888,15 +868,12 @@ class MaterialLibrary:
     def save_node_octane(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         # Filepath where to save stuff
         file_name = (
-            self.path
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + self.settings.get_ext()
+            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
         )
 
         # interface-stuff
         parms_file_name = (
-            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
+            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
         )
         children = node.children()
 
@@ -917,12 +894,7 @@ class MaterialLibrary:
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
         # Build path
-        path = (
-            self.path
-            + self.settings.get_img_dir()
-            + str(asset_id)
-            + self.settings.get_img_ext()
-        )
+        path = self.path + self.settings.img_dir + str(asset_id) + self.settings.img_ext
 
         # Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path)
@@ -946,15 +918,12 @@ class MaterialLibrary:
         """Saves the Arnold node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.path
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + self.settings.get_ext()
+            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
         )
 
         # interface-stuff
         parms_file_name = (
-            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
+            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
         )
         children = node.children()
 
@@ -975,11 +944,11 @@ class MaterialLibrary:
         thumb.parm("mat").set(node.path())
 
         # Build path
-        path = self.path + self.settings.get_img_dir() + str(asset_id)
+        path = self.path + self.settings.img_dir + str(asset_id)
 
         #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path + ".exr")
-        thumb.parm("cop_out_img").set(path + self.settings.get_img_ext())
+        thumb.parm("cop_out_img").set(path + self.settings.img_ext)
 
         exclude = "* ^" + thumb.name()
         thumb.parm("obj_exclude").set(exclude)
@@ -1009,10 +978,7 @@ class MaterialLibrary:
         """Saves the Mantra node to disk - does not add to library"""
         # Filepath where to save stuff
         file_name = (
-            self.path
-            + self.settings.get_asset_dir()
-            + str(asset_id)
-            + self.settings.get_ext()
+            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
         )
 
         origNode = node
@@ -1026,7 +992,7 @@ class MaterialLibrary:
 
         # interface-stuff
         parms_file_name = (
-            self.path + self.settings.get_asset_dir() + str(asset_id) + ".interface"
+            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
         )
         children = node.children()
 

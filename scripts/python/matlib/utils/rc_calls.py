@@ -9,12 +9,10 @@ def save_material(node: hou.Node) -> None:
     # TODO: Move
     # Initialize
     pref = main_prefs.Prefs()
-    path = pref.get_dir() + "/"
-    path = path.replace("\\", "/")
 
     # Save new Data to Library
     library = matlib_core.MaterialLibrary()
-    library.load(path, pref)
+    library.load(pref.dir, pref)
 
     # Get Stuff from User
     dialog = usd_dialog.UsdDialog()

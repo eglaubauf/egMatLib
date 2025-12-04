@@ -36,7 +36,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         self.prefs = main_prefs.Prefs()
-        path = self.prefs.get_dir()
+        path = self.prefs.dir
         if not path.endswith("/"):
             path = path + "/"
 
@@ -71,7 +71,7 @@ class MatLibPanel(QtWidgets.QWidget):
         count = 0
         while count < 1:
             if os.path.exists(path):
-                self.prefs.set_dir(path)
+                self.prefs.dir = path
                 self.prefs.save()
                 count = 3
             elif path == "":
@@ -93,9 +93,9 @@ class MatLibPanel(QtWidgets.QWidget):
             )
             shutil.copy(oldpath, path + "/library.json")
             new_folder = True
-        if not os.path.exists(path + self.prefs.get_img_dir()):
-            os.mkdir(path + self.prefs.get_img_dir())
-            os.mkdir(path + self.prefs.get_asset_dir())
+        if not os.path.exists(path + self.prefs.img_dir):
+            os.mkdir(path + self.prefs.img_dir)
+            os.mkdir(path + self.prefs.asset_dir)
             new_folder = True
         if new_folder:
             msg = "A new library has been created successfully"
@@ -487,8 +487,8 @@ class MatLibPanel(QtWidgets.QWidget):
     # Remove image thumbs and .asset-files not used in material library.
     def cleanup_files(self) -> None:
         assets = self.library.assets
-        img_path = os.path.join(self.path, self.prefs.get_img_dir())
-        asset_path = os.path.join(self.path, self.prefs.get_asset_dir())
+        img_path = os.path.join(self.path, self.prefs.img_dir)
+        asset_path = os.path.join(self.path, self.prefs.asset_dir)
 
         img_thumbs = os.listdir(img_path)
         asset_files = os.listdir(asset_path)
@@ -551,16 +551,16 @@ class MatLibPanel(QtWidgets.QWidget):
             if asset.mat_id > 0:
                 interface_path = os.path.join(
                     self.path,
-                    self.prefs.get_asset_dir(),
+                    self.prefs.asset_dir,
                     str(asset.mat_id) + ".interface",
                 )
                 mat_path = os.path.join(
-                    self.path, self.prefs.get_asset_dir(), str(asset.mat_id) + ".mat"
+                    self.path, self.prefs.asset_dir, str(asset.mat_id) + ".mat"
                 )
                 img_path = os.path.join(
                     self.path,
-                    self.prefs.get_img_dir(),
-                    str(asset.mat_id) + self.prefs.get_img_ext(),
+                    self.prefs.img_dir,
+                    str(asset.mat_id) + self.prefs.img_ext,
                 )
 
                 # asset_path = asset.path
@@ -578,7 +578,7 @@ class MatLibPanel(QtWidgets.QWidget):
                         f"Image for Asset { asset.mat_id} missing on disk. Needs Rendering."
                     )
 
-        mats_path = os.path.join(self.path, self.prefs.get_asset_dir())
+        mats_path = os.path.join(self.path, self.prefs.asset_dir)
         mark_lone = 0
         for f in os.listdir(mats_path):
             if f.endswith(".mat") or f.endswith(".interface"):
@@ -618,8 +618,8 @@ class MatLibPanel(QtWidgets.QWidget):
             if asset.mat_id > 0:
                 img_path = os.path.join(
                     self.path,
-                    self.prefs.get_img_dir(),
-                    str(asset.mat_id) + self.prefs.get_img_ext(),
+                    self.prefs.img_dir,
+                    str(asset.mat_id) + self.prefs.img_ext,
                 )
                 # print(img_path)
                 asset_path = asset.path
@@ -933,9 +933,9 @@ class MatLibPanel(QtWidgets.QWidget):
 
                 img = (
                     self.library.path
-                    + self.prefs.get_img_dir()
+                    + self.prefs.img_dir
                     + str(asset.mat_id)
-                    + self.prefs.get_img_ext()
+                    + self.prefs.img_ext
                 )
 
                 favicon = hou.getenv("EGMATLIB") + "/def/Favorite.png"
