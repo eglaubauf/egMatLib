@@ -23,7 +23,7 @@ importlib.reload(database)
 
 
 class Categories(QtCore.QAbstractListModel):
-    def __init__(self, parent: QtCore.QObject | None = ...) -> None:
+    def __init__(self, parent: QtCore.QObject | None = None) -> None:
         super().__init__()
 
         perferences = prefs.Prefs()
@@ -37,7 +37,7 @@ class Categories(QtCore.QAbstractListModel):
         return len(self._categories)
 
     def data(
-        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = ...
+        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
     ) -> Any:
         if role == QtCore.Qt.ItemDataRole.DisplayRole:
             return self._categories[index.row()]

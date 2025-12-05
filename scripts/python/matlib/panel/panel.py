@@ -50,7 +50,11 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Attach models to views
         self.category_model = models.Categories()
-        self.cat_list.setModel(self.category_model)
+        self.category_sorted_model = QtCore.QSortFilterProxyModel()
+        self.category_sorted_model.setSourceModel(self.category_model)
+        self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.category_sorted_model.sort(0)
+        self.cat_list.setModel(self.category_sorted_model)
 
         # Load prefs and open library
         self.prefs = prefs.Prefs()

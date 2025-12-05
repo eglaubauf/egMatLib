@@ -75,6 +75,9 @@
        <property name="showDropIndicator" stdset="0">
         <bool>false</bool>
        </property>
+       <property name="alternatingRowColors">
+        <bool>false</bool>
+       </property>
       </widget>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -344,7 +347,7 @@
              <x>0</x>
              <y>0</y>
              <width>229</width>
-             <height>773</height>
+             <height>760</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -659,7 +662,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>37</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
