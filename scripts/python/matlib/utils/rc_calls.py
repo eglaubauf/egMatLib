@@ -12,7 +12,7 @@ def save_material(node: hou.Node) -> None:
 
     # Save new Data to Library
     library = models.MaterialLibrary()
-    library.load(pref.dir, pref)
+    library.load(pref)
 
     # Get Stuff from User
     dialog = usd_dialog.UsdDialog()

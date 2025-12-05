@@ -767,6 +767,10 @@ class MatLibPanel(QtWidgets.QWidget):
                     if asset.renderer != "MatX":
                         continue
 
+                # print(self.library.path)
+                # print(self.prefs.img_dir)
+                # print(str(asset.mat_id))
+                # print(self.prefs.img_ext)
                 img = (
                     self.library.path
                     + self.prefs.img_dir
@@ -778,6 +782,7 @@ class MatLibPanel(QtWidgets.QWidget):
                 # Check if Thumb Exists and attach
                 icon = None
                 if os.path.isfile(img):
+
                     # Draw Star Icon on Top if Favorite
                     if asset.fav:
                         pm = QtGui.QPixmap(

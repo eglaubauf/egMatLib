@@ -8,7 +8,7 @@ import hou
 
 from matlib.helpers import helpers
 from matlib.render import thumbnail_scene
-from matlib.core import material
+from matlib.core import material, database
 
 
 from matlib.prefs import prefs
@@ -16,6 +16,7 @@ from matlib.prefs import prefs
 importlib.reload(material)
 importlib.reload(helpers)
 importlib.reload(thumbnail_scene)
+importlib.reload(database)
 
 
 class MaterialLibrary:
@@ -33,18 +34,18 @@ class MaterialLibrary:
         self._context: hou.Node = hou.node("/stage")
 
     def load(self, prefs: prefs.Prefs) -> None:
-        self._path = prefs.dir
-        with open(self._path + ("/library.json"), encoding="utf_8") as lib_json:
-            self._data = json.load(lib_json)
 
-            asset_data = self._data["assets"]
-            self._assets = [material.Material.from_dict(data) for data in asset_data]
+        self.path = prefs.dir
+        db = database.DatabaseConnector()
+        self._data = db.load(prefs.dir)
 
-            self._categories = self._data["categories"]
-            self._tags = self._data["tags"]
-            self.thumbsize = self._data["thumbsize"]
-            self.rendersize = self._data["rendersize"]
-            self.render_on_import = self._data["render_on_import"]
+        self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
+
+        self._categories = self._data["categories"]
+        self._tags = self._data["tags"]
+        self.thumbsize = self._data["thumbsize"]
+        self.rendersize = self._data["rendersize"]
+        self.render_on_import = self._data["render_on_import"]
 
         self.settings = prefs
 
@@ -58,8 +59,8 @@ class MaterialLibrary:
         self._data["rendersize"] = self.rendersize
         self._data["render_on_import"] = self.render_on_import
 
-        with open(self._path + ("/library.json"), "w", encoding="utf-8") as lib_json:
-            json.dump(self._data, lib_json, indent=4)
+        db = database.DatabaseConnector()
+        db.save()
 
     def check_exists_in_lib(self, path: str) -> bool:
         return any(asset.path == path for asset in self.assets)
@@ -77,6 +78,10 @@ class MaterialLibrary:
     @property
     def path(self) -> str:
         return self._path
+
+    @path.setter
+    def path(self, path: str) -> None:
+        self._path = path
 
     @property
     def assets(self) -> list:
