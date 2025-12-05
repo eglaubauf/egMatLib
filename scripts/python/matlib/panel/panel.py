@@ -49,63 +49,59 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Load prefs and open library
         self.prefs = prefs.Prefs()
-        if os.path.exists(self.prefs.dir):
-            self.open(self.prefs.dir)
+        self.load()
 
         self.update_context()
 
-    def open(self, path=None) -> None:
-        if not path:
-            path = self.prefs.get_dir()
-            if not path.endswith("/"):
-                path = path + "/"
-            path = hou.ui.selectFile(file_type=hou.fileType.Directory)
-            path = hou.expandString(path)
+    def load(self) -> None:
+        if not os.path.exists(self.prefs.dir):
+            if not self.get_dir_from_user():
+                return
 
+        new_folder = False
+        if not os.path.exists(self.prefs.dir + "/library.json"):
+            oldpath = (
+                hou.getenv("EGMATLIB") + "/scripts/python/matlib/res/def/library.json"
+            )
+            shutil.copy(oldpath, self.prefs.dir + "/library.json")
+            new_folder = True
+
+        if not os.path.exists(self.prefs.dir + self.prefs.img_dir):
+            os.mkdir(self.prefs.dir + self.prefs.img_dir)
+            os.mkdir(self.prefs.dir + self.prefs.asset_dir)
+            new_folder = True
+
+        if new_folder:
+            msg = "A new library has been created successfully"
+            hou.ui.displayMessage(msg)  # type: ignore
+
+        # Create Library
+        self.library = models.MaterialLibrary()
+        self.library.load(self.prefs)
+
+        self.draw_assets = self.library.assets  # Filterered assets for Views
+        self.update_views()
+
+    def get_dir_from_user(self) -> bool:
         # Get Dir from User
         count = 0
+        path = ""
         while count < 1:
-            if os.path.exists(path):
+            if os.path.exists(self.prefs.dir):
                 self.prefs.dir = path
                 self.prefs.save()
-                count = 3
-            elif path == "":
-                return
+                return True
             else:
                 hou.ui.displayMessage("Please choose a valid path")  # type: ignore
                 path = hou.ui.selectFile(file_type=hou.fileType.Directory)
                 path = hou.expandString(path)
             count += 1
-        # Return if still not a valid path
-        if path == "":
-            return
-
-        path = path.replace("\\", "/")
-        new_folder = False
-        if not os.path.exists(path + "/library.json"):
-            oldpath = (
-                hou.getenv("EGMATLIB") + "/scripts/python/matlib/res/def/library.json"
-            )
-            shutil.copy(oldpath, path + "/library.json")
-            new_folder = True
-        if not os.path.exists(path + self.prefs.img_dir):
-            os.mkdir(path + self.prefs.img_dir)
-            os.mkdir(path + self.prefs.asset_dir)
-            new_folder = True
-        if new_folder:
-            msg = "A new library has been created successfully"
-            hou.ui.displayMessage(msg)  # type: ignore
-        self.path = path
-        # Create Library
-        self.library = models.MaterialLibrary()
-        self.library.load(path, self.prefs)
-
-        self.draw_assets = self.library.assets  # Filterered assets for Views
-        self.update_views()
+        # Return false if still not a valid path
+        return False
 
     def update_external(self) -> None:
         if self.library:
-            self.library.load(self.path, self.prefs)
+            self.library.load(self.prefs)
             self.update_views()
         else:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
@@ -191,7 +187,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_about.triggered.connect(self.show_about)
 
         self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
-        self.action_open.triggered.connect(self.open)
+        self.action_open.triggered.connect(self.load)
 
         self.action_import_files = self.ui.findChild(
             QtGui.QAction, "action_import_files"
