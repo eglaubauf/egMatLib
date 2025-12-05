@@ -209,7 +209,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QListWidget" name="listw_matview">
+         <widget class="QListView" name="thumbview">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -346,7 +346,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>229</width>
+             <width>230</width>
              <height>760</height>
             </rect>
            </property>

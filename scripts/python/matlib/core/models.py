@@ -4,7 +4,7 @@ import datetime
 import time
 import importlib
 
-from PySide6 import QtCore
+from PySide6 import QtCore, QtGui
 from typing import Any
 
 import hou
@@ -20,6 +20,10 @@ importlib.reload(material)
 importlib.reload(helpers)
 importlib.reload(thumbnail_scene)
 importlib.reload(database)
+
+default_icon = QtGui.QImage(
+    "/Users/elmar/git/egMatLib/scripts/python/matlib/res/img/default.png"
+).scaled(QtCore.QSize(64, 64))
 
 
 class Categories(QtCore.QAbstractListModel):
@@ -43,8 +47,9 @@ class Categories(QtCore.QAbstractListModel):
             return self._categories[index.row()]
 
 
-class MaterialLibrary:
-    def __init__(self) -> None:
+class MaterialLibrary(QtCore.QAbstractListModel):
+    def __init__(self, parent: QtCore.QObject | None = None) -> None:
+        super().__init__()
         self._assets = []
         self._categories = [""]
         self._tags = [""]
@@ -53,25 +58,50 @@ class MaterialLibrary:
         self._thumbsize = -1
         self._rendersize = -1
         self._render_on_import = False
-        self._data = {}
+        # self._data = {}
 
         self._context: hou.Node = hou.node("/stage")
 
-    def load(self, prefs: prefs.Prefs) -> None:
-
-        self.path = prefs.dir
+        # Open Db Connection
+        perferences = prefs.Prefs()
+        self.settings = prefs  # TODO Remove Future
         db = database.DatabaseConnector()
-        self._data = db.load(prefs.dir)
+        data = db.load(perferences.dir)
 
-        self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
+        # Map to Model
+        self._assets = [material.Material.from_dict(d) for d in data["assets"]]
+        self._categories = data["categories"]
+        self._tags = data["tags"]
+        self.thumbsize = data["thumbsize"]
+        self.rendersize = data["rendersize"]
+        self.render_on_import = data["render_on_import"]
 
-        self._categories = self._data["categories"]
-        self._tags = self._data["tags"]
-        self.thumbsize = self._data["thumbsize"]
-        self.rendersize = self._data["rendersize"]
-        self.render_on_import = self._data["render_on_import"]
+        self.IdRole = QtCore.Qt.ItemDataRole.UserRole
+        self.CategoryRole = QtCore.Qt.ItemDataRole.UserRole + 1
 
-        self.settings = prefs
+    # def roleNames(self) -> QtCore.Dict[int, QtCore.QByteArray]:
+    #     return {self.IdRole: b"id", self.CategoryRole: b"Category"}
+
+    def rowCount(
+        self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
+    ) -> int:
+        return len(self._assets)
+
+    def data(
+        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
+    ) -> Any:
+        # if self._assets[index.row()].mat_id == "-1":
+        #     return None
+        if role == QtCore.Qt.ItemDataRole.DisplayRole:
+            return self._assets[index.row()].name
+
+        if role == QtCore.Qt.ItemDataRole.DecorationRole:
+            if index.row() < 0:
+                return None
+            return default_icon
+
+        if role == self.CategoryRole:
+            return self._assets[index.row()].categories
 
     def save(self) -> None:
         """Save data to disk as json"""

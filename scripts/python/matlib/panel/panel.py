@@ -56,6 +56,13 @@ class MatLibPanel(QtWidgets.QWidget):
         self.category_sorted_model.sort(0)
         self.cat_list.setModel(self.category_sorted_model)
 
+        self.material_model = models.MaterialLibrary()
+        self.material_sorted_model = QtCore.QSortFilterProxyModel()
+        self.material_sorted_model.setSourceModel(self.material_model)
+        self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.material_sorted_model.sort(0)
+        self.thumblist.setModel(self.material_sorted_model)
+
         # Load prefs and open library
         self.prefs = prefs.Prefs()
         self.load()
@@ -85,11 +92,13 @@ class MatLibPanel(QtWidgets.QWidget):
             hou.ui.displayMessage(msg)  # type: ignore
 
         # Create Library
-        self.library = models.MaterialLibrary()
-        self.library.load(self.prefs)
+        # self.library = models.MaterialLibrary()
+
+        self.library = self.material_model
+        # self.library.load(self.prefs)
 
         self.draw_assets = self.library.assets  # Filterered assets for Views
-        self.update_views()
+        # self.update_views()
 
     def get_dir_from_user(self) -> bool:
         # Get Dir from User
@@ -207,11 +216,9 @@ class MatLibPanel(QtWidgets.QWidget):
         )
         self.action_force_update.triggered.connect(self.update_external)
 
-        self.thumblist = self.ui.findChild(QtWidgets.QListWidget, "listw_matview")
+        self.thumblist = self.ui.findChild(QtWidgets.QListView, "thumbview")
         self.thumblist.doubleClicked.connect(self.import_asset)
-        self.thumblist.itemPressed.connect(self.update_details_view)
-        self.thumblist.setContentsMargins(0, 0, 0, 0)
-        self.thumblist.setSortingEnabled(True)
+        # self.thumblist.itemPressed.connect(self.update_details_view)
 
         # Category UI
         self.cat_list = self.ui.findChild(QtWidgets.QListView, "catview")
@@ -683,15 +690,13 @@ class MatLibPanel(QtWidgets.QWidget):
     # Update the Views when selection changes
     def update_selected_cat(self) -> None:
         """Update thumb view on change of category"""
-        self.selected_cat = None
-        items = self.cat_list.selectedIndexes()
-        if len(items) == 1:
-            if items[0].data() == "All":
-                self.selected_cat = None
-                self.update_thumb_view()
-            else:
-                self.selected_cat = items[0].data()
-                self.update_thumb_view()
+        index = self.cat_list.selectedIndexes()[0]
+        if index.data() == "All":
+            self.material_sorted_model.setFilterRole(self.material_model.CategoryRole)
+            self.material_sorted_model.setFilterFixedString("")
+        else:
+            self.material_sorted_model.setFilterRole(self.material_model.CategoryRole)
+            self.material_sorted_model.setFilterFixedString(index.data())
 
     # Filter assets in Thumblist for Category
     def filter_view_category(self) -> None:
@@ -727,7 +732,7 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_thumb_view(self) -> None:
         """Redraw the ThumbView with filters"""
         # Cleanup UI
-        self.thumblist.clear()
+        # self.thumblist.clear()
 
         self.filter_view_category()  # Filter View by Category
         self.filter_view_filter()  # Filter View by Line Filter
