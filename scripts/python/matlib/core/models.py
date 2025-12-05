@@ -3,7 +3,10 @@ import uuid
 import datetime
 import time
 import importlib
-import json
+
+from PySide6 import QtCore
+from typing import Any
+
 import hou
 
 from matlib.helpers import helpers
@@ -17,6 +20,27 @@ importlib.reload(material)
 importlib.reload(helpers)
 importlib.reload(thumbnail_scene)
 importlib.reload(database)
+
+
+class Categories(QtCore.QAbstractListModel):
+    def __init__(self, parent: QtCore.QObject | None = ...) -> None:
+        super().__init__()
+
+        perferences = prefs.Prefs()
+        db = database.DatabaseConnector()
+        data = db.load(perferences.dir)
+        self._categories = data["categories"]
+
+    def rowCount(
+        self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
+    ) -> int:
+        return len(self._categories)
+
+    def data(
+        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = ...
+    ) -> Any:
+        if role == QtCore.Qt.ItemDataRole.DisplayRole:
+            return self._categories[index.row()]
 
 
 class MaterialLibrary:

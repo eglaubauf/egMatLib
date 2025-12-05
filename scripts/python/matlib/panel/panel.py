@@ -1,3 +1,4 @@
+from dbm.ndbm import library
 import os
 import shutil
 import sys
@@ -46,6 +47,10 @@ class MatLibPanel(QtWidgets.QWidget):
         self.edit = False
 
         self.init_ui()
+
+        # Attach models to views
+        self.category_model = models.Categories()
+        self.cat_list.setModel(self.category_model)
 
         # Load prefs and open library
         self.prefs = prefs.Prefs()
@@ -206,7 +211,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.thumblist.setSortingEnabled(True)
 
         # Category UI
-        self.cat_list = self.ui.findChild(QtWidgets.QListWidget, "listw_catview")
+        self.cat_list = self.ui.findChild(QtWidgets.QListView, "catview")
         self.cat_list.clicked.connect(self.update_selected_cat)
 
         # FILTER UI
@@ -676,32 +681,34 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_selected_cat(self) -> None:
         """Update thumb view on change of category"""
         self.selected_cat = None
-        items = self.cat_list.selectedItems()
+        items = self.cat_list.selectedIndexes()
         if len(items) == 1:
-            if items[0].text() == "All":
+            if items[0].data() == "All":
                 self.selected_cat = None
                 self.update_thumb_view()
             else:
-                self.selected_cat = items[0].text()
+                self.selected_cat = items[0].data()
                 self.update_thumb_view()
 
     # Update Category View
     def update_cat_view(self) -> None:
-        """Update cat view"""
-        self.cat_list.clear()
-        for cat in self.library.categories:
-            item = QtWidgets.QListWidgetItem(cat)
-            self.cat_list.addItem(item)
+        pass
 
-        begin = self.cat_list.findItems("All", QtCore.Qt.MatchExactly)[0]
+    #     """Update cat view"""
+    #     self.cat_list.clear()
+    #     for cat in self.library.categories:
+    #         item = QtWidgets.QListWidgetItem(cat)
+    #         self.cat_list.addItem(item)
 
-        if sys.platform == "linux" or sys.platform == "linux2":
-            begin.setText("000_All")
-        else:
-            begin.setText("___All")
-        self.cat_list.sortItems()
-        begin.setText("All")
-        self.thumblist.sortItems()
+    #     begin = self.cat_list.findItems("All", QtCore.Qt.MatchExactly)[0]
+
+    #     if sys.platform == "linux" or sys.platform == "linux2":
+    #         begin.setText("000_All")
+    #     else:
+    #         begin.setText("___All")
+    #     self.cat_list.sortItems()
+    #     begin.setText("All")
+    #     self.thumblist.sortItems()
 
     # Filter assets in Thumblist for Category
     def filter_view_category(self) -> None:
