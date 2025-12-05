@@ -35,17 +35,9 @@ class MatLibPanel(QtWidgets.QWidget):
         # Initialize
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-        self.prefs = prefs.Prefs()
-        path = self.prefs.dir
-        if not path.endswith("/"):
-            path = path + "/"
-
         self.library = None
-        self.createview()
-
         self.selected_cat = None
         self.filter = ""
-
         self.active_row = None
         self.last_selected_items = []
         self.draw_assets = []
@@ -53,13 +45,16 @@ class MatLibPanel(QtWidgets.QWidget):
         self.active_item = None
         self.edit = False
 
-        if os.path.exists(path):
-            self.open(path)
+        self.init_ui()
+
+        # Load prefs and open library
+        self.prefs = prefs.Prefs()
+        if os.path.exists(self.prefs.dir):
+            self.open(self.prefs.dir)
 
         self.update_context()
 
     def open(self, path=None) -> None:
-
         if not path:
             path = self.prefs.get_dir()
             if not path.endswith("/"):
@@ -160,7 +155,7 @@ class MatLibPanel(QtWidgets.QWidget):
             self.action_detailsview.setChecked(False)
 
     # View Stuff
-    def createview(self) -> None:
+    def init_ui(self) -> None:
         """Creates the panel-view on load"""
         # Load UI from ui.file
         loader = QtUiTools.QUiLoader()
@@ -198,10 +193,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
         self.action_open.triggered.connect(self.open)
 
-        # TODO: FUTURE
-        # self.action_import_folder = self.ui.findChild(QtGui.QAction, "action_import_folder")
-        # self.action_import_folder.triggered.connect(self.import_folder)
-
         self.action_import_files = self.ui.findChild(
             QtGui.QAction, "action_import_files"
         )
@@ -213,14 +204,8 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_force_update.triggered.connect(self.update_external)
 
         self.thumblist = self.ui.findChild(QtWidgets.QListWidget, "listw_matview")
-        # self.thumblist.setIconSize(
-        #     QtCore.QSize(self.library.thumbsize, self.library.thumbsize)
-        # )
         self.thumblist.doubleClicked.connect(self.import_asset)
         self.thumblist.itemPressed.connect(self.update_details_view)
-        # self.thumblist.setGridSize(
-        #     QtCore.QSize(self.library.thumbsize + 10, self.library.thumbsize + 40)
-        # )
         self.thumblist.setContentsMargins(0, 0, 0, 0)
         self.thumblist.setSortingEnabled(True)
 
@@ -304,10 +289,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.a_files.setDisabled(True)
         self.a_files.setVisible(False)
 
-        # self.menu_import = self.ui.findChild(QtWidgets.QMenu, "menuImport")
-        # self.menu_import.setDisabled(True)
-        # self.menu_import.setVisible(False)
-
         # set main layout and attach to widget
         mainlayout = QtWidgets.QVBoxLayout()
         mainlayout.addWidget(self.ui)
@@ -319,7 +300,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.setStyleSheet("""  font-family: Lato; """)
         self.menu.setStyleSheet(""" font-family: Lato; """)
         self.menuGoto.setStyleSheet("""  font-family: Lato; """)
-        # self.menu_import.setStyleSheet("""  font-family: Lato; """)
 
     def update_context(self) -> None:
         if not self.library:
