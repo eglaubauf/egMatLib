@@ -385,11 +385,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.update_details_view(items[0])
         self.update_views()
 
-    # def import_folder(self):
-    #     self.h = importMat.Controller()
-    #     self.h.show()
-    #     self.h.finished.connect(self.import_folder_finished)
-
     def import_folder_finished(self) -> None:
         #  finalize import by adding the created materials to the library
         materials = self.h.core.get_new_materials()
