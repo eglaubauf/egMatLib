@@ -119,7 +119,6 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_views(self) -> None:
         self.update_ui()
         self.update_thumb_view()
-        self.update_cat_view()
 
     def update_ui(self) -> None:
         if self.cb_mantra.isChecked():
@@ -693,26 +692,6 @@ class MatLibPanel(QtWidgets.QWidget):
             else:
                 self.selected_cat = items[0].data()
                 self.update_thumb_view()
-
-    # Update Category View
-    def update_cat_view(self) -> None:
-        pass
-
-    #     """Update cat view"""
-    #     self.cat_list.clear()
-    #     for cat in self.library.categories:
-    #         item = QtWidgets.QListWidgetItem(cat)
-    #         self.cat_list.addItem(item)
-
-    #     begin = self.cat_list.findItems("All", QtCore.Qt.MatchExactly)[0]
-
-    #     if sys.platform == "linux" or sys.platform == "linux2":
-    #         begin.setText("000_All")
-    #     else:
-    #         begin.setText("___All")
-    #     self.cat_list.sortItems()
-    #     begin.setText("All")
-    #     self.thumblist.sortItems()
 
     # Filter assets in Thumblist for Category
     def filter_view_category(self) -> None:
