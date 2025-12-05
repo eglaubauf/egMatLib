@@ -63,7 +63,7 @@ class PrefsDialog(QtWidgets.QDialog):
 
     # Fill UI
     def fill_values(self) -> None:
-        self.directory = self.prefs.get_dir()
+        self.directory = self.prefs.dir
         self.rendersize = self.library.rendersize
         self.thumbsize = self.library.thumbsize
         self.render_on_import = self.library.render_on_import
