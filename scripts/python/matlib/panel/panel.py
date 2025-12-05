@@ -149,28 +149,10 @@ class MatLibPanel(QtWidgets.QWidget):
             self.cat_list.setVisible(False)
             self.action_catview.setChecked(False)
 
-    def toggle_catview_rc(self) -> None:
-        if not self.action_catview.isChecked():
-            self.cat_list.setVisible(True)
-            self.action_catview.setChecked(True)
-        else:
-            self.cat_list.setVisible(False)
-            self.action_catview.setChecked(False)
-
     def toggle_detailsview(self) -> None:
         details_widget = self.ui.findChild(QtWidgets.QWidget, "details_widget")
 
         if self.action_detailsview.isChecked():
-            details_widget.setHidden(False)
-            self.action_detailsview.setChecked(True)
-        else:
-            details_widget.setHidden(True)
-            self.action_detailsview.setChecked(False)
-
-    def toggle_detailsview_rc(self) -> None:
-        details_widget = self.ui.findChild(QtWidgets.QWidget, "details_widget")
-
-        if not self.action_detailsview.isChecked():
             details_widget.setHidden(False)
             self.action_detailsview.setChecked(True)
         else:
@@ -390,9 +372,9 @@ class MatLibPanel(QtWidgets.QWidget):
         elif action == action_toggle_fav:
             self.toggle_fav()
         elif action == action_toggle_details:
-            self.toggle_detailsview_rc()
+            self.toggle_detailsview()
         elif action == action_toggle_cats:
-            self.toggle_catview_rc()
+            self.toggle_catview()
 
         self.update_views()
 
