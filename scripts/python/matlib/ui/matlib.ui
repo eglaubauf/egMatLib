@@ -800,7 +800,7 @@
   </action>
   <action name="action_open">
    <property name="text">
-    <string>Open Library</string>
+    <string>Reload Library</string>
    </property>
   </action>
  </widget>

@@ -76,6 +76,13 @@ class MatLibPanel(QtWidgets.QWidget):
         self.prefs = prefs.Prefs()
         self.load()
 
+    def open(self) -> None:
+        self.material_model.save()
+        self.material_model = models.MaterialLibrary()
+        self.prefs.load()
+        self.load()
+        hou.ui.displayMessage("Library Reloaded successfully!")
+
     def load(self) -> None:
 
         new_folder = False
@@ -89,7 +96,6 @@ class MatLibPanel(QtWidgets.QWidget):
             os.mkdir(self.prefs.dir + self.prefs.img_dir)
             os.mkdir(self.prefs.dir + self.prefs.asset_dir)
             new_folder = True
-
         if new_folder:
             msg = "A new library has been created successfully"
             hou.ui.displayMessage(msg)  # type: ignore
@@ -148,7 +154,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_about.triggered.connect(self.show_about)
 
         self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
-        self.action_open.triggered.connect(self.load)
+        self.action_open.triggered.connect(self.open)
 
         self.action_import_files = self.ui.findChild(
             QtGui.QAction, "action_import_files"
