@@ -41,7 +41,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.filter = ""
         self.active_row = None
         self.last_selected_items = []
-        self.draw_assets = []
         self.active = False
         self.active_item = None
         self.edit = False
@@ -85,8 +84,6 @@ class MatLibPanel(QtWidgets.QWidget):
         if new_folder:
             msg = "A new library has been created successfully"
             hou.ui.displayMessage(msg)  # type: ignore
-
-        self.draw_assets = self.material_model.assets  # Filterered assets for Views
 
     def update_external(self) -> None:
         if self.material_model:
@@ -196,7 +193,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # FILTER UI
         self.line_filter = self.ui.findChild(QtWidgets.QLineEdit, "line_filter")
-        self.line_filter.textChanged.connect(self.filter_thumb_view)
+        self.line_filter.textChanged.connect(self.filter_thumb_view_user)
 
         # Updated Details UI
         self.details = self.ui.findChild(QtWidgets.QTableWidget, "details_widget")
@@ -668,36 +665,6 @@ class MatLibPanel(QtWidgets.QWidget):
         else:
             self.material_sorted_model.setFilterRole(self.material_model.CategoryRole)
             self.material_sorted_model.setFilterFixedString(index.data())
-
-    # # Filter assets in Thumblist for Category
-    # def filter_view_category(self) -> None:
-    #     """Filter Thumbview for selected Category"""
-    #     # Filter Thumbnail View
-    #     self.draw_assets = []
-    #     for asset in self.material_model.assets:
-    #         if self.selected_cat in asset.categories:
-    #             self.draw_assets.append(asset)
-    #     if not self.selected_cat:
-    #         self.draw_assets = self.material_model.assets
-
-    # Filter assets in Thumblist for Category
-    def filter_view_filter(self) -> None:
-        """Filter Thumbview for entered characters in filter-Line"""
-        # Filter Thumbnail View
-        if self.filter == "":
-            return
-        tmp = []
-        if self.filter.startswith("*"):
-            # Filter for tags
-            curr_filter = self.filter[1:]
-            for asset in self.draw_assets:
-                if curr_filter in asset.tags:
-                    tmp.append(asset)
-        else:
-            for asset in self.draw_assets:
-                if self.filter in asset.name:
-                    tmp.append(asset)
-        self.draw_assets = tmp
 
     # # Update Thumbnail View
     # def update_thumb_view(self) -> None:
