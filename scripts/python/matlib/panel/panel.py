@@ -320,22 +320,6 @@ class MatLibPanel(QtWidgets.QWidget):
             self.add_category_user()
         return
 
-    # def add_material_from_rc(self) -> None:
-    #     # Get Infos from User
-    #     dialog = usd_dialog.UsdDialog()
-    #     r = dialog.exec_()
-    #     if dialog.canceled or not r:
-    #         return
-
-    #     # Check if Category or Tags already exist
-    #     if dialog.categories:
-    #         library.check_add_category(dialog.categories)
-    #     if dialog.tags:
-    #         library.check_add_tags(dialog.tags)
-
-    #     library.layoutAboutToBeChanged.emit()
-    #     library.add_asset(node, dialog.categories, dialog.tags, dialog.fav)
-
     def toggle_fav(self) -> None:
         items = self.get_selected_items_from_thumblist()
         if not items:
@@ -398,7 +382,6 @@ class MatLibPanel(QtWidgets.QWidget):
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
         self.material_model.cleanup_db()
-        # self.update_thumb_view()
 
     def render_missing(self) -> None:
         if not self.material_model:
@@ -426,7 +409,6 @@ class MatLibPanel(QtWidgets.QWidget):
                     elif not os.path.exists(asset_path):
                         print("Asset missing on disk. Removing.")
                         self.material_model.remove_asset(asset.mat_id)
-                    self.update_thumb_view()
         return
 
     def open_usdlib_folder(self) -> None:
@@ -663,161 +645,7 @@ class MatLibPanel(QtWidgets.QWidget):
             self.material_sorted_model.setFilterRole(self.material_model.CategoryRole)
             self.material_sorted_model.setFilterFixedString(index.data())
 
-    # # Update Thumbnail View
-    # def update_thumb_view(self) -> None:
-    #     """Redraw the ThumbView with filters"""
-    #     # Cleanup UI
-    #     # self.thumblist.clear()
-
-    #     # self.filter_view_category()  # Filter View by Category
-    #     self.filter_view_filter()  # Filter View by Line Filter
-
-    #     if self.draw_assets:
-    #         for asset in self.draw_assets:
-    #             # Pass Empty Default material
-    #             if asset.mat_id == -1:
-    #                 continue
-    #             # Show only Favs
-    #             if self.cb_favsonly.checkState() is QtCore.Qt.Checked:
-    #                 if asset.fav == 0:
-    #                     continue
-    #             if self.cb_redshift.isChecked():
-    #                 if asset.renderer != "Redshift":
-    #                     continue
-    #             elif self.cb_mantra.isChecked():
-    #                 if asset.renderer != "Mantra":
-    #                     continue
-    #             elif self.cb_arnold.isChecked():
-    #                 if asset.renderer != "Arnold":
-    #                     continue
-    #             elif self.cb_octane.isChecked():
-    #                 if asset.renderer != "Octane":
-    #                     continue
-    #             elif self.cb_matx.isChecked():
-    #                 if asset.renderer != "MatX":
-    #                     continue
-
-    #             img = (
-    #                 self.material_model.path
-    #                 + self.prefs.img_dir
-    #                 + str(asset.mat_id)
-    #                 + self.prefs.img_ext
-    #             )
-
-    #             favicon = hou.getenv("EGMATLIB") + "/def/Favorite.png"
-    #             # Check if Thumb Exists and attach
-    #             icon = None
-    #             if os.path.isfile(img):
-
-    #                 # Draw Star Icon on Top if Favorite
-    #                 if asset.fav:
-    #                     pm = QtGui.QPixmap(
-    #                         self.material_model.thumbsize, self.material_model.thumbsize
-    #                     )
-
-    #                     pm1 = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         aspectMode=QtCore.Qt.KeepAspectRatio,
-    #                     )
-    #                     pm2 = QtGui.QPixmap.fromImage(QtGui.QImage(favicon)).scaled(
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         aspectMode=QtCore.Qt.KeepAspectRatio,
-    #                     )
-    #                     painter = QtGui.QPainter(pm)
-    #                     painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
-    #                     painter.fillRect(
-    #                         0,
-    #                         0,
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         QtGui.QColor(0, 0, 0, 0),
-    #                     )
-    #                     painter.setCompositionMode(
-    #                         QtGui.QPainter.CompositionMode_SourceOver
-    #                     )
-    #                     painter.drawPixmap(
-    #                         0,
-    #                         0,
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         pm1,
-    #                     )
-
-    #                     painter.drawPixmap(
-    #                         0,
-    #                         0,
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         pm2,
-    #                     )
-    #                     painter.end()
-    #                     icon = QtGui.QIcon(pm)
-
-    #                 else:
-    #                     pm = QtGui.QPixmap(
-    #                         self.material_model.thumbsize, self.material_model.thumbsize
-    #                     )
-    #                     painter = QtGui.QPainter(pm)
-    #                     painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
-    #                     painter.fillRect(
-    #                         0,
-    #                         0,
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         QtGui.QColor(0, 0, 0, 0),
-    #                     )
-    #                     painter.setCompositionMode(
-    #                         QtGui.QPainter.CompositionMode_SourceOver
-    #                     )
-
-    #                     pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         aspectMode=QtCore.Qt.KeepAspectRatio,
-    #                     )
-    #                     painter.drawPixmap(
-    #                         0,
-    #                         0,
-    #                         self.material_model.thumbsize,
-    #                         self.material_model.thumbsize,
-    #                         pixmap,
-    #                     )
-    #                     painter.end()
-    #                     icon = QtGui.QIcon(pm)
-    #             else:
-    #                 icon = self.default_icon()
-
-    #             # Create entry in Thumblist
-    #             # img_name = self.get_usd_by_id(asset.mat_id)
-    #             item = QtWidgets.QListWidgetItem(icon, asset.name)
-
-    #             item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom)
-    #             item.setData(QtCore.Qt.UserRole, asset.mat_id)  # Store ID with Thumb
-    #             self.thumblist.addItem(item)
-    #             self.thumblist.sortItems()
-
-    # Create PlaceHolder Icon in case something goes wrong
-    def default_icon(self) -> QtGui.QIcon:
-        """Creates the default icon if something goes wrong"""
-        # Generate Default Icon
-        default_img = QtGui.QImage(
-            self.material_model.thumbsize,
-            self.material_model.thumbsize,
-            QtGui.QImage.Format_RGB16,
-        )
-        default_img.fill(QtGui.QColor(0, 0, 0))
-        pixmap = QtGui.QPixmap.fromImage(default_img).scaled(
-            self.material_model.thumbsize,
-            self.material_model.thumbsize,
-            aspectMode=QtCore.Qt.KeepAspectRatio,
-        )
-        default_icon = QtGui.QIcon(pixmap)
-        return default_icon
-
     # Library Stuffs
-    # Rerender All Visible assets
     def update_all_assets(self) -> None:
         """Rerenders all assets in the library - The UI is blocked for the duration of the render"""
         if not self.material_model:
@@ -836,7 +664,6 @@ class MatLibPanel(QtWidgets.QWidget):
             asset_id = self.get_id_from_thumblist(item)
             self.render_thumbnail(asset_id)
 
-        # self.update_thumb_view()
         hou.ui.displayMessage("Updating all Thumbnails finished")  # type: ignore
 
     # Rerender Selected Asset
@@ -852,7 +679,6 @@ class MatLibPanel(QtWidgets.QWidget):
             asset_id = self.get_id_from_thumblist(item)
             self.render_thumbnail(asset_id)
 
-        # self.update_thumb_view() :EGL
         if call:
             hou.ui.displayMessage("Thumbnail(s) updated")  # type: ignore
 
@@ -880,9 +706,6 @@ class MatLibPanel(QtWidgets.QWidget):
 
             asset_id = self.get_id_from_thumblist(item)
             self.material_model.remove_asset(asset_id)
-
-        # Update View
-        # self.update_thumb_view()
 
     # Get the selected material from Library
     def get_selected_item_from_thumblist(self):
