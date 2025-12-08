@@ -250,7 +250,7 @@
            <enum>Qt::DropAction::IgnoreAction</enum>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::SelectionMode::ContiguousSelection</enum>
+           <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
           </property>
           <property name="verticalScrollMode">
            <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
@@ -287,6 +287,9 @@
           </property>
           <property name="wordWrap">
            <bool>true</bool>
+          </property>
+          <property name="itemAlignment">
+           <set>Qt::AlignmentFlag::AlignBaseline|Qt::AlignmentFlag::AlignCenter|Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -347,7 +350,7 @@
              <x>0</x>
              <y>0</y>
              <width>230</width>
-             <height>760</height>
+             <height>773</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -411,7 +414,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="line_id"/>
+             <widget class="QLineEdit" name="line_id">
+              <property name="acceptDrops">
+               <bool>false</bool>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="date">
@@ -677,7 +687,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>37</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="nativeMenuBar">

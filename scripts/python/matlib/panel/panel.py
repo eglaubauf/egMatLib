@@ -44,28 +44,32 @@ class MatLibPanel(QtWidgets.QWidget):
         self.active_item = None
         self.edit = False
 
-        self.init_ui()
-
         # Attach models to views
         self.category_model = models.Categories()
         self.category_sorted_model = QtCore.QSortFilterProxyModel()
         self.category_sorted_model.setSourceModel(self.category_model)
         self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.category_sorted_model.sort(0)
-        self.cat_list.setModel(self.category_sorted_model)
 
         self.material_model = models.MaterialLibrary()
+
         self.material_sorted_model = QtCore.QSortFilterProxyModel()
         self.material_sorted_model.setSourceModel(self.material_model)
         self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.sort(0)
+        self.material_selection_model = QtCore.QItemSelectionModel(
+            self.material_sorted_model
+        )
 
-        # self.material_fav_sorted_model = QtCore.QSortFilterProxyModel()
-        # self.material_fav_sorted_model.setSourceModel(self.material_sorted_model)
+        self.init_ui()
 
+        # Attach Models
+        self.cat_list.setModel(self.category_sorted_model)
         self.thumblist.setModel(self.material_sorted_model)
-        # Init ThumbSize
+        self.thumblist.setSelectionModel(self.material_selection_model)
+
+        self.material_selection_model.selectionChanged.connect(self.update_details_view)
         self.slide()
 
         # Load prefs and open library
@@ -170,8 +174,13 @@ class MatLibPanel(QtWidgets.QWidget):
         self.line_cat = self.ui.findChild(QtWidgets.QLineEdit, "line_cat")
         self.line_tags = self.ui.findChild(QtWidgets.QLineEdit, "line_tags")
         self.line_id = self.ui.findChild(QtWidgets.QLineEdit, "line_id")
+        self.line_id.setDisabled(True)
+
         self.line_render = self.ui.findChild(QtWidgets.QLineEdit, "line_render")
+
         self.line_date = self.ui.findChild(QtWidgets.QLineEdit, "line_date")
+        self.line_date.setDisabled(True)
+
         self.box_fav = self.ui.findChild(QtWidgets.QCheckBox, "cb_set_fav")
         self.btn_update = self.ui.findChild(QtWidgets.QPushButton, "btn_update")
         self.btn_update.clicked.connect(self.user_update_asset)
@@ -221,9 +230,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.slider_layout = self.ui.findChild(QtWidgets.QVBoxLayout, "slider_layout")
         self.slider_layout.addWidget(self.click_slider)
         self.click_slider.valueChanged.connect(self.slide)
-
-        # if self.material_model:
-        #     self.click_slider.setValue(self.material_model.thumbsize)
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
@@ -332,7 +338,7 @@ class MatLibPanel(QtWidgets.QWidget):
             else:
                 self.material_model.set_asset_fav(curr_id, True)
 
-        self.update_details_view(items[0])
+        self.update_details_view()
 
     def import_folder_finished(self) -> None:
         #  finalize import by adding the created materials to the library
@@ -578,12 +584,19 @@ class MatLibPanel(QtWidgets.QWidget):
             asset_id = self.get_id_from_thumblist(item)
             self.material_model.update_asset_date(asset_id)
 
-    def update_details_view(self, item: QtWidgets.QListWidgetItem) -> None:
+    def update_details_view(self) -> None:
         """Update upon changes in Detail view"""
-        indexes = self.thumblist.selectedIndexes()
-        if not indexes:
+
+        if not self.material_selection_model.hasSelection():
+            self.line_name.setText("")
+            self.line_id.setText("")
+            self.line_date.setText("")
+            self.line_tags.setText("")
+            self.line_cat.setText("")
+
             return
 
+        indexes = self.material_selection_model.selectedIndexes()
         asset_id = ""
         name = ""
         date = ""
