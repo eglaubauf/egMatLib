@@ -36,7 +36,7 @@ class MatLibPanel(QtWidgets.QWidget):
         # Initialize
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-        self.library = None
+        self.material_model = None
         self.selected_cat = None
         self.filter = ""
         self.active_row = None
@@ -60,6 +60,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_sorted_model = QtCore.QSortFilterProxyModel()
         self.material_sorted_model.setSourceModel(self.material_model)
         self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.material_sorted_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.sort(0)
         self.thumblist.setModel(self.material_sorted_model)
 
@@ -67,12 +68,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.prefs = prefs.Prefs()
         self.load()
 
-        self.update_context()
-
     def load(self) -> None:
-        if not os.path.exists(self.prefs.dir):
-            if not self.get_dir_from_user():
-                return
 
         new_folder = False
         if not os.path.exists(self.prefs.dir + "/library.json"):
@@ -81,7 +77,6 @@ class MatLibPanel(QtWidgets.QWidget):
             )
             shutil.copy(oldpath, self.prefs.dir + "/library.json")
             new_folder = True
-
         if not os.path.exists(self.prefs.dir + self.prefs.img_dir):
             os.mkdir(self.prefs.dir + self.prefs.img_dir)
             os.mkdir(self.prefs.dir + self.prefs.asset_dir)
@@ -91,35 +86,11 @@ class MatLibPanel(QtWidgets.QWidget):
             msg = "A new library has been created successfully"
             hou.ui.displayMessage(msg)  # type: ignore
 
-        # Create Library
-        # self.library = models.MaterialLibrary()
-
-        self.library = self.material_model
-        # self.library.load(self.prefs)
-
-        self.draw_assets = self.library.assets  # Filterered assets for Views
-        # self.update_views()
-
-    def get_dir_from_user(self) -> bool:
-        # Get Dir from User
-        count = 0
-        path = ""
-        while count < 1:
-            if os.path.exists(self.prefs.dir):
-                self.prefs.dir = path
-                self.prefs.save()
-                return True
-            else:
-                hou.ui.displayMessage("Please choose a valid path")  # type: ignore
-                path = hou.ui.selectFile(file_type=hou.fileType.Directory)
-                path = hou.expandString(path)
-            count += 1
-        # Return false if still not a valid path
-        return False
+        self.draw_assets = self.material_model.assets  # Filterered assets for Views
 
     def update_external(self) -> None:
-        if self.library:
-            self.library.load(self.prefs)
+        if self.material_model:
+            self.material_model.load(self.prefs)
             self.update_views()
         else:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
@@ -127,7 +98,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def update_views(self) -> None:
         self.update_ui()
-        self.update_thumb_view()
+        # self.update_thumb_view()
 
     def update_ui(self) -> None:
         if self.cb_mantra.isChecked():
@@ -167,7 +138,6 @@ class MatLibPanel(QtWidgets.QWidget):
             details_widget.setHidden(True)
             self.action_detailsview.setChecked(False)
 
-    # View Stuff
     def init_ui(self) -> None:
         """Creates the panel-view on load"""
         # Load UI from ui.file
@@ -226,7 +196,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # FILTER UI
         self.line_filter = self.ui.findChild(QtWidgets.QLineEdit, "line_filter")
-        self.line_filter.textChanged.connect(self.filter_thumb_view_user)
+        self.line_filter.textChanged.connect(self.filter_thumb_view)
 
         # Updated Details UI
         self.details = self.ui.findChild(QtWidgets.QTableWidget, "details_widget")
@@ -285,8 +255,8 @@ class MatLibPanel(QtWidgets.QWidget):
         self.slider_layout = self.ui.findChild(QtWidgets.QVBoxLayout, "slider_layout")
         self.slider_layout.addWidget(self.click_slider)
         self.click_slider.valueChanged.connect(self.slide)
-        if self.library:
-            self.click_slider.setValue(self.library.thumbsize)
+        if self.material_model:
+            self.click_slider.setValue(self.material_model.thumbsize)
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
@@ -313,19 +283,19 @@ class MatLibPanel(QtWidgets.QWidget):
         self.menuGoto.setStyleSheet("""  font-family: Lato; """)
 
     def update_context(self) -> None:
-        if not self.library:
-            return
+        # if not self.material_model:
+        #     return
         if self.radio_usd.isChecked():
-            self.library.context = hou.node("/stage")
+            self.material_model.context = hou.node("/stage")
         elif self.radio_current.isChecked():
             curr_node = self.get_current_network_node()
             if curr_node is None:
-                self.library.context = hou.node("/stage")
+                self.material_model.context = hou.node("/stage")
                 return
             else:
-                self.library.context = curr_node
+                self.material_model.context = curr_node
         elif self.radio_default.isChecked():
-            self.library.context = hou.node("/mat")
+            self.material_model.context = hou.node("/mat")
 
     def get_current_network_node(self) -> hou.Node | None:
         """Return thre current Node in the Network Editor"""
@@ -392,10 +362,10 @@ class MatLibPanel(QtWidgets.QWidget):
         for item in items:
             curr_id = self.get_id_from_thumblist(item)
 
-            if self.library.get_asset_fav(curr_id):
-                self.library.set_asset_fav(curr_id, False)
+            if self.material_model.get_asset_fav(curr_id):
+                self.material_model.set_asset_fav(curr_id, False)
             else:
-                self.library.set_asset_fav(curr_id, True)
+                self.material_model.set_asset_fav(curr_id, True)
 
         self.update_details_view(items[0])
         self.update_views()
@@ -434,10 +404,10 @@ class MatLibPanel(QtWidgets.QWidget):
         about.exec_()
 
     def show_prefs(self) -> None:
-        if not self.library:
+        if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        prefs = prefs_dialog.PrefsDialog(self.library, self.prefs)
+        prefs = prefs_dialog.PrefsDialog(self.material_model, self.prefs)
         prefs.exec_()
 
         if prefs.canceled:
@@ -445,25 +415,27 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Update Thumblist Grid
         self.thumblist.setIconSize(
-            QtCore.QSize(self.library.thumbsize, self.library.thumbsize)
+            QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
         )
         self.thumblist.setGridSize(
-            QtCore.QSize(self.library.thumbsize + 10, self.library.thumbsize + 40)
+            QtCore.QSize(
+                self.material_model.thumbsize + 10, self.material_model.thumbsize + 40
+            )
         )
         self.update_views()
 
     def cleanup_db(self) -> None:
-        if not self.library:
+        if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        self.library.cleanup_db()
-        self.update_thumb_view()
+        self.material_model.cleanup_db()
+        # self.update_thumb_view()
 
     def render_missing(self) -> None:
-        if not self.library:
+        if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        assets = self.library.assets
+        assets = self.material_model.assets
 
         for asset in assets:
             if asset.mat_id > 0:
@@ -485,12 +457,12 @@ class MatLibPanel(QtWidgets.QWidget):
                         self.render_thumbnail(asset.mat_id)
                     elif not os.path.exists(asset_path):
                         print("Asset missing on disk. Removing.")
-                        self.library.remove_asset(asset.mat_id)
+                        self.material_model.remove_asset(asset.mat_id)
                     self.update_thumb_view()
         return
 
     def open_usdlib_folder(self) -> None:
-        if not self.library:
+        if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
         lib_dir = self.path
@@ -510,8 +482,8 @@ class MatLibPanel(QtWidgets.QWidget):
         choice, cat = hou.ui.readInput("Please enter the new category name:")  # type: ignore
         if choice:  # Return if no
             return
-        self.library.check_add_category(cat)
-        self.library.save()
+        self.material_model.check_add_category(cat)
+        self.material_model.save()
         self.update_views()
 
     # User Removes Category with Button
@@ -522,9 +494,9 @@ class MatLibPanel(QtWidgets.QWidget):
         if rmv_item[0].text() == "All":
             return
 
-        self.library.remove_category(rmv_item[0].text())
+        self.material_model.remove_category(rmv_item[0].text())
 
-        self.library.save()
+        self.material_model.save()
         self.update_views()
 
     def rename_category_user(self) -> None:
@@ -538,17 +510,16 @@ class MatLibPanel(QtWidgets.QWidget):
         if rnm_item[0].text() == "All":
             return
 
-        self.library.rename_category(rnm_item[0].text(), cat)
+        self.material_model.rename_category(rnm_item[0].text(), cat)
 
-        self.library.save()
+        self.material_model.save()
         self.update_views()
         return
 
     # Get Filter Text from User
-    def filter_thumb_view_user(self) -> None:
+    def filter_thumb_view(self) -> None:
         """Get Filter from user and trigger view update"""
-        self.filter = self.line_filter.text()
-        self.update_thumb_view()
+        self.material_sorted_model.setFilterRegularExpression(self.line_filter.text())
 
     def listen_entry_from_detail(self, item: QtWidgets.QListWidgetItem) -> None:
         """Set Detail view to Edit Mode"""
@@ -573,17 +544,17 @@ class MatLibPanel(QtWidgets.QWidget):
             pos = txt.find(",")
             if pos != -1:
                 txt = txt[:pos]
-            self.library.set_asset_cat(asset_id, txt)
+            self.material_model.set_asset_cat(asset_id, txt)
 
-        self.library.save()
+        self.material_model.save()
 
     def user_update_name(self) -> None:
         """Apply change in Detail view to Library"""
         items = self.last_selected_items
         for item in items:
             asset_id = self.get_id_from_thumblist(item)
-            self.library.set_asset_name_by_id(asset_id, self.line_name.text())
-        self.library.save()
+            self.material_model.set_asset_name_by_id(asset_id, self.line_name.text())
+        self.material_model.save()
 
     def user_update_tags(self) -> None:
         """Apply change in Detail view to Library"""
@@ -596,9 +567,9 @@ class MatLibPanel(QtWidgets.QWidget):
             pos = txt.find(",")
             if pos != -1:
                 txt = txt[-pos]
-            self.library.set_asset_tag(asset_id, txt)
+            self.material_model.set_asset_tag(asset_id, txt)
 
-        self.library.save()
+        self.material_model.save()
 
     def user_update_fav(self) -> None:
         """Apply change in Detail View - Favorite"""
@@ -612,13 +583,13 @@ class MatLibPanel(QtWidgets.QWidget):
             asset_id = self.get_id_from_thumblist(item)
             asset_ids.append(asset_id)
             if self.box_fav.checkState() is QtCore.Qt.Checked:
-                self.library.set_asset_fav(asset_id, True)
+                self.material_model.set_asset_fav(asset_id, True)
             else:
-                self.library.set_asset_fav(asset_id, False)
+                self.material_model.set_asset_fav(asset_id, False)
 
         index = self.thumblist.selectedIndexes()
 
-        self.library.save()
+        self.material_model.save()
 
         for i in index:
             item = self.thumblist.itemFromIndex(i)
@@ -628,7 +599,7 @@ class MatLibPanel(QtWidgets.QWidget):
         items = self.last_selected_items
         for item in items:
             asset_id = self.get_id_from_thumblist(item)
-            self.library.update_asset_date(asset_id)
+            self.material_model.update_asset_date(asset_id)
 
     # Update Views Section
     # Update Details view
@@ -647,7 +618,7 @@ class MatLibPanel(QtWidgets.QWidget):
             # Check all Selected assets for same Cat and Tag Values
             for x, item in enumerate(items):
                 asset_id = self.get_id_from_thumblist(item)
-                curr_asset = self.library.get_asset_by_id(asset_id)
+                curr_asset = self.material_model.get_asset_by_id(asset_id)
 
                 if x == 0:
                     cat = curr_asset.categories
@@ -663,7 +634,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         asset_id = self.get_id_from_thumblist(item)
 
-        for asset in self.library.assets:
+        for asset in self.material_model.assets:
             if asset.mat_id == asset_id:
                 # set name
                 self.line_name.setText(asset.name)
@@ -698,16 +669,16 @@ class MatLibPanel(QtWidgets.QWidget):
             self.material_sorted_model.setFilterRole(self.material_model.CategoryRole)
             self.material_sorted_model.setFilterFixedString(index.data())
 
-    # Filter assets in Thumblist for Category
-    def filter_view_category(self) -> None:
-        """Filter Thumbview for selected Category"""
-        # Filter Thumbnail View
-        self.draw_assets = []
-        for asset in self.library.assets:
-            if self.selected_cat in asset.categories:
-                self.draw_assets.append(asset)
-        if not self.selected_cat:
-            self.draw_assets = self.library.assets
+    # # Filter assets in Thumblist for Category
+    # def filter_view_category(self) -> None:
+    #     """Filter Thumbview for selected Category"""
+    #     # Filter Thumbnail View
+    #     self.draw_assets = []
+    #     for asset in self.material_model.assets:
+    #         if self.selected_cat in asset.categories:
+    #             self.draw_assets.append(asset)
+    #     if not self.selected_cat:
+    #         self.draw_assets = self.material_model.assets
 
     # Filter assets in Thumblist for Category
     def filter_view_filter(self) -> None:
@@ -728,158 +699,154 @@ class MatLibPanel(QtWidgets.QWidget):
                     tmp.append(asset)
         self.draw_assets = tmp
 
-    # Update Thumbnail View
-    def update_thumb_view(self) -> None:
-        """Redraw the ThumbView with filters"""
-        # Cleanup UI
-        # self.thumblist.clear()
+    # # Update Thumbnail View
+    # def update_thumb_view(self) -> None:
+    #     """Redraw the ThumbView with filters"""
+    #     # Cleanup UI
+    #     # self.thumblist.clear()
 
-        self.filter_view_category()  # Filter View by Category
-        self.filter_view_filter()  # Filter View by Line Filter
+    #     # self.filter_view_category()  # Filter View by Category
+    #     self.filter_view_filter()  # Filter View by Line Filter
 
-        if self.draw_assets:
-            for asset in self.draw_assets:
-                # Pass Empty Default material
-                if asset.mat_id == -1:
-                    continue
-                # Show only Favs
-                if self.cb_favsonly.checkState() is QtCore.Qt.Checked:
-                    if asset.fav == 0:
-                        continue
-                if self.cb_redshift.isChecked():
-                    if asset.renderer != "Redshift":
-                        continue
-                elif self.cb_mantra.isChecked():
-                    if asset.renderer != "Mantra":
-                        continue
-                elif self.cb_arnold.isChecked():
-                    if asset.renderer != "Arnold":
-                        continue
-                elif self.cb_octane.isChecked():
-                    if asset.renderer != "Octane":
-                        continue
-                elif self.cb_matx.isChecked():
-                    if asset.renderer != "MatX":
-                        continue
+    #     if self.draw_assets:
+    #         for asset in self.draw_assets:
+    #             # Pass Empty Default material
+    #             if asset.mat_id == -1:
+    #                 continue
+    #             # Show only Favs
+    #             if self.cb_favsonly.checkState() is QtCore.Qt.Checked:
+    #                 if asset.fav == 0:
+    #                     continue
+    #             if self.cb_redshift.isChecked():
+    #                 if asset.renderer != "Redshift":
+    #                     continue
+    #             elif self.cb_mantra.isChecked():
+    #                 if asset.renderer != "Mantra":
+    #                     continue
+    #             elif self.cb_arnold.isChecked():
+    #                 if asset.renderer != "Arnold":
+    #                     continue
+    #             elif self.cb_octane.isChecked():
+    #                 if asset.renderer != "Octane":
+    #                     continue
+    #             elif self.cb_matx.isChecked():
+    #                 if asset.renderer != "MatX":
+    #                     continue
 
-                # print(self.library.path)
-                # print(self.prefs.img_dir)
-                # print(str(asset.mat_id))
-                # print(self.prefs.img_ext)
-                img = (
-                    self.library.path
-                    + self.prefs.img_dir
-                    + str(asset.mat_id)
-                    + self.prefs.img_ext
-                )
+    #             img = (
+    #                 self.material_model.path
+    #                 + self.prefs.img_dir
+    #                 + str(asset.mat_id)
+    #                 + self.prefs.img_ext
+    #             )
 
-                favicon = hou.getenv("EGMATLIB") + "/def/Favorite.png"
-                # Check if Thumb Exists and attach
-                icon = None
-                if os.path.isfile(img):
+    #             favicon = hou.getenv("EGMATLIB") + "/def/Favorite.png"
+    #             # Check if Thumb Exists and attach
+    #             icon = None
+    #             if os.path.isfile(img):
 
-                    # Draw Star Icon on Top if Favorite
-                    if asset.fav:
-                        pm = QtGui.QPixmap(
-                            self.library.thumbsize, self.library.thumbsize
-                        )
+    #                 # Draw Star Icon on Top if Favorite
+    #                 if asset.fav:
+    #                     pm = QtGui.QPixmap(
+    #                         self.material_model.thumbsize, self.material_model.thumbsize
+    #                     )
 
-                        pm1 = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            aspectMode=QtCore.Qt.KeepAspectRatio,
-                        )
-                        pm2 = QtGui.QPixmap.fromImage(QtGui.QImage(favicon)).scaled(
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            aspectMode=QtCore.Qt.KeepAspectRatio,
-                        )
-                        painter = QtGui.QPainter(pm)
-                        painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
-                        painter.fillRect(
-                            0,
-                            0,
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            QtGui.QColor(0, 0, 0, 0),
-                        )
-                        painter.setCompositionMode(
-                            QtGui.QPainter.CompositionMode_SourceOver
-                        )
-                        painter.drawPixmap(
-                            0,
-                            0,
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            pm1,
-                        )
+    #                     pm1 = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         aspectMode=QtCore.Qt.KeepAspectRatio,
+    #                     )
+    #                     pm2 = QtGui.QPixmap.fromImage(QtGui.QImage(favicon)).scaled(
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         aspectMode=QtCore.Qt.KeepAspectRatio,
+    #                     )
+    #                     painter = QtGui.QPainter(pm)
+    #                     painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
+    #                     painter.fillRect(
+    #                         0,
+    #                         0,
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         QtGui.QColor(0, 0, 0, 0),
+    #                     )
+    #                     painter.setCompositionMode(
+    #                         QtGui.QPainter.CompositionMode_SourceOver
+    #                     )
+    #                     painter.drawPixmap(
+    #                         0,
+    #                         0,
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         pm1,
+    #                     )
 
-                        painter.drawPixmap(
-                            0,
-                            0,
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            pm2,
-                        )
-                        painter.end()
-                        icon = QtGui.QIcon(pm)
+    #                     painter.drawPixmap(
+    #                         0,
+    #                         0,
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         pm2,
+    #                     )
+    #                     painter.end()
+    #                     icon = QtGui.QIcon(pm)
 
-                    else:
-                        pm = QtGui.QPixmap(
-                            self.library.thumbsize, self.library.thumbsize
-                        )
-                        painter = QtGui.QPainter(pm)
-                        painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
-                        painter.fillRect(
-                            0,
-                            0,
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            QtGui.QColor(0, 0, 0, 0),
-                        )
-                        painter.setCompositionMode(
-                            QtGui.QPainter.CompositionMode_SourceOver
-                        )
+    #                 else:
+    #                     pm = QtGui.QPixmap(
+    #                         self.material_model.thumbsize, self.material_model.thumbsize
+    #                     )
+    #                     painter = QtGui.QPainter(pm)
+    #                     painter.setCompositionMode(QtGui.QPainter.CompositionMode_Clear)
+    #                     painter.fillRect(
+    #                         0,
+    #                         0,
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         QtGui.QColor(0, 0, 0, 0),
+    #                     )
+    #                     painter.setCompositionMode(
+    #                         QtGui.QPainter.CompositionMode_SourceOver
+    #                     )
 
-                        pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            aspectMode=QtCore.Qt.KeepAspectRatio,
-                        )
-                        painter.drawPixmap(
-                            0,
-                            0,
-                            self.library.thumbsize,
-                            self.library.thumbsize,
-                            pixmap,
-                        )
-                        painter.end()
-                        icon = QtGui.QIcon(pm)
-                else:
-                    icon = self.default_icon()
+    #                     pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(img)).scaled(
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         aspectMode=QtCore.Qt.KeepAspectRatio,
+    #                     )
+    #                     painter.drawPixmap(
+    #                         0,
+    #                         0,
+    #                         self.material_model.thumbsize,
+    #                         self.material_model.thumbsize,
+    #                         pixmap,
+    #                     )
+    #                     painter.end()
+    #                     icon = QtGui.QIcon(pm)
+    #             else:
+    #                 icon = self.default_icon()
 
-                # Create entry in Thumblist
-                # img_name = self.get_usd_by_id(asset.mat_id)
-                item = QtWidgets.QListWidgetItem(icon, asset.name)
+    #             # Create entry in Thumblist
+    #             # img_name = self.get_usd_by_id(asset.mat_id)
+    #             item = QtWidgets.QListWidgetItem(icon, asset.name)
 
-                item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom)
-                item.setData(QtCore.Qt.UserRole, asset.mat_id)  # Store ID with Thumb
-                self.thumblist.addItem(item)
-                self.thumblist.sortItems()
+    #             item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom)
+    #             item.setData(QtCore.Qt.UserRole, asset.mat_id)  # Store ID with Thumb
+    #             self.thumblist.addItem(item)
+    #             self.thumblist.sortItems()
 
     # Create PlaceHolder Icon in case something goes wrong
     def default_icon(self) -> QtGui.QIcon:
         """Creates the default icon if something goes wrong"""
         # Generate Default Icon
         default_img = QtGui.QImage(
-            self.library.thumbsize,
-            self.library.thumbsize,
+            self.material_model.thumbsize,
+            self.material_model.thumbsize,
             QtGui.QImage.Format_RGB16,
         )
         default_img.fill(QtGui.QColor(0, 0, 0))
         pixmap = QtGui.QPixmap.fromImage(default_img).scaled(
-            self.library.thumbsize,
-            self.library.thumbsize,
+            self.material_model.thumbsize,
+            self.material_model.thumbsize,
             aspectMode=QtCore.Qt.KeepAspectRatio,
         )
         default_icon = QtGui.QIcon(pixmap)
@@ -889,7 +856,7 @@ class MatLibPanel(QtWidgets.QWidget):
     # Rerender All Visible assets
     def update_all_assets(self) -> None:
         """Rerenders all assets in the library - The UI is blocked for the duration of the render"""
-        if not self.library:
+        if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
 
@@ -905,7 +872,7 @@ class MatLibPanel(QtWidgets.QWidget):
             asset_id = self.get_id_from_thumblist(item)
             self.render_thumbnail(asset_id)
 
-        self.update_thumb_view()
+        # self.update_thumb_view()
         hou.ui.displayMessage("Updating all Thumbnails finished")  # type: ignore
 
     # Rerender Selected Asset
@@ -948,10 +915,10 @@ class MatLibPanel(QtWidgets.QWidget):
                 return
 
             asset_id = self.get_id_from_thumblist(item)
-            self.library.remove_asset(asset_id)
+            self.material_model.remove_asset(asset_id)
 
         # Update View
-        self.update_thumb_view()
+        # self.update_thumb_view()
 
     # Get the selected material from Library
     def get_selected_item_from_thumblist(self):
@@ -992,7 +959,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not sel:
             hou.ui.displayMessage("No material selected")  # type: ignore
             return
-        if not self.library:
+        if not self.material_model:
             hou.ui.displayMessage(
                 "Please set a Materiallibrary first. Please use the MatLib Panel - Library/Open Dialog."  # type: ignore
             )  # type: ignore
@@ -1010,12 +977,14 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Check if Category or Tags already exist
         if dialog.categories:
-            self.library.check_add_category(dialog.categories)
+            self.material_model.check_add_category(dialog.categories)
         if dialog.tags:
-            self.library.check_add_tags(dialog.tags)
+            self.material_model.check_add_tags(dialog.tags)
 
         for asset in sel:
-            self.library.add_asset(asset, dialog.categories, dialog.tags, dialog.fav)
+            self.material_model.add_asset(
+                asset, dialog.categories, dialog.tags, dialog.fav
+            )
         self.update_views()
 
     def import_assets(self) -> None:
@@ -1039,34 +1008,36 @@ class MatLibPanel(QtWidgets.QWidget):
 
         asset_id = self.get_id_from_thumblist(item)
 
-        return self.library.import_asset_to_scene(asset_id)
+        return self.material_model.import_asset_to_scene(asset_id)
 
     def render_thumbnail(self, asset_id: str) -> None:
         # Move to correct context before rerendering assets
-        if "MatX" in self.library.get_renderer_by_id(asset_id):
-            self.library.context = hou.node("/stage")
+        if "MatX" in self.material_model.get_renderer_by_id(asset_id):
+            self.material_model.context = hou.node("/stage")
         else:
-            self.library.context = hou.node("/mat")
+            self.material_model.context = hou.node("/mat")
 
-        builder = self.library.import_asset_to_scene(asset_id)
+        builder = self.material_model.import_asset_to_scene(asset_id)
         if not builder:
             return
-        self.library.create_thumbnail(builder, asset_id)
+        self.material_model.create_thumbnail(builder, asset_id)
 
-        if "stage" in self.library.context.path():
+        if "stage" in self.material_model.context.path():
             builder.parent().destroy()
         else:
             builder.destroy()
 
     # Set IconSize via Slider
     def slide(self) -> None:
-        self.library.thumbsize = self.click_slider.value()
+        self.material_model.thumbsize = self.click_slider.value()
         # Update Thumblist Grid
         self.thumblist.setIconSize(
-            QtCore.QSize(self.library.thumbsize, self.library.thumbsize)
+            QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
         )
         self.thumblist.setGridSize(
-            QtCore.QSize(self.library.thumbsize + 10, self.library.thumbsize + 40)
+            QtCore.QSize(
+                self.material_model.thumbsize + 10, self.material_model.thumbsize + 40
+            )
         )
 
         self.update_views()
