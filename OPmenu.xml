@@ -50,31 +50,45 @@ n = kwargs.get("node", None)
 if n.type().name() == "redshift_vopnet":
     import matlib
     from matlib.utils import rc_calls
-    rc_calls.save_material(n)
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
 elif n.type().name() == "octane_vopnet":
     import matlib
     from matlib.utils import rc_calls
-    rc_calls.save_material(n)
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
 elif n.type().name() == "materialbuilder":
     import matlib
     from matlib.utils import rc_calls
-    rc_calls.save_material(n)
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
 elif n.type().name() == "principledshader::2.0":
     import matlib
     from matlib.utils import rc_calls
-    rc_calls.save_material(n)
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
 elif n.type().name() == "arnold_materialbuilder":
     import matlib
     from matlib.utils import rc_calls
-    rc_calls.save_material(n)
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
 elif n.type().name() == "subnet":
     import matlib
     from matlib.utils import rc_calls
-    rc_calls.save_material(n)
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
 elif n.type().name() == "collect":
     import matlib
     from matlib.utils import rc_calls
-    rc_calls.save_material(n)
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
 else:
     hou.ui.displayMessage('Please select Material Builder Nodes to save Material')
 

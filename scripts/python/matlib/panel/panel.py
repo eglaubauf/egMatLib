@@ -89,13 +89,6 @@ class MatLibPanel(QtWidgets.QWidget):
             msg = "A new library has been created successfully"
             hou.ui.displayMessage(msg)  # type: ignore
 
-    def update_external(self) -> None:
-        if self.material_model:
-            self.material_model.load(self.prefs)
-        else:
-            hou.ui.displayMessage("Please open a library first")  # type: ignore
-        return
-
     def toggle_catview(self) -> None:
         if self.action_catview.isChecked():
             self.cat_list.setVisible(True)
@@ -160,7 +153,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_force_update = self.ui.findChild(
             QtGui.QAction, "action_force_update"
         )
-        self.action_force_update.triggered.connect(self.update_external)
+        #         self.action_force_update.triggered.connect(self.update_external)
 
         self.thumblist = self.ui.findChild(QtWidgets.QListView, "thumbview")
         self.thumblist.doubleClicked.connect(self.import_asset)
@@ -322,6 +315,22 @@ class MatLibPanel(QtWidgets.QWidget):
         elif action == action_add:
             self.add_category_user()
         return
+
+    # def add_material_from_rc(self) -> None:
+    #     # Get Infos from User
+    #     dialog = usd_dialog.UsdDialog()
+    #     r = dialog.exec_()
+    #     if dialog.canceled or not r:
+    #         return
+
+    #     # Check if Category or Tags already exist
+    #     if dialog.categories:
+    #         library.check_add_category(dialog.categories)
+    #     if dialog.tags:
+    #         library.check_add_tags(dialog.tags)
+
+    #     library.layoutAboutToBeChanged.emit()
+    #     library.add_asset(node, dialog.categories, dialog.tags, dialog.fav)
 
     def toggle_fav(self) -> None:
         items = self.get_selected_items_from_thumblist()
@@ -918,10 +927,14 @@ class MatLibPanel(QtWidgets.QWidget):
         if dialog.tags:
             self.material_model.check_add_tags(dialog.tags)
 
+        self.material_model.layoutAboutToBeChanged.emit()
+        self.category_model.layoutAboutToBeChanged.emit()
         for asset in sel:
             self.material_model.add_asset(
                 asset, dialog.categories, dialog.tags, dialog.fav
             )
+        self.material_model.layoutChanged.emit()
+        self.category_model.layoutChanged.emit()
 
     def import_asset(self, *kwargs):
         """Import Material to scene"""

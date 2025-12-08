@@ -58,7 +58,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._thumbsize = -1
         self._rendersize = -1
         self._render_on_import = False
-        # self._data = {}
 
         self._context: hou.Node = hou.node("/stage")
 
@@ -114,14 +113,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def save(self) -> None:
         """Save data to disk as json"""
-
-        self._data["assets"] = [curr_asset.get_as_dict() for curr_asset in self._assets]
-        self._data["categories"] = self._categories
-        self._data["tags"] = self.tags
-        self._data["thumbsize"] = self.thumbsize
-        self._data["rendersize"] = self.rendersize
-        self._data["render_on_import"] = self.render_on_import
-
         db = database.DatabaseConnector()
         db.save()
 
@@ -262,19 +253,19 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def check_add_category(self, cat: str) -> None:
         """Checks if this category exists and adds it if needed"""
-        cats = cat.split(",")
-        for c in cats:
+        for c in cat.split(","):
             c = c.replace(" ", "")
             if c != "" and c not in self._categories:
                 self._categories.append(c)
+        self.save()
 
     def check_add_tags(self, tag: str) -> None:
         """Checks if this tag exists and adds it if needed"""
-        tags = tag.split(",")
-        for t in tags:
+        for t in tag.split(","):
             t = t.replace(" ", "")
             if t != "" and t not in self.tags:
                 self.tags.append(t)
+        self.save()
 
     def get_current_network_node(self) -> None | hou.Node:
         """Return thre current Node in the Network Editor"""
@@ -358,7 +349,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                 "builder": builder,
                 "usd": use_usd,
             }
-
             new_mat = material.Material.from_dict(mat)
             self._assets.append(new_mat)
             self.save()
