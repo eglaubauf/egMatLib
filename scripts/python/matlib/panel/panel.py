@@ -601,7 +601,7 @@ class MatLibPanel(QtWidgets.QWidget):
             self.line_date.setText("")
             self.line_tags.setText("")
             self.line_cat.setText("")
-
+            self.box_fav.setCheckState(QtCore.Qt.CheckState.Unchecked)
             return
 
         indexes = self.material_selection_model.selectedIndexes()
@@ -623,8 +623,8 @@ class MatLibPanel(QtWidgets.QWidget):
                 sel_cats.append(cat)
             for tag in curr_asset.data(self.material_model.TagRole):
                 sel_tags.append(tag)
-            for fav in curr_asset.data(self.material_model.FavoriteRole):
-                sel_tags.append(fav)
+            for f in curr_asset.data(self.material_model.FavoriteRole):
+                fav.append(f)
 
         msg = "Multiple Values..." if len(indexes) > 1 else name
         self.line_name.setText(msg)
