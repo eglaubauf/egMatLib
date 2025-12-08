@@ -423,7 +423,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        lib_dir = self.path
+        lib_dir = self.material_model.path
         lib_dir.encode("unicode_escape")
 
         if sys.platform == "linux" and sys.platform == "linux2":  # Linux
