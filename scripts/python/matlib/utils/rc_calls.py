@@ -1,7 +1,4 @@
 import hou
-from matlib.prefs import prefs
-from matlib.core import models
-from matlib.dialogs import usd_dialog
 
 
 def save_material() -> None:
