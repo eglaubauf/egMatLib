@@ -87,12 +87,13 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     # def roleNames(self) -> QtCore.Dict[int, QtCore.QByteArray]:
     #     return {self.IdRole: b"id", self.CategoryRole: b"Category"}
 
-    def setCustomIconSize(self, size) -> None:
+    def setCustomIconSize(self, size: QtCore.QSize) -> None:
         self.default_image = QtGui.QPixmap.fromImage(
             QtGui.QImage(
                 "/Users/elmar/git/egMatLib/scripts/python/matlib/res/img/default.png"
             ).scaled(size)
         )
+        self._thumbsize = size.width()
 
     def rowCount(
         self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
@@ -102,18 +103,19 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     def data(
         self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
     ) -> Any:
-        # if self._assets[index.row()].mat_id == "-1":
-        #     return None
         if role == QtCore.Qt.ItemDataRole.DisplayRole:
             return self._assets[index.row()].name
 
         if role == QtCore.Qt.ItemDataRole.DecorationRole:
-            # if index.row() < 0:
-            #     return None
-            # mat_id = self._assets[index.row()].mat_id
-            # path = self.path + self.settings.img_dir + mat_id + self.settings.img_ext
-            # if os.path.exists(path):
-            #     return QtGui.QImage(path)
+            mat_id = self._assets[index.row()].mat_id
+            path = self.path + self.settings.img_dir + mat_id + self.settings.img_ext
+
+            if os.path.exists(path):
+                image = QtGui.QImage(path).scaled(
+                    QtCore.QSize(self._thumbsize, self._thumbsize)
+                )
+
+                return image
 
             return self.default_image
 
