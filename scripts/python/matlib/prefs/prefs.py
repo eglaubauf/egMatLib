@@ -1,5 +1,6 @@
 import json
 import hou
+import os
 
 
 class Prefs:
@@ -34,6 +35,20 @@ class Prefs:
             self.done_file = data["done_file"]
             self._img_dir = data["img_dir"]
             self._asset_dir = data["asset_dir"]
+
+            self.get_dir_from_user()
+
+    def get_dir_from_user(self) -> None:
+        """Get Directory from User and write into prefs"""
+        count = 0
+        while count < 3:
+            if not os.path.exists(self.dir):
+                hou.ui.displayMessage("Please choose a valid path")  # type: ignore
+                path = hou.ui.selectFile(file_type=hou.fileType.Directory)
+                self.dir = hou.expandString(path)
+            else:
+                return
+            count += 1
 
     @property
     def dir(self) -> str:
