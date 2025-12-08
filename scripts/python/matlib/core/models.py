@@ -487,7 +487,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             # Interface Check
             if os.path.exists(parms_file_name):
                 # Only load parms if MatBuilder
-                if self.check_materialbuilder_by_id(asset_id):
+                if self.check_materialbuilder_by_id(mat.mat_id):
                     interface_file = open(parms_file_name, "r", encoding="utf-8")
                     code = interface_file.read()
                     exec(code)
@@ -543,7 +543,9 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             return None
 
         # If node is Principled Shader
-        if mat.renderer == "Mantra" and not self.check_materialbuilder_by_id(asset_id):
+        if mat.renderer == "Mantra" and not self.check_materialbuilder_by_id(
+            mat.mat_id
+        ):
             n = builder.children()[0]
             hou.moveNodesTo((n,), builder.parent())  # type: ignore
             builder.destroy()
