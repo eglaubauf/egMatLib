@@ -64,10 +64,11 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         # Open Db Connection
         perferences = prefs.Prefs()
-        self.settings = prefs  # TODO Remove Future
+        self.settings = perferences  # TODO Remove Future
         db = database.DatabaseConnector()
         data = db.load(perferences.dir)
 
+        self._path = perferences.dir
         # Map to Model
         self._assets = [material.Material.from_dict(d) for d in data["assets"]]
         self._categories = data["categories"]
@@ -125,7 +126,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         db.save()
 
     def check_exists_in_lib(self, path: str) -> bool:
-        return any(asset.path == path for asset in self.assets)
+        return any(asset.path == path for asset in self._assets)
 
     def run_dir(self, path: str, entries: list) -> list[str]:
         for file in os.listdir(path):
@@ -196,7 +197,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def get_asset_by_id(self, asset_id: str) -> None | material.Material:
         """Returns the Asset for the given id"""
-        for asset in self.assets:
+        for asset in self._assets:
             if str(asset_id) == str(asset.mat_id):
                 return asset
         return None
@@ -228,9 +229,9 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def remove_asset(self, asset_id: str) -> None:
         """Removes a material from this Library and Disk"""
-        for asset in self.assets:
+        for asset in self._assets:
             if asset_id == asset.mat_id:
-                self.assets.remove(asset)
+                self._assets.remove(asset)
 
                 # Remove Files from Disk
                 asset_file_path = os.path.join(
@@ -286,7 +287,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         """Removes the given category from the library (and also in all assets)"""
         self._categories.remove(cat)
         # check assets against category and remove there also:
-        for asset in self.assets:
+        for asset in self._assets:
             asset.remove_category(cat)
 
     def rename_category(self, old: str, new: str) -> None:
@@ -296,7 +297,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             if current == old:
                 self._categories[count] = new
         # Update all Categories with that name in all assets
-        for asset in self.assets:
+        for asset in self._assets:
             asset.rename_category(old, new)
 
     def add_asset(
@@ -359,12 +360,12 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             }
 
             new_mat = material.Material.from_dict(mat)
-            self.assets.append(new_mat)
+            self._assets.append(new_mat)
             self.save()
 
     def get_renderer_by_id(self, asset_id: str) -> str:
         """Return the Renderer for this Material as a string"""
-        for mat in self.assets:
+        for mat in self._assets:
             if isinstance(asset_id, int):
                 if int(asset_id) == mat.mat_id:
                     return mat.renderer
@@ -375,7 +376,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def check_materialbuilder_by_id(self, asset_id: str) -> int | None:
         """Return if the Material is a Builder (Mantra) as a 0/1"""
-        for mat in self.assets:
+        for mat in self._assets:
             if isinstance(asset_id, int):
                 if int(asset_id) == mat.mat_id:
                     return mat.builder
@@ -387,30 +388,23 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     def update_context(self) -> None:
         self.context = self.get_current_network_node()
 
-    def import_asset_to_scene(self, asset_id: str) -> None | hou.Node:
+    def import_asset_to_scene(self, index: QtCore.QModelIndex) -> None | hou.Node:
         """Import a Material to the Nework Editor/Scene"""
+        mat = self._assets[index.row()]
         file_name = (
-            self.path + self.settings.asset_dir + str(asset_id) + self.settings.ext
+            self._path + self.settings.asset_dir + mat.mat_id + self.settings.ext
         )
 
-        mat = self.get_asset_by_id(asset_id)
-
-        renderer = self.get_renderer_by_id(asset_id)
-        builder = None
-
-        # Import to current context
         import_path = None
 
         # This checks if USD has been selected in the panel and imports accordingly
         if self.context == hou.node("/stage"):
             import_path = self.context.createNode("materiallibrary")
-
         elif self.context.path() == "/mat":
             import_path = hou.node("/mat")
             # override if Material was saved in USD Mode
             if mat.usd:
                 import_path = hou.node("/stage").createNode("materiallibrary")
-
         else:
             # Radio is set to Current Network
             parent = self.get_current_network_node().parent()
@@ -444,14 +438,16 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                     import_path = hou.node("/stage").createNode("materiallibrary")
 
         parms_file_name = (
-            self.path + self.settings.asset_dir + str(asset_id) + ".interface"
+            self._path + self.settings.asset_dir + str(mat.mat_id) + ".interface"
         )
 
         # Create temporary storage of nodes
         tmp_matnet = hou.node("obj").createNode("matnet")
         hou_parent = tmp_matnet  # needed for the code script below
 
-        if renderer == "Redshift":
+        builder = None
+
+        if mat.renderer == "Redshift":
             # Interface Check
             if os.path.exists(parms_file_name):
                 interface_file = open(parms_file_name, "r", encoding="utf-8")
@@ -469,7 +465,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             for node in builder.children():
                 node.destroy()
 
-        elif renderer == "Octane":
+        elif mat.renderer == "Octane":
             # Interface Check
             if os.path.exists(parms_file_name):
                 interface_file = open(parms_file_name, "r", encoding="utf-8")
@@ -487,7 +483,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             for node in builder.children():
                 node.destroy()
 
-        elif renderer == "Mantra":
+        elif mat.renderer == "Mantra":
             # Interface Check
             if os.path.exists(parms_file_name):
                 # Only load parms if MatBuilder
@@ -509,7 +505,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             for node in builder.children():
                 node.destroy()
 
-        elif renderer == "Arnold":
+        elif mat.renderer == "Arnold":
             # CreateBuilder
             # Interface Check
             if os.path.exists(parms_file_name):
@@ -527,19 +523,18 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             for node in builder.children():
                 node.destroy()
 
-        elif renderer == "MatX":
-            # Interface Check
+        elif mat.renderer == "MaterialX":
             if os.path.exists(parms_file_name):
                 interface_file = open(parms_file_name, "r", encoding="utf-8")
                 code = interface_file.read()
                 exec(code)
-
                 builder = import_path.createNode("subnet")
                 builder.setName(mat.name, unique_name=True)
                 builder.setGenericFlag(hou.nodeFlag.Material, True)
                 for n in builder.children():
                     n.destroy()
-
+            else:
+                return
         # Import file from disk
         try:
             builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
@@ -548,7 +543,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             return None
 
         # If node is Principled Shader
-        if renderer == "Mantra" and not self.check_materialbuilder_by_id(asset_id):
+        if mat.renderer == "Mantra" and not self.check_materialbuilder_by_id(asset_id):
             n = builder.children()[0]
             hou.moveNodesTo((n,), builder.parent())  # type: ignore
             builder.destroy()
@@ -1082,7 +1077,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def cleanup_db(self) -> None:
 
-        assets = self.assets
+        assets = self._assets
         mark_rmv = 0
         mark_render = 0
 

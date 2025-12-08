@@ -230,7 +230,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
-        self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
+        # self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
 
         self.a_folder = self.ui.findChild(QtGui.QAction, "action_import_folder")
         self.a_folder.setDisabled(True)
@@ -295,7 +295,7 @@ class MatLibPanel(QtWidgets.QWidget):
         elif action == action_render:
             self.update_single_asset()
         elif action == action_import:
-            self.import_assets()
+            self.import_asset()
         elif action == action_renderall:
             self.update_all_assets()
         elif action == action_thumb_viewport:
@@ -923,28 +923,10 @@ class MatLibPanel(QtWidgets.QWidget):
                 asset, dialog.categories, dialog.tags, dialog.fav
             )
 
-    def import_assets(self) -> None:
-        items = self.get_selected_items_from_thumblist()
-        if not items:
-            return
-        for item in items:
-            self.import_asset(item)
-
-    #  Import material to Scene
-    def import_asset(self, sel: QtWidgets.QListWidgetItem) -> None | hou.Node:
+    def import_asset(self, *kwargs):
         """Import Material to scene"""
-        if not sel:
-            item = self.thumblist.selectedItems()[0]
-        else:
-            item = sel
-
-        if not item:
-            hou.ui.displayMessage("No Asset selected")  # type: ignore
-            return
-
-        asset_id = self.get_id_from_thumblist(item)
-
-        return self.material_model.import_asset_to_scene(asset_id)
+        for index in self.thumblist.selectedIndexes():
+            self.material_model.import_asset_to_scene(index)
 
     def render_thumbnail(self, asset_id: str) -> None:
         # Move to correct context before rerendering assets
