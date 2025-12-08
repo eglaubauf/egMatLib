@@ -591,7 +591,9 @@ class MatLibPanel(QtWidgets.QWidget):
         sel_tags = []
         fav = []
         for idx in indexes:
-            curr_asset = self.material_model.index(idx.row())
+            curr_asset = self.material_model.index(
+                self.material_sorted_model.mapToSource(idx).row()
+            )
             name = curr_asset.data(QtCore.Qt.ItemDataRole.DisplayRole)
             asset_id = curr_asset.data(self.material_model.IdRole)
             date = curr_asset.data(self.material_model.DateRole)
@@ -777,10 +779,13 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model.layoutChanged.emit()
         self.category_model.layoutChanged.emit()
 
-    def import_asset(self, *kwargs):
+    def import_asset(self):
         """Import Material to scene"""
         for index in self.thumblist.selectedIndexes():
-            self.material_model.import_asset_to_scene(index)
+
+            self.material_model.import_asset_to_scene(
+                self.material_sorted_model.mapToSource(index)
+            )
 
     def render_thumbnail(self, asset_id: str) -> None:
         # Move to correct context before rerendering assets
