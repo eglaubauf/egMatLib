@@ -1,4 +1,3 @@
-from dbm.ndbm import library
 import os
 import shutil
 import sys
@@ -157,7 +156,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.thumblist = self.ui.findChild(QtWidgets.QListView, "thumbview")
         self.thumblist.doubleClicked.connect(self.import_asset)
-        # self.thumblist.itemPressed.connect(self.update_details_view)
+        self.thumblist.clicked.connect(self.update_details_view)
 
         # Category UI
         self.cat_list = self.ui.findChild(QtWidgets.QListView, "catview")
@@ -223,7 +222,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
-        # self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
+        self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
 
         self.a_folder = self.ui.findChild(QtGui.QAction, "action_import_folder")
         self.a_folder.setDisabled(True)
@@ -409,7 +408,6 @@ class MatLibPanel(QtWidgets.QWidget):
                     self.prefs.img_dir,
                     str(asset.mat_id) + self.prefs.img_ext,
                 )
-                # print(img_path)
                 asset_path = asset.path
 
                 # Only check for img and asset for backwards compatibility
@@ -447,19 +445,31 @@ class MatLibPanel(QtWidgets.QWidget):
         choice, cat = hou.ui.readInput("Please enter the new category name:")  # type: ignore
         if choice:  # Return if no
             return
+
+        self.material_model.layoutAboutToBeChanged.emit()
+        self.category_model.layoutAboutToBeChanged.emit()
+
         self.material_model.check_add_category(cat)
-        self.material_model.save()
+
+        self.material_model.layoutChanged.emit()
+        self.category_model.layoutChanged.emit()
 
     # User Removes Category with Button
     def rmv_category_user(self) -> None:
         """Removes a category - called by user change in UI"""
-        rmv_item = self.cat_list.selectedItems()
         # Prevent Deletion of "All" - Category
-        if rmv_item[0].text() == "All":
-            return
+        self.material_model.layoutAboutToBeChanged.emit()
+        self.category_model.layoutAboutToBeChanged.emit()
+        for index in self.cat_list.selectedIndexes():
+            if index.data(QtCore.Qt.ItemDataRole.DisplayRole) == "All":
+                return
+            self.material_model.remove_category(
+                index.data(QtCore.Qt.ItemDataRole.DisplayRole)
+            )
 
-        self.material_model.remove_category(rmv_item[0].text())
         self.material_model.save()
+        self.material_model.layoutChanged.emit()
+        self.category_model.layoutChanged.emit()
 
     def rename_category_user(self) -> None:
         """Renames a category - called by user change in UI"""
@@ -467,15 +477,19 @@ class MatLibPanel(QtWidgets.QWidget):
         if choice:  # Return if no
             return
 
-        rnm_item = self.cat_list.selectedItems()
-        # Prevent Deletion of "All" - Category
-        if rnm_item[0].text() == "All":
-            return
+        self.material_model.layoutAboutToBeChanged.emit()
+        self.category_model.layoutAboutToBeChanged.emit()
+        for index in self.cat_list.selectedIndexes():
+            if index.data(QtCore.Qt.ItemDataRole.DisplayRole) == "All":
+                return
 
-        self.material_model.rename_category(rnm_item[0].text(), cat)
+            self.material_model.rename_category(
+                index.data(QtCore.Qt.ItemDataRole.DisplayRole), cat
+            )
 
         self.material_model.save()
-        return
+        self.material_model.layoutChanged.emit()
+        self.category_model.layoutChanged.emit()
 
     def filter_thumb_view(self) -> None:
         """Get Filter from user and trigger view update"""
@@ -577,62 +591,61 @@ class MatLibPanel(QtWidgets.QWidget):
             asset_id = self.get_id_from_thumblist(item)
             self.material_model.update_asset_date(asset_id)
 
-    # Update Views Section
-    # Update Details view
     def update_details_view(self, item: QtWidgets.QListWidgetItem) -> None:
         """Update upon changes in Detail view"""
-        if item is None:
+        indexes = self.thumblist.selectedIndexes()
+        if not indexes:
             return
 
-        items = self.get_selected_items_from_thumblist_silent()
+        asset_id = ""
+        name = ""
+        date = ""
+        sel_cats = []
+        sel_tags = []
+        fav = []
+        for idx in indexes:
+            curr_asset = self.material_model.index(idx.row())
+            name = curr_asset.data(QtCore.Qt.ItemDataRole.DisplayRole)
+            asset_id = curr_asset.data(self.material_model.IdRole)
+            date = curr_asset.data(self.material_model.DateRole)
 
-        cat_flag = False
-        tag_flag = False
-        cat = ""
-        tags = ""
-        if items is not None:
-            # Check all Selected assets for same Cat and Tag Values
-            for x, item in enumerate(items):
-                asset_id = self.get_id_from_thumblist(item)
-                curr_asset = self.material_model.get_asset_by_id(asset_id)
+            for cat in curr_asset.data(self.material_model.CategoryRole):
+                sel_cats.append(cat)
+            for tag in curr_asset.data(self.material_model.TagRole):
+                sel_tags.append(tag)
+            for fav in curr_asset.data(self.material_model.FavoriteRole):
+                sel_tags.append(fav)
 
-                if x == 0:
-                    cat = curr_asset.categories
-                    tags = curr_asset.tags
-                    # fav = curr_asset.get_fav()
-                else:
-                    # Check Categories
-                    if cat != curr_asset.categories:
-                        cat_flag = True
-                    # Check Tags
-                    if tags != curr_asset.tags:
-                        tag_flag = True
+        msg = "Multiple Values..." if len(indexes) > 1 else name
+        self.line_name.setText(msg)
 
-        asset_id = self.get_id_from_thumblist(item)
+        msg = "Multiple Values..." if len(indexes) > 1 else asset_id
+        self.line_id.setText(msg)
 
-        for asset in self.material_model.assets:
-            if asset.mat_id == asset_id:
-                # set name
-                self.line_name.setText(asset.name)
-                # set cat
-                if cat_flag:
-                    self.line_cat.setText("Multiple Values")
-                else:
-                    self.line_cat.setText(", ".join(asset.categories))
-                # set tag
-                if tag_flag:
-                    self.line_tags.setText("Multiple Values")
-                else:
-                    self.line_tags.setText(", ".join(asset.tags))
-                # set fav
-                if asset.fav == 1:
-                    self.box_fav.setCheckState(QtCore.Qt.Checked)
-                else:
-                    self.box_fav.setCheckState(QtCore.Qt.Unchecked)
-                # set id
-                self.line_id.setText(str(asset.mat_id))
-                self.line_date.setText(str(asset.date))
-        return
+        msg = "Multiple Values..." if len(indexes) > 1 else date
+        self.line_date.setText(msg)
+
+        msg = (
+            QtCore.Qt.CheckState.Checked
+            if fav[0] is True
+            else QtCore.Qt.CheckState.Unchecked
+        )
+        msg = QtCore.Qt.CheckState.PartiallyChecked if len(indexes) > 1 else msg
+        self.box_fav.setCheckState(msg)
+
+        msg = (
+            sel_cats[0]
+            if len(sel_cats) < 2
+            else ", ".join(list(filter(None, set(sel_cats))))
+        )
+        self.line_cat.setText(msg)
+
+        msg = (
+            sel_tags[0]
+            if len(sel_cats) < 2
+            else ", ".join(list(filter(None, set(sel_tags))))
+        )
+        self.line_tags.setText(msg)
 
     # Update the Views when selection changes
     def update_selected_cat(self) -> None:

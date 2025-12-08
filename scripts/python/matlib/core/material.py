@@ -121,10 +121,10 @@ class Material:
         self._cats = cat
 
     def remove_category(self, cat: str) -> None:
-        if cat in self.cats:
-            self.cats.remove(cat)
+        if cat in self._cats:
+            self._cats.remove(cat)
 
     def rename_category(self, old: str, new: str) -> None:
-        for cat in self.cats:
-            if old in cat:
-                cat = new
+        for index, cat in enumerate(self._cats):
+            if old == cat:
+                self._cats[index] = new
