@@ -92,34 +92,9 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_external(self) -> None:
         if self.material_model:
             self.material_model.load(self.prefs)
-            # self.update_views()
         else:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
         return
-
-    # def update_views(self) -> None:
-    #     self.update_ui()
-    #     # self.update_thumb_view()
-
-    def update_ui(self) -> None:
-        if self.cb_mantra.isChecked():
-            self.radio_usd.setDisabled(False)
-            self.radio_current.setDisabled(False)
-        if self.cb_matx.isChecked():
-            self.radio_usd.setDisabled(False)
-            self.radio_current.setDisabled(False)
-        if self.cb_arnold.isChecked():
-            self.radio_default.setChecked(True)
-            self.radio_usd.setDisabled(True)
-            self.radio_current.setDisabled(True)
-        if self.cb_redshift.isChecked():
-            self.radio_default.setChecked(True)
-            self.radio_usd.setDisabled(True)
-            self.radio_current.setDisabled(True)
-        if self.cb_octane.isChecked():
-            self.radio_default.setChecked(True)
-            self.radio_usd.setDisabled(True)
-            self.radio_current.setDisabled(True)
 
     def toggle_catview(self) -> None:
         if self.action_catview.isChecked():
@@ -332,8 +307,6 @@ class MatLibPanel(QtWidgets.QWidget):
         elif action == action_toggle_cats:
             self.toggle_catview()
 
-        self.update_views()
-
     def catlist_rc_menu(self) -> None:
         cmenu = QtWidgets.QMenu(self)
 
@@ -363,7 +336,6 @@ class MatLibPanel(QtWidgets.QWidget):
                 self.material_model.set_asset_fav(curr_id, True)
 
         self.update_details_view(items[0])
-        self.update_views()
 
     def import_folder_finished(self) -> None:
         #  finalize import by adding the created materials to the library
@@ -407,7 +379,6 @@ class MatLibPanel(QtWidgets.QWidget):
                 self.material_model.thumbsize + 10, self.material_model.thumbsize + 40
             )
         )
-        self.update_views()
 
     def cleanup_db(self) -> None:
         if not self.material_model:
@@ -469,7 +440,6 @@ class MatLibPanel(QtWidgets.QWidget):
             return
         self.material_model.check_add_category(cat)
         self.material_model.save()
-        self.update_views()
 
     # User Removes Category with Button
     def rmv_category_user(self) -> None:
@@ -480,9 +450,7 @@ class MatLibPanel(QtWidgets.QWidget):
             return
 
         self.material_model.remove_category(rmv_item[0].text())
-
         self.material_model.save()
-        self.update_views()
 
     def rename_category_user(self) -> None:
         """Renames a category - called by user change in UI"""
@@ -498,7 +466,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model.rename_category(rnm_item[0].text(), cat)
 
         self.material_model.save()
-        self.update_views()
         return
 
     def filter_thumb_view(self) -> None:
@@ -534,7 +501,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.user_update_tags()
         self.user_update_fav()
         self.user_update_date()
-        self.update_views()
 
     def user_update_cats(self) -> None:
         """Apply change in Detail view to Library"""
@@ -956,7 +922,6 @@ class MatLibPanel(QtWidgets.QWidget):
             self.material_model.add_asset(
                 asset, dialog.categories, dialog.tags, dialog.fav
             )
-        self.update_views()
 
     def import_assets(self) -> None:
         items = self.get_selected_items_from_thumblist()
@@ -1010,5 +975,3 @@ class MatLibPanel(QtWidgets.QWidget):
                 self.material_model.thumbsize + 10, self.material_model.thumbsize + 40
             )
         )
-
-        self.update_views()
