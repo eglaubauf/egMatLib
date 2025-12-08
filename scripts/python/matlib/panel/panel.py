@@ -220,11 +220,11 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.cb_showcat = self.ui.findChild(QtWidgets.QCheckBox, "cb_showCat")
 
-        # self.cb_redshift.toggled.connect(self.update_views)
-        # self.cb_mantra.toggled.connect(self.update_views)
-        # self.cb_arnold.toggled.connect(self.update_views)
-        # self.cb_octane.toggled.connect(self.update_views)
-        # self.cb_matx.toggled.connect(self.update_views)
+        self.cb_redshift.toggled.connect(self.filter_renderer)
+        self.cb_mantra.toggled.connect(self.filter_renderer)
+        self.cb_arnold.toggled.connect(self.filter_renderer)
+        self.cb_octane.toggled.connect(self.filter_renderer)
+        self.cb_matx.toggled.connect(self.filter_renderer)
 
         # Context Options
         self.radio_current = self.ui.findChild(QtWidgets.QRadioButton, "radio_current")
@@ -514,6 +514,12 @@ class MatLibPanel(QtWidgets.QWidget):
         )
 
         self.material_sorted_model.setFilterRole(self.material_model.FavoriteRole)
+        self.material_sorted_model.setFilterRegularExpression(filter)
+
+    def filter_renderer(self) -> None:
+        """Get Filter from user and trigger view update"""
+        filter = self.cb_matx.group().checkedButton().text()
+        self.material_sorted_model.setFilterRole(self.material_model.RendererRole)
         self.material_sorted_model.setFilterRegularExpression(filter)
 
     def listen_entry_from_detail(self, item: QtWidgets.QListWidgetItem) -> None:

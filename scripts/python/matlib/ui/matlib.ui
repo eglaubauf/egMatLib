@@ -583,6 +583,9 @@
                    <property name="checked">
                     <bool>false</bool>
                    </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rendererGroup</string>
+                   </attribute>
                   </widget>
                  </item>
                  <item row="4" column="1">
@@ -601,16 +604,6 @@
                    </property>
                   </spacer>
                  </item>
-                 <item row="4" column="0">
-                  <widget class="QRadioButton" name="cb_MatX">
-                   <property name="text">
-                    <string>MaterialX</string>
-                   </property>
-                   <property name="checked">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="5" column="0">
                   <widget class="QRadioButton" name="cb_Redshift">
                    <property name="text">
@@ -619,16 +612,9 @@
                    <property name="checked">
                     <bool>false</bool>
                    </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QRadioButton" name="cb_Mantra">
-                   <property name="text">
-                    <string>Mantra</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
-                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rendererGroup</string>
+                   </attribute>
                   </widget>
                  </item>
                  <item row="1" column="0">
@@ -639,6 +625,35 @@
                    <property name="checked">
                     <bool>false</bool>
                    </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rendererGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QRadioButton" name="cb_Mantra">
+                   <property name="text">
+                    <string>Mantra</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rendererGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QRadioButton" name="cb_MatX">
+                   <property name="text">
+                    <string>MaterialX</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rendererGroup</string>
+                   </attribute>
                   </widget>
                  </item>
                 </layout>
@@ -778,4 +793,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="rendererGroup"/>
+ </buttongroups>
 </ui>
