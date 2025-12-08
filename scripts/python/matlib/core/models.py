@@ -21,10 +21,6 @@ importlib.reload(helpers)
 importlib.reload(thumbnail_scene)
 importlib.reload(database)
 
-default_icon = QtGui.QImage(
-    "/Users/elmar/git/egMatLib/scripts/python/matlib/res/img/default.png"
-).scaled(QtCore.QSize(64, 64))
-
 
 class Categories(QtCore.QAbstractListModel):
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
@@ -48,6 +44,7 @@ class Categories(QtCore.QAbstractListModel):
 
 
 class MaterialLibrary(QtCore.QAbstractListModel):
+
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
         super().__init__()
         self._assets = []
@@ -83,8 +80,19 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.TagRole = QtCore.Qt.ItemDataRole.UserRole + 4
         self.DateRole = QtCore.Qt.ItemDataRole.UserRole + 5
 
+        self.default_image = QtGui.QImage(
+            "/Users/elmar/git/egMatLib/scripts/python/matlib/res/img/default.png"
+        ).scaled(QtCore.QSize(256, 256))
+
     # def roleNames(self) -> QtCore.Dict[int, QtCore.QByteArray]:
     #     return {self.IdRole: b"id", self.CategoryRole: b"Category"}
+
+    def setCustomIconSize(self, size) -> None:
+        self.default_image = QtGui.QPixmap.fromImage(
+            QtGui.QImage(
+                "/Users/elmar/git/egMatLib/scripts/python/matlib/res/img/default.png"
+            ).scaled(size)
+        )
 
     def rowCount(
         self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
@@ -100,21 +108,26 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             return self._assets[index.row()].name
 
         if role == QtCore.Qt.ItemDataRole.DecorationRole:
-            if index.row() < 0:
-                return None
-            return default_icon
+            # if index.row() < 0:
+            #     return None
+            # mat_id = self._assets[index.row()].mat_id
+            # path = self.path + self.settings.img_dir + mat_id + self.settings.img_ext
+            # if os.path.exists(path):
+            #     return QtGui.QImage(path)
+
+            return self.default_image
 
         if role == self.CategoryRole:
             return self._assets[index.row()].categories
+
+        if role == self.TagRole:
+            return self._assets[index.row()].tags
 
         if role == self.FavoriteRole:
             return str(self._assets[index.row()].fav)
 
         if role == self.RendererRole:
             return str(self._assets[index.row()].renderer)
-
-        if role == self.TagRole:
-            return self._assets[index.row()].tags
 
         if role == self.DateRole:
             return str(self._assets[index.row()].date)

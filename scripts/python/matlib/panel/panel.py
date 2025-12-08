@@ -65,6 +65,8 @@ class MatLibPanel(QtWidgets.QWidget):
         # self.material_fav_sorted_model.setSourceModel(self.material_sorted_model)
 
         self.thumblist.setModel(self.material_sorted_model)
+        # Init ThumbSize
+        self.slide()
 
         # Load prefs and open library
         self.prefs = prefs.Prefs()
@@ -205,20 +207,23 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # IconSize Slider
         self.slide_iconsize = self.ui.findChild(QtWidgets.QSlider, "slide_iconSize")
+        self.slide_iconsize.setRange(32, 512)
+        self.slide_iconsize.setValue(128)
         self.slide_iconsize.setVisible(False)
 
         # Set Up Clickable Slider
         self.click_slider = ui_helpers.ClickSlider()
         self.click_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.click_slider.setMinimum(0)
-        self.click_slider.setMaximum(512)
+        self.click_slider.setRange(32, 256)
+        self.click_slider.setValue(128)
         self.click_slider.setSingleStep(50)
         self.click_slider.setPageStep(50)
         self.slider_layout = self.ui.findChild(QtWidgets.QVBoxLayout, "slider_layout")
         self.slider_layout.addWidget(self.click_slider)
         self.click_slider.valueChanged.connect(self.slide)
-        if self.material_model:
-            self.click_slider.setValue(self.material_model.thumbsize)
+
+        # if self.material_model:
+        #     self.click_slider.setValue(self.material_model.thumbsize)
 
         # RC Menus
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
@@ -973,13 +978,19 @@ class MatLibPanel(QtWidgets.QWidget):
 
     # Set IconSize via Slider
     def slide(self) -> None:
+
         self.material_model.thumbsize = self.click_slider.value()
         # Update Thumblist Grid
-        self.thumblist.setIconSize(
-            QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
-        )
+
         self.thumblist.setGridSize(
             QtCore.QSize(
                 self.material_model.thumbsize + 10, self.material_model.thumbsize + 40
             )
+        )
+        self.thumblist.setIconSize(
+            QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
+        )
+        # Also need to resize the images!
+        self.material_model.setCustomIconSize(
+            QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
         )
