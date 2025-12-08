@@ -61,6 +61,10 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.sort(0)
+
+        # self.material_fav_sorted_model = QtCore.QSortFilterProxyModel()
+        # self.material_fav_sorted_model.setSourceModel(self.material_sorted_model)
+
         self.thumblist.setModel(self.material_sorted_model)
 
         # Load prefs and open library
@@ -88,14 +92,14 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_external(self) -> None:
         if self.material_model:
             self.material_model.load(self.prefs)
-            self.update_views()
+            # self.update_views()
         else:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
         return
 
-    def update_views(self) -> None:
-        self.update_ui()
-        # self.update_thumb_view()
+    # def update_views(self) -> None:
+    #     self.update_ui()
+    #     # self.update_thumb_view()
 
     def update_ui(self) -> None:
         if self.cb_mantra.isChecked():
@@ -191,10 +195,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cat_list = self.ui.findChild(QtWidgets.QListView, "catview")
         self.cat_list.clicked.connect(self.update_selected_cat)
 
-        # FILTER UI
-        self.line_filter = self.ui.findChild(QtWidgets.QLineEdit, "line_filter")
-        self.line_filter.textChanged.connect(self.filter_thumb_view_user)
-
         # Updated Details UI
         self.details = self.ui.findChild(QtWidgets.QTableWidget, "details_widget")
         self.line_name = self.ui.findChild(QtWidgets.QLineEdit, "line_name")
@@ -209,7 +209,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Options
         self.cb_favsonly = self.ui.findChild(QtWidgets.QCheckBox, "cb_FavsOnly")
-        self.cb_favsonly.stateChanged.connect(self.update_views)
+        self.cb_favsonly.stateChanged.connect(self.filter_favs)
 
         # Material
         self.cb_redshift = self.ui.findChild(QtWidgets.QRadioButton, "cb_Redshift")
@@ -220,13 +220,11 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.cb_showcat = self.ui.findChild(QtWidgets.QCheckBox, "cb_showCat")
 
-        self.cb_favsonly.stateChanged.connect(self.update_views)
-
-        self.cb_redshift.toggled.connect(self.update_views)
-        self.cb_mantra.toggled.connect(self.update_views)
-        self.cb_arnold.toggled.connect(self.update_views)
-        self.cb_octane.toggled.connect(self.update_views)
-        self.cb_matx.toggled.connect(self.update_views)
+        # self.cb_redshift.toggled.connect(self.update_views)
+        # self.cb_mantra.toggled.connect(self.update_views)
+        # self.cb_arnold.toggled.connect(self.update_views)
+        # self.cb_octane.toggled.connect(self.update_views)
+        # self.cb_matx.toggled.connect(self.update_views)
 
         # Context Options
         self.radio_current = self.ui.findChild(QtWidgets.QRadioButton, "radio_current")
@@ -385,16 +383,6 @@ class MatLibPanel(QtWidgets.QWidget):
         if choice < 0 or choice == len(buttons) - 1:
             return
 
-    def import_files_finished(self) -> None:
-        # finalize import by adding the created materials to the library
-        mat = self.h.core.get_new_material()
-        nodes = []
-        if mat.getNode().type().name() == "materiallibrary":
-            nodes.append(mat.get_output())
-        else:
-            nodes.append(mat.getNode())
-        self.get_material_info_user(nodes)
-
     # User Stuff
     def show_about(self) -> None:
         about = about_dialog.AboutDialog()
@@ -513,10 +501,20 @@ class MatLibPanel(QtWidgets.QWidget):
         self.update_views()
         return
 
-    # Get Filter Text from User
     def filter_thumb_view(self) -> None:
         """Get Filter from user and trigger view update"""
         self.material_sorted_model.setFilterRegularExpression(self.line_filter.text())
+
+    def filter_favs(self) -> None:
+        """Get Filter from user and trigger view update"""
+        filter = (
+            "True"
+            if self.cb_favsonly.checkState() == QtCore.Qt.CheckState.Checked
+            else "False"
+        )
+
+        self.material_sorted_model.setFilterRole(self.material_model.FavoriteRole)
+        self.material_sorted_model.setFilterRegularExpression(filter)
 
     def listen_entry_from_detail(self, item: QtWidgets.QListWidgetItem) -> None:
         """Set Detail view to Edit Mode"""

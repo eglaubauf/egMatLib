@@ -78,6 +78,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         self.IdRole = QtCore.Qt.ItemDataRole.UserRole
         self.CategoryRole = QtCore.Qt.ItemDataRole.UserRole + 1
+        self.FavoriteRole = QtCore.Qt.ItemDataRole.UserRole + 2
 
     # def roleNames(self) -> QtCore.Dict[int, QtCore.QByteArray]:
     #     return {self.IdRole: b"id", self.CategoryRole: b"Category"}
@@ -102,6 +103,9 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         if role == self.CategoryRole:
             return self._assets[index.row()].categories
+
+        if role == self.FavoriteRole:
+            return str(self._assets[index.row()].fav)
 
     def save(self) -> None:
         """Save data to disk as json"""
