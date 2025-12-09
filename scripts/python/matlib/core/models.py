@@ -126,7 +126,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             return self._assets[index.row()].tags
 
         if role == self.FavoriteRole:
-            return str(self._assets[index.row()].fav)
+            return self._assets[index.row()].fav
 
         if role == self.RendererRole:
             return str(self._assets[index.row()].renderer)

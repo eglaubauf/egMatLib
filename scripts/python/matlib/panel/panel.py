@@ -51,6 +51,9 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
             if isinstance(data, (list, tuple)):
                 if filter.lower() not in str(data).lower():
                     return False
+            elif isinstance(data, bool):
+                if filter != data and filter != "":
+                    return False
             elif filter.lower() not in data.lower():
                 return False
         return True
@@ -534,7 +537,7 @@ class MatLibPanel(QtWidgets.QWidget):
     def filter_favs(self) -> None:
         """Get Filter from user and trigger view update"""
         filter = (
-            "True"
+            True
             if self.cb_favsonly.checkState() == QtCore.Qt.CheckState.Checked
             else ""
         )
@@ -658,8 +661,7 @@ class MatLibPanel(QtWidgets.QWidget):
                 sel_cats.append(cat)
             for tag in curr_asset.data(self.material_model.TagRole):
                 sel_tags.append(tag)
-            for f in curr_asset.data(self.material_model.FavoriteRole):
-                fav.append(f)
+            fav.append(curr_asset.data(self.material_model.FavoriteRole))
 
         msg = "Multiple Values..." if len(indexes) > 1 else name
         self.line_name.setText(msg)
