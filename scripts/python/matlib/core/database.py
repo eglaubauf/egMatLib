@@ -21,8 +21,12 @@ class DatabaseConnector:
                 self._data = json.load(lib_json)
         return self._data
 
+    def set(self, assets):
+        self._data = assets
+
     def save(self) -> None:
         if not self._data:
+            print("No Data")
             return
         with open(self._path + ("/library.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self._data, lib_json, indent=4)
