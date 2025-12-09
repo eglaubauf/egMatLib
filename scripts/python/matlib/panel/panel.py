@@ -331,9 +331,6 @@ class MatLibPanel(QtWidgets.QWidget):
         action_thumb_viewport = cmenu.addAction("Thumbnail from Viewport")
         cmenu.addSeparator()
         action_delete = cmenu.addAction("Delete Entry")
-        cmenu.addSeparator()
-        action_toggle_cats = cmenu.addAction("Toggle Cat View")
-        action_toggle_details = cmenu.addAction("Toggle Details View")
         action = cmenu.exec_(QtGui.QCursor.pos())
 
         if action == action_delete:
@@ -348,10 +345,6 @@ class MatLibPanel(QtWidgets.QWidget):
             self.update_single_asset()
         elif action == action_toggle_fav:
             self.toggle_fav()
-        elif action == action_toggle_details:
-            self.toggle_detailsview()
-        elif action == action_toggle_cats:
-            self.toggle_catview()
 
     def catlist_rc_menu(self) -> None:
         cmenu = QtWidgets.QMenu(self)
