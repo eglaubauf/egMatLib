@@ -3,7 +3,6 @@ import shutil
 import sys
 import subprocess
 import importlib
-from xml.dom import INDEX_SIZE_ERR
 from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 
 import hou
@@ -18,7 +17,6 @@ from matlib.dialogs import (
 from matlib.prefs import prefs
 from matlib.helpers import ui_helpers
 
-# Set Develop flag to reload everthing properly
 importlib.reload(models)
 importlib.reload(prefs)
 importlib.reload(ui_helpers)
