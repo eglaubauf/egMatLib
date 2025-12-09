@@ -21,6 +21,40 @@ importlib.reload(helpers)
 importlib.reload(thumbnail_scene)
 importlib.reload(database)
 
+favicon = hou.getenv("EGMATLIB") + "/scripts/python/matlib/res/def/Favorite.png"
+missing = hou.getenv("EGMATLIB") + "/scripts/python/matlib/res/img/missing.jpg"
+base_size = 512
+
+
+class ThumbnailWorker(QtCore.QThread):
+    thumbnail_ready = QtCore.Signal(int, QtGui.QImage)
+
+    def __init__(self, items, size: int, parent: QtCore.QObject | None = None) -> None:
+        super().__init__()
+        self._items = items
+        self._size = size
+
+    def run(self) -> None:
+        for elem, data in self._items:
+
+            img = QtGui.QImage(data[0]).scaled(QtCore.QSize(base_size, base_size))
+            if img.isNull():
+                continue
+            if data[1]:
+                fav_img = QtGui.QImage(favicon).scaled(
+                    QtCore.QSize(base_size, base_size)
+                )
+                composite = QtGui.QImage(
+                    QtCore.QSize(base_size, base_size), QtGui.QImage.Format_ARGB32
+                )
+                painter = QtGui.QPainter(composite)
+                painter.drawImage(0, 0, img)
+                painter.drawImage(0, 0, fav_img)
+                painter.end()
+                self.thumbnail_ready.emit(elem, composite)
+            else:
+                self.thumbnail_ready.emit(elem, img)
+
 
 class Categories(QtCore.QAbstractListModel):
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
@@ -80,19 +114,38 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.TagRole = QtCore.Qt.ItemDataRole.UserRole + 4
         self.DateRole = QtCore.Qt.ItemDataRole.UserRole + 5
 
-        self.default_image = QtGui.QImage(
-            "/Users/elmar/git/egMatLib/scripts/python/matlib/res/img/default.png"
-        ).scaled(QtCore.QSize(256, 256))
+        self.default_image = QtGui.QImage(missing).scaled(
+            QtCore.QSize(base_size, base_size)
+        )
+        self._thumbs = {}
+        self._paths = []
+        self._get_paths()
+        self._start_worker()
 
-    # def roleNames(self) -> QtCore.Dict[int, QtCore.QByteArray]:
-    #     return {self.IdRole: b"id", self.CategoryRole: b"Category"}
+    def _get_paths(self):
+        self._paths = []
+        for elem in range(self.rowCount()):
+            mat_id = self._assets[elem].mat_id
+            is_fav = self._assets[elem].fav
+            path = self.path + self.settings.img_dir + mat_id + self.settings.img_ext
+            self._paths.append((path, is_fav))
+
+    def _start_worker(self):
+        items = list(enumerate(self._paths))
+
+        self.worker = ThumbnailWorker(items, self._thumbsize)
+        self.worker.thumbnail_ready.connect(self._on_thumb_ready)
+        self.worker.start()
+
+    @QtCore.Slot(int, QtGui.QImage)
+    def _on_thumb_ready(self, elem, image):
+        self._thumbs[elem] = image
+        self.dataChanged.emit(
+            self.index(elem), self.index(elem), QtCore.Qt.ItemDataRole.DecorationRole
+        )
 
     def setCustomIconSize(self, size: QtCore.QSize) -> None:
-        self.default_image = QtGui.QPixmap.fromImage(
-            QtGui.QImage(
-                "/Users/elmar/git/egMatLib/scripts/python/matlib/res/img/default.png"
-            ).scaled(size)
-        )
+        self.default_image = QtGui.QImage(missing).scaled(size)
         self._thumbsize = size.width()
 
     def rowCount(
@@ -107,16 +160,9 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             return self._assets[index.row()].name
 
         if role == QtCore.Qt.ItemDataRole.DecorationRole:
-            mat_id = self._assets[index.row()].mat_id
-            path = self.path + self.settings.img_dir + mat_id + self.settings.img_ext
-
-            if os.path.exists(path):
-                image = QtGui.QImage(path).scaled(
-                    QtCore.QSize(self._thumbsize, self._thumbsize)
-                )
-
-                return image
-
+            image = self._thumbs.get(index.row())
+            if image:
+                return image.scaled(QtCore.QSize(self._thumbsize, self._thumbsize))
             return self.default_image
 
         if role == self.CategoryRole:
