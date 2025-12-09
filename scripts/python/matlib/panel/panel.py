@@ -707,24 +707,21 @@ class MatLibPanel(QtWidgets.QWidget):
             Do you want continue rendering all visible assets?"""  # type: ignore
         ):  # type: ignore
             return
-
-        for i in range(self.thumblist.count()):
-            item = self.thumblist.item(i)
-
-            asset_id = self.get_id_from_thumblist(item)
-            self.render_thumbnail(asset_id)
-
+        self.material_model.layoutAboutToBeChanged.emit()
+        for i in range(self.material_model.rowCount()):
+            self.material_model.render_thumbnail(self.material_model.index(i))
+        self.material_model.layoutChanged.emit()
         hou.ui.displayMessage("Updating all Thumbnails finished")  # type: ignore
 
     # Rerender Selected Asset
     def update_single_asset(self) -> None:
         """Rerenders a single Asset in the library - The UI is blocked for the duration of the render"""
         indexes = self.material_selection_model.selectedIndexes()
-
+        self.material_model.layoutAboutToBeChanged.emit()
         for index in indexes:
             idx = self.material_sorted_model.mapToSource(index)
             self.material_model.render_thumbnail(idx)
-
+        self.material_model.layoutChanged.emit()
         hou.ui.displayMessage("Thumbnail(s) updated")  # type: ignore
 
     def get_id_from_thumblist(self, item: QtWidgets.QListWidgetItem) -> str:

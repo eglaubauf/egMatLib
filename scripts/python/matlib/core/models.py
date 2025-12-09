@@ -1237,6 +1237,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         if not builder:
             return
         self.create_thumbnail(builder, index)
+        self._update_thumb_paths(index)
         if "stage" in self.context.path():
             builder.parent().destroy()
         else:
