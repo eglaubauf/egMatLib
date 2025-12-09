@@ -3,6 +3,7 @@ import shutil
 import sys
 import subprocess
 import importlib
+from xml.dom import INDEX_SIZE_ERR
 from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 
 import hou
@@ -369,17 +370,13 @@ class MatLibPanel(QtWidgets.QWidget):
         return
 
     def toggle_fav(self) -> None:
-        items = self.get_selected_items_from_thumblist()
-        if not items:
-            return
-        for item in items:
-            curr_id = self.get_id_from_thumblist(item)
 
-            if self.material_model.get_asset_fav(curr_id):
-                self.material_model.set_asset_fav(curr_id, False)
-            else:
-                self.material_model.set_asset_fav(curr_id, True)
-
+        self.material_model.layoutAboutToBeChanged.emit()
+        indexes = self.material_selection_model.selectedIndexes()
+        for index in indexes:
+            idx = self.material_sorted_model.mapToSource(index)
+            self.material_model.toggle_fav(idx)
+        self.material_model.layoutChanged.emit()
         self.update_details_view()
 
     def import_folder_finished(self) -> None:
@@ -603,7 +600,7 @@ class MatLibPanel(QtWidgets.QWidget):
     def user_update_fav(self) -> None:
         """Apply change in Detail View - Favorite"""
 
-        items = self.get_selected_items_from_thumblist_silent()
+        items = self.material_selection_model.selectedIndexes()
         if not items:
             return
 
@@ -729,18 +726,13 @@ class MatLibPanel(QtWidgets.QWidget):
     # Rerender Selected Asset
     def update_single_asset(self) -> None:
         """Rerenders a single Asset in the library - The UI is blocked for the duration of the render"""
-        items = self.get_selected_items_from_thumblist()
-        if not items:
-            return
-        call = False
-        for item in items:
-            if not item:
-                return
-            asset_id = self.get_id_from_thumblist(item)
-            self.render_thumbnail(asset_id)
+        indexes = self.material_selection_model.selectedIndexes()
 
-        if call:
-            hou.ui.displayMessage("Thumbnail(s) updated")  # type: ignore
+        for index in indexes:
+            idx = self.material_sorted_model.mapToSource(index)
+            self.material_model.render_thumbnail(idx)
+
+        hou.ui.displayMessage("Thumbnail(s) updated")  # type: ignore
 
     def get_id_from_thumblist(self, item: QtWidgets.QListWidgetItem) -> str:
         """Return the id for the selected item in thumbview"""
@@ -757,7 +749,7 @@ class MatLibPanel(QtWidgets.QWidget):
         ):
             return
 
-        items = self.get_selected_items_from_thumblist()
+        items = self.material_selection_model.selectedIndexes()
         if not items:
             return
         for item in items:
@@ -770,32 +762,11 @@ class MatLibPanel(QtWidgets.QWidget):
     # Get the selected material from Library
     def get_selected_item_from_thumblist(self):
         """Return the material for the selected item in thumbview"""
-        item = self.thumblist.selectedItems()[0]
+        item = self.material_selection_model.selectedIndexes()[0]
         if not item:
             hou.ui.displayMessage("No material selected")  # type: ignore
             return None
         return item
-
-    def get_selected_items_from_thumblist(
-        self,
-    ) -> list[QtWidgets.QListWidgetItem] | None:
-        """Return the material for the selected item in thumbview"""
-        items = self.thumblist.selectedItems()
-        if not items:
-            hou.ui.displayMessage("No material selected")  # type: ignore
-            return None
-        self.last_selected_items = items
-        return items
-
-    def get_selected_items_from_thumblist_silent(
-        self,
-    ) -> list[QtWidgets.QListWidgetItem] | None:
-        """Return the material for the selected item in thumbview"""
-        items = self.thumblist.selectedItems()
-        if not items:
-            return None
-        self.last_selected_items = items
-        return items
 
     #  Saves a material to the Library
     def save_asset(self) -> None:
@@ -844,23 +815,6 @@ class MatLibPanel(QtWidgets.QWidget):
             self.material_model.import_asset_to_scene(
                 self.material_sorted_model.mapToSource(index)
             )
-
-    def render_thumbnail(self, asset_id: str) -> None:
-        # Move to correct context before rerendering assets
-        if "MatX" in self.material_model.get_renderer_by_id(asset_id):
-            self.material_model.context = hou.node("/stage")
-        else:
-            self.material_model.context = hou.node("/mat")
-
-        builder = self.material_model.import_asset_to_scene(asset_id)
-        if not builder:
-            return
-        self.material_model.create_thumbnail(builder, asset_id)
-
-        if "stage" in self.material_model.context.path():
-            builder.parent().destroy()
-        else:
-            builder.destroy()
 
     # Set IconSize via Slider
     def slide(self) -> None:

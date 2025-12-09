@@ -35,7 +35,7 @@ class ThumbnailWorker(QtCore.QThread):
         self._size = size
 
     def run(self) -> None:
-        for elem, data in self._items:
+        for data in self._items:
 
             img = QtGui.QImage(data[0]).scaled(QtCore.QSize(base_size, base_size))
             if img.isNull():
@@ -51,9 +51,9 @@ class ThumbnailWorker(QtCore.QThread):
                 painter.drawImage(0, 0, img)
                 painter.drawImage(0, 0, fav_img)
                 painter.end()
-                self.thumbnail_ready.emit(elem, composite)
+                self.thumbnail_ready.emit(data[2], composite)
             else:
-                self.thumbnail_ready.emit(elem, img)
+                self.thumbnail_ready.emit(data[2], img)
 
 
 class Categories(QtCore.QAbstractListModel):
@@ -62,8 +62,8 @@ class Categories(QtCore.QAbstractListModel):
 
         perferences = prefs.Prefs()
         db = database.DatabaseConnector()
-        data = db.load(perferences.dir)
-        self._categories = data["categories"]
+        _data = db.load(perferences.dir)
+        self._categories = _data["categories"]
 
     def rowCount(
         self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
@@ -96,16 +96,16 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         perferences = prefs.Prefs()
         self.settings = perferences  # TODO Remove Future
         db = database.DatabaseConnector()
-        data = db.load(perferences.dir)
+        self._data = db.load(perferences.dir)
 
         self._path = perferences.dir
-        # Map to Model
-        self._assets = [material.Material.from_dict(d) for d in data["assets"]]
-        self._categories = data["categories"]
-        self._tags = data["tags"]
-        self.thumbsize = data["thumbsize"]
-        self.rendersize = data["rendersize"]
-        self.render_on_import = data["render_on_import"]
+        # Map Data to Model
+        self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
+        self._categories = self._data["categories"]
+        self._tags = self._data["tags"]
+        self.thumbsize = self._data["thumbsize"]
+        self.rendersize = self._data["rendersize"]
+        self.render_on_import = self._data["render_on_import"]
 
         self.IdRole = QtCore.Qt.ItemDataRole.UserRole
         self.CategoryRole = QtCore.Qt.ItemDataRole.UserRole + 1
@@ -118,21 +118,35 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             QtCore.QSize(base_size, base_size)
         )
         self._thumbs = {}
-        self._paths = []
-        self._get_paths()
+        self._mat_paths = []
+        self._get__mat_paths()
         self._start_worker()
 
-    def _get_paths(self):
-        self._paths = []
+    def _get__mat_paths(self):
+        self._mat_paths = []
         for elem in range(self.rowCount()):
             mat_id = self._assets[elem].mat_id
             is_fav = self._assets[elem].fav
             path = self.path + self.settings.img_dir + mat_id + self.settings.img_ext
-            self._paths.append((path, is_fav))
+            self._mat_paths.append((path, is_fav, elem))
 
-    def _start_worker(self):
-        items = list(enumerate(self._paths))
+    def _update_thumb_paths(self, index: QtCore.QModelIndex):
+        mat_id = self._assets[index.row()].mat_id
 
+        paths = []
+        for elem in range(self.rowCount()):
+            if mat_id == self._assets[elem].mat_id:
+                is_fav = self._assets[elem].fav
+                path = (
+                    self.path + self.settings.img_dir + mat_id + self.settings.img_ext
+                )
+                paths.append((path, is_fav, index.row()))
+        self._start_worker(paths)
+
+    def _start_worker(self, paths=None):
+        if not paths:
+            paths = self._mat_paths
+        items = paths
         self.worker = ThumbnailWorker(items, self._thumbsize)
         self.worker.thumbnail_ready.connect(self._on_thumb_ready)
         self.worker.start()
@@ -186,6 +200,14 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     def save(self) -> None:
         """Save data to disk as json"""
         db = database.DatabaseConnector()
+        data = {}
+        data["categories"] = self._categories
+        data["tags"] = self._tags
+        data["thumbsize"] = self.thumbsize
+        data["rendersize"] = self.rendersize
+        data["render_on_import"] = self.render_on_import
+        data["assets"] = [asset.get_as_dict() for asset in self._assets]
+        db.set(data)
         db.save()
 
     def check_exists_in_lib(self, path: str) -> bool:
@@ -750,12 +772,12 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         return self.create_thumb_mtlx(children, asset_id)
 
-    def create_thumbnail(self, node: hou.Node, asset_id: str) -> None:
-        renderer = self.get_renderer_by_id(asset_id)
-        if renderer == "MatX":
-            self.create_thumb_mtlx(node.children(), asset_id)
-        elif renderer == "Mantra":
-            self.create_thumb_mantra(node, asset_id)
+    def create_thumbnail(self, node: hou.Node, index: QtCore.QModelIndex) -> None:
+
+        if self._assets[index.row()].renderer == "MaterialX":
+            self.create_thumb_mtlx(node.children(), self._assets[index.row()].mat_id)
+        elif self._assets[index.row()].renderer == "Mantra":
+            self.create_thumb_mantra(node, self._assets[index.row()].mat_id)
         else:
             pass
 
@@ -1203,3 +1225,27 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             )
         if mark_lone:
             hou.ui.displayMessage("Lone files have been found and removed from disk.")  # type: ignore
+
+    def render_thumbnail(self, index: QtCore.QModelIndex) -> None:
+        # Move to correct context before rerendering assets
+        if "MatX" in self._assets[index.row()].renderer:
+            self.context = hou.node("/stage")
+        else:
+            self.context = hou.node("/mat")
+
+        builder = self.import_asset_to_scene(index)
+        if not builder:
+            return
+        self.create_thumbnail(builder, index)
+        if "stage" in self.context.path():
+            builder.parent().destroy()
+        else:
+            builder.destroy()
+
+    def toggle_fav(self, index: QtCore.QModelIndex) -> None:
+
+        self._assets[index.row()].fav = False if self._assets[index.row()].fav else True
+        self.save()
+        self._update_thumb_paths(index)
+
+        # self.dataChanged.emit(index, index, self.IdRole)
