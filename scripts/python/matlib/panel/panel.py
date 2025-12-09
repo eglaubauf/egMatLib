@@ -28,6 +28,34 @@ importlib.reload(prefs_dialog)
 importlib.reload(usd_dialog)
 
 
+class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
+    def __init__(self, parent: QtCore.QObject | None = ...) -> None:
+        super().__init__()
+        self._filters = {}
+
+    def setFilter(self, filter_role, filter_value):
+        self._filters[filter_role] = filter_value
+        self.invalidateFilter()
+
+    def filterAcceptsRow(
+        self,
+        source_row: int,
+        source_parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
+    ) -> bool:
+        if not self._filters:
+            return True
+
+        for role, filter in self._filters.items():
+            index = self.sourceModel().index(source_row, 0, source_parent)
+            data = index.data(role)
+            if isinstance(data, (list, tuple)):
+                if filter.lower() not in str(data).lower():
+                    return False
+            elif filter.lower() not in data.lower():
+                return False
+        return True
+
+
 class MatLibPanel(QtWidgets.QWidget):
     def __init__(self) -> None:
         super(MatLibPanel, self).__init__()
@@ -53,15 +81,15 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.material_model = models.MaterialLibrary()
 
-        self.material_sorted_model = QtCore.QSortFilterProxyModel()
+        self.material_sorted_model = MultiFilterProxyModel()
         self.material_sorted_model.setSourceModel(self.material_model)
         self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.sort(0)
+        self.material_sorted_model.setDynamicSortFilter(False)  # Improves Performance
         self.material_selection_model = QtCore.QItemSelectionModel(
             self.material_sorted_model
         )
-
         self.init_ui()
 
         # Attach Models
@@ -70,6 +98,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.thumblist.setSelectionModel(self.material_selection_model)
 
         self.material_selection_model.selectionChanged.connect(self.update_details_view)
+        self.filter_renderer()
         self.slide()
 
         # Load prefs and open library
@@ -173,6 +202,8 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cat_list = self.ui.findChild(QtWidgets.QListView, "catview")
         self.cat_list.clicked.connect(self.update_selected_cat)
 
+        self.line_filter = self.ui.findChild(QtWidgets.QLineEdit, "line_filter")
+        self.line_filter.textEdited.connect(self.filter_thumb_view)
         # Updated Details UI
         self.details = self.ui.findChild(QtWidgets.QTableWidget, "details_widget")
         self.line_name = self.ui.findChild(QtWidgets.QLineEdit, "line_name")
@@ -494,24 +525,28 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def filter_thumb_view(self) -> None:
         """Get Filter from user and trigger view update"""
-        self.material_sorted_model.setFilterRegularExpression(self.line_filter.text())
+        # self.material_sorted_model.setFilterRole(0)
+        self.material_sorted_model.setFilter(
+            QtCore.Qt.ItemDataRole.DisplayRole, self.line_filter.text()
+        )
+        self.material_sorted_model.sort(0)
 
     def filter_favs(self) -> None:
         """Get Filter from user and trigger view update"""
         filter = (
             "True"
             if self.cb_favsonly.checkState() == QtCore.Qt.CheckState.Checked
-            else "False"
+            else ""
         )
 
-        self.material_sorted_model.setFilterRole(self.material_model.FavoriteRole)
-        self.material_sorted_model.setFilterRegularExpression(filter)
+        self.material_sorted_model.setFilter(self.material_model.FavoriteRole, filter)
+        self.material_sorted_model.sort(0)
 
     def filter_renderer(self) -> None:
         """Get Filter from user and trigger view update"""
         filter = self.cb_matx.group().checkedButton().text()
-        self.material_sorted_model.setFilterRole(self.material_model.RendererRole)
-        self.material_sorted_model.setFilterRegularExpression(filter)
+        self.material_sorted_model.setFilter(self.material_model.RendererRole, filter)
+        self.material_sorted_model.sort(0)
 
     def listen_entry_from_detail(self, item: QtWidgets.QListWidgetItem) -> None:
         """Set Detail view to Edit Mode"""
@@ -662,11 +697,11 @@ class MatLibPanel(QtWidgets.QWidget):
         """Update thumb view on change of category"""
         index = self.cat_list.selectedIndexes()[0]
         if index.data() == "All":
-            self.material_sorted_model.setFilterRole(self.material_model.CategoryRole)
-            self.material_sorted_model.setFilterFixedString("")
+            self.material_sorted_model.setFilter(self.material_model.CategoryRole, "")
         else:
-            self.material_sorted_model.setFilterRole(self.material_model.CategoryRole)
-            self.material_sorted_model.setFilterFixedString(index.data())
+            self.material_sorted_model.setFilter(
+                self.material_model.CategoryRole, index.data()
+            )
 
     # Library Stuffs
     def update_all_assets(self) -> None:
