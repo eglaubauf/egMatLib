@@ -411,17 +411,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             self._update_thumb_paths(self.index(self.rowCount() - 1, 0))
             self.save()
 
-    def get_renderer_by_id(self, asset_id: str) -> str:
-        """Return the Renderer for this Material as a string"""
-        for mat in self._assets:
-            if isinstance(asset_id, int):
-                if int(asset_id) == mat.mat_id:
-                    return mat.renderer
-            else:
-                if asset_id == mat.mat_id:
-                    return mat.renderer
-        return ""
-
     def check_materialbuilder_by_id(self, asset_id: str) -> int | None:
         """Return if the Material is a Builder (Mantra) as a 0/1"""
         for mat in self._assets:
@@ -432,9 +421,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                 if asset_id == mat.mat_id:
                     return mat.builder
         return None
-
-    def update_context(self) -> None:
-        self.context = self.get_current_network_node()
 
     def import_asset_to_scene(self, index: QtCore.QModelIndex) -> None | hou.Node:
         """Import a Material to the Nework Editor/Scene"""
