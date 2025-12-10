@@ -8,6 +8,7 @@ from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 import hou
 
 from matlib.core import models
+from matlib.core import category_model
 from matlib.dialogs import (
     about_dialog,
     material_dialog,
@@ -69,7 +70,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.selected_cat = None
 
         # Attach models to views
-        self.category_model = models.Categories()
+        self.category_model = category_model.Categories()
         self.category_sorted_model = QtCore.QSortFilterProxyModel()
         self.category_sorted_model.setSourceModel(self.category_model)
         self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)

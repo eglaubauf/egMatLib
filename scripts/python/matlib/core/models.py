@@ -56,27 +56,6 @@ class ThumbnailWorker(QtCore.QThread):
                 self.thumbnail_ready.emit(data[2], img)
 
 
-class Categories(QtCore.QAbstractListModel):
-    def __init__(self, parent: QtCore.QObject | None = None) -> None:
-        super().__init__()
-
-        perferences = prefs.Prefs()
-        db = database.DatabaseConnector()
-        _data = db.load(perferences.dir)
-        self._categories = _data["categories"]
-
-    def rowCount(
-        self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
-    ) -> int:
-        return len(self._categories)
-
-    def data(
-        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
-    ) -> Any:
-        if role == QtCore.Qt.ItemDataRole.DisplayRole:
-            return self._categories[index.row()]
-
-
 class MaterialLibrary(QtCore.QAbstractListModel):
 
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
