@@ -1,5 +1,4 @@
 import os
-from tkinter import N
 import uuid
 import datetime
 import time
@@ -118,7 +117,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.default_image = QtGui.QImage(missing).scaled(
             QtCore.QSize(base_size, base_size)
         )
-        self._thumbs = {}
+
+        self._thumbs = [0 for x in range(self.rowCount())]
         self._mat_paths = []
         self._get__mat_paths()
         self._start_worker()
@@ -142,10 +142,12 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                     self.path + self.settings.img_dir + mat_id + self.settings.img_ext
                 )
                 paths.append((path, is_fav, index.row()))
+        # Extend Thumbslist by 1 and fill later
+        self._thumbs.append(0)
         self._start_worker(paths)
 
     def _remove_thumb(self, elem):
-        del self._thumbs[elem]
+        self._thumbs.pop(elem)
 
     def _start_worker(self, paths=None):
         if not paths:
@@ -178,7 +180,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             return self._assets[index.row()].name
 
         if role == QtCore.Qt.ItemDataRole.DecorationRole:
-            image = self._thumbs.get(index.row())
+            image = self._thumbs[index.row()]
             if image:
                 return image.scaled(QtCore.QSize(self._thumbsize, self._thumbsize))
             return self.default_image
@@ -322,8 +324,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             os.remove(interface_file_path)
 
         self._assets.remove(asset)
-        self.removeRow(index.row())
-        # self._remove_thumb(index.row())
+        self._remove_thumb(index.row())
+
         self.save()
 
     def check_add_category(self, cat: str) -> None:
@@ -426,6 +428,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             }
             new_mat = material.Material.from_dict(mat)
             self._assets.append(new_mat)
+
+            self._update_thumb_paths(self.index(self.rowCount() - 1, 0))
             self.save()
 
     def get_renderer_by_id(self, asset_id: str) -> str:
@@ -461,7 +465,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         )
 
         import_path = None
-
         # This checks if USD has been selected in the panel and imports accordingly
         if self.context == hou.node("/stage"):
             import_path = self.context.createNode("materiallibrary")
@@ -503,7 +506,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                     import_path = hou.node("/stage").createNode("materiallibrary")
 
         parms_file_name = (
-            self._path + self.settings.asset_dir + str(mat.mat_id) + ".interface"
+            self._path + self.settings.asset_dir + mat.mat_id + ".interface"
         )
 
         # Create temporary storage of nodes
@@ -824,7 +827,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         settings.parm("resolutiony").set(self.rendersize)
         settings.parm("engine").set("xpu")
         settings.parm("engine").pressButton()
-        settings.parm("pathtracedsamples").set(256)
+        settings.parm("pathtracedsamples").set(32)  # TODO: set to 256 again
         settings.parm("enabledof").set(0)
         settings.parm("enablemblur").set(0)
         settings.parm("picture").set(path)
@@ -1209,7 +1212,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def render_thumbnail(self, index: QtCore.QModelIndex) -> None:
         # Move to correct context before rerendering assets
-        if "MatX" in self._assets[index.row()].renderer:
+        if "MaterialX" in self._assets[index.row()].renderer:
             self.context = hou.node("/stage")
         else:
             self.context = hou.node("/mat")
@@ -1217,17 +1220,20 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         builder = self.import_asset_to_scene(index)
         if not builder:
             return
-        self.create_thumbnail(builder, index)
-        self._update_thumb_paths(index)
+        # Interruptable
+        with hou.InterruptableOperation(
+            "Rendering", "Performing Tasks", open_interrupt_dialog=True
+        ):
+            self.create_thumbnail(builder, index)
+
         if "stage" in self.context.path():
             builder.parent().destroy()
         else:
             builder.destroy()
+        self._update_thumb_paths(index)
 
     def toggle_fav(self, index: QtCore.QModelIndex) -> None:
 
         self._assets[index.row()].fav = False if self._assets[index.row()].fav else True
         self.save()
         self._update_thumb_paths(index)
-
-        # self.dataChanged.emit(index, index, self.IdRole)

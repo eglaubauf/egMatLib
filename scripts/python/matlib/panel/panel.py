@@ -574,6 +574,7 @@ class MatLibPanel(QtWidgets.QWidget):
         for index in indexes:
             idx = self.material_sorted_model.mapToSource(index)
             self.material_model.remove_asset(idx)
+
         self.material_model.layoutChanged.emit()
 
     #  Saves a material to the Library
