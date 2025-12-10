@@ -67,12 +67,6 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.material_model = None
         self.selected_cat = None
-        self.filter = ""
-        self.active_row = None
-        self.last_selected_items = []
-        self.active = False
-        self.active_item = None
-        self.edit = False
 
         # Attach models to views
         self.category_model = models.Categories()
@@ -82,7 +76,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.category_sorted_model.sort(0)
 
         self.material_model = models.MaterialLibrary()
-
         self.material_sorted_model = MultiFilterProxyModel()
         self.material_sorted_model.setSourceModel(self.material_model)
         self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
@@ -115,7 +108,6 @@ class MatLibPanel(QtWidgets.QWidget):
         hou.ui.displayMessage("Library Reloaded successfully!")
 
     def load(self) -> None:
-
         new_folder = False
         if not os.path.exists(self.prefs.dir + "/library.json"):
             oldpath = (
@@ -158,9 +150,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.ui = loader.load(file)
         file.close()
 
-        # Helper for Table_Trigger
-        self.active = False
-
         # Load Ui Element so self
         self.menu = self.ui.findChild(QtWidgets.QMenuBar, "menubar")
         self.menuGoto = self.ui.findChild(QtWidgets.QMenu, "menu_file")
@@ -186,11 +175,6 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
         self.action_open.triggered.connect(self.open)
-
-        self.action_import_files = self.ui.findChild(
-            QtGui.QAction, "action_import_files"
-        )
-        self.action_import_files.triggered.connect(self.import_files)
 
         self.action_force_update = self.ui.findChild(
             QtGui.QAction, "action_force_update"
@@ -240,16 +224,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cb_octane.toggled.connect(self.filter_renderer)
         self.cb_matx.toggled.connect(self.filter_renderer)
 
-        # Context Options
-        self.radio_current = self.ui.findChild(QtWidgets.QRadioButton, "radio_current")
-        self.radio_current.toggled.connect(self.update_context)
-
-        self.radio_usd = self.ui.findChild(QtWidgets.QRadioButton, "radio_USD")
-        self.radio_usd.toggled.connect(self.update_context)
-
-        self.radio_default = self.ui.findChild(QtWidgets.QRadioButton, "radio_default")
-        self.radio_default.toggled.connect(self.update_context)
-
         # IconSize Slider
         self.slide_iconsize = self.ui.findChild(QtWidgets.QSlider, "slide_iconSize")
         self.slide_iconsize.setRange(32, 512)
@@ -296,28 +270,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.menu.setStyleSheet(""" font-family: Lato; """)
         self.menuGoto.setStyleSheet("""  font-family: Lato; """)
 
-    def update_context(self) -> None:
-        # if not self.material_model:
-        #     return
-        if self.radio_usd.isChecked():
-            self.material_model.context = hou.node("/stage")
-        elif self.radio_current.isChecked():
-            curr_node = self.get_current_network_node()
-            if curr_node is None:
-                self.material_model.context = hou.node("/stage")
-                return
-            else:
-                self.material_model.context = curr_node
-        elif self.radio_default.isChecked():
-            self.material_model.context = hou.node("/mat")
-
-    def get_current_network_node(self) -> hou.Node | None:
-        """Return thre current Node in the Network Editor"""
-        for pt in hou.ui.paneTabs():  # type: ignore
-            if pt.type() == hou.paneTabType.NetworkEditor:
-                return pt.currentNode()
-        return None
-
     # RC Menus
     def thumblist_rc_menu(self) -> None:
         cmenu = QtWidgets.QMenu(self)
@@ -361,7 +313,6 @@ class MatLibPanel(QtWidgets.QWidget):
         return
 
     def toggle_fav(self) -> None:
-
         self.material_model.layoutAboutToBeChanged.emit()
         indexes = self.material_selection_model.selectedIndexes()
         for index in indexes:
@@ -369,24 +320,6 @@ class MatLibPanel(QtWidgets.QWidget):
             self.material_model.toggle_fav(idx)
         self.material_model.layoutChanged.emit()
         self.update_details_view()
-
-    def import_folder_finished(self) -> None:
-        #  finalize import by adding the created materials to the library
-        materials = self.h.core.get_new_materials()
-        nodes = []
-        for mat in materials:
-            if mat.getNode().type().name() == "materiallibrary":
-                nodes.append(mat.get_output())
-            else:
-                nodes.append(mat.getNode())
-        self.get_material_info_user(nodes)
-
-    def import_files(self) -> None:
-        msg = "Choose Material type to create"
-        buttons = ["Principled", "MaterialX", "Cancel"]
-        choice = hou.ui.displayMessage(msg, buttons)  # type: ignore
-        if choice < 0 or choice == len(buttons) - 1:
-            return
 
     # User Stuff
     def show_about(self) -> None:
@@ -419,34 +352,6 @@ class MatLibPanel(QtWidgets.QWidget):
             return
         self.material_model.cleanup_db()
 
-    def render_missing(self) -> None:
-        if not self.material_model:
-            hou.ui.displayMessage("Please open a library first")  # type: ignore
-            return
-        assets = self.material_model.assets
-
-        for asset in assets:
-            if asset.mat_id > 0:
-                img_path = os.path.join(
-                    self.path,
-                    self.prefs.img_dir,
-                    str(asset.mat_id) + self.prefs.img_ext,
-                )
-                asset_path = asset.path
-
-                # Only check for img and asset for backwards compatibility
-                if os.path.exists(img_path) and os.path.exists(asset_path):
-                    # All clear - do nothing
-                    continue
-                else:
-                    if not os.path.exists(img_path):
-                        print("Render Thumbnail for Asset " + asset.name)
-                        self.render_thumbnail(asset.mat_id)
-                    elif not os.path.exists(asset_path):
-                        print("Asset missing on disk. Removing.")
-                        self.material_model.remove_asset(asset.mat_id)
-        return
-
     def open_usdlib_folder(self) -> None:
         if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
@@ -463,7 +368,6 @@ class MatLibPanel(QtWidgets.QWidget):
         elif sys.platform == "win32":  # MacOS:  # Windows
             os.startfile(lib_dir)
 
-    # User Adds Category with Button
     def add_category_user(self) -> None:
         choice, cat = hou.ui.readInput("Please enter the new category name:")  # type: ignore
         if choice:  # Return if no
@@ -477,7 +381,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model.layoutChanged.emit()
         self.category_model.layoutChanged.emit()
 
-    # User Removes Category with Button
     def rmv_category_user(self) -> None:
         """Removes a category - called by user change in UI"""
         # Prevent Deletion of "All" - Category
@@ -539,12 +442,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_sorted_model.setFilter(self.material_model.RendererRole, filter)
         self.material_sorted_model.sort(0)
 
-    def listen_entry_from_detail(self, item: QtWidgets.QListWidgetItem) -> None:
-        """Set Detail view to Edit Mode"""
-        self.active = True
-        self.active_item = item
-
-    # Update Views
     def user_update_asset(self) -> None:
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
@@ -564,7 +461,6 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def update_details_view(self) -> None:
         """Update upon changes in Detail view"""
-
         if not self.material_selection_model.hasSelection():
             self.line_name.setText("")
             self.line_id.setText("")
@@ -666,39 +562,19 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model.layoutChanged.emit()
         hou.ui.displayMessage("Thumbnail(s) updated")  # type: ignore
 
-    def get_id_from_thumblist(self, item: QtWidgets.QListWidgetItem) -> str:
-        """Return the id for the selected item in thumbview"""
-        if item:
-            return str(item.data(QtCore.Qt.UserRole))
-        else:
-            return ""
-
-    # Delete material from Library
     def delete_asset(self) -> None:
         """Deletes the selected material from Disk and Library"""
         if not hou.ui.displayConfirmation(
-            "This will delete the selected material from Disk. Are you sure?"  # type: ignore
+            "This will delete the selected material(s) from Disk. Are you sure?"  # type: ignore
         ):
             return
 
-        items = self.material_selection_model.selectedIndexes()
-        if not items:
-            return
-        for item in items:
-            if not item:
-                return
-
-            asset_id = self.get_id_from_thumblist(item)
-            self.material_model.remove_asset(asset_id)
-
-    # Get the selected material from Library
-    def get_selected_item_from_thumblist(self):
-        """Return the material for the selected item in thumbview"""
-        item = self.material_selection_model.selectedIndexes()[0]
-        if not item:
-            hou.ui.displayMessage("No material selected")  # type: ignore
-            return None
-        return item
+        indexes = self.material_selection_model.selectedIndexes()
+        self.material_model.layoutAboutToBeChanged.emit()
+        for index in indexes:
+            idx = self.material_sorted_model.mapToSource(index)
+            self.material_model.remove_asset(idx)
+        self.material_model.layoutChanged.emit()
 
     #  Saves a material to the Library
     def save_asset(self) -> None:

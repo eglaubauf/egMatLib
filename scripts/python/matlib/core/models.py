@@ -110,10 +110,10 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         self.IdRole = QtCore.Qt.ItemDataRole.UserRole  # 256
         self.CategoryRole = QtCore.Qt.ItemDataRole.UserRole + 1  # 257
-        self.FavoriteRole = QtCore.Qt.ItemDataRole.UserRole + 2
-        self.RendererRole = QtCore.Qt.ItemDataRole.UserRole + 3
+        self.FavoriteRole = QtCore.Qt.ItemDataRole.UserRole + 2  # 258
+        self.RendererRole = QtCore.Qt.ItemDataRole.UserRole + 3  # 259
         self.TagRole = QtCore.Qt.ItemDataRole.UserRole + 4  # 260
-        self.DateRole = QtCore.Qt.ItemDataRole.UserRole + 5
+        self.DateRole = QtCore.Qt.ItemDataRole.UserRole + 5  # 261
 
         self.default_image = QtGui.QImage(missing).scaled(
             QtCore.QSize(base_size, base_size)
@@ -143,6 +143,9 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                 )
                 paths.append((path, is_fav, index.row()))
         self._start_worker(paths)
+
+    def _remove_thumb(self, elem):
+        del self._thumbs[elem]
 
     def _start_worker(self, paths=None):
         if not paths:
@@ -289,75 +292,39 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         asset.set_current_date()
         self.save()
 
-    def set_asset_name_by_id(self, asset_id: str, name: str) -> None:
-        """Sets the Name for the given Asset (asset_id)"""
-        asset = self.get_asset_by_id(asset_id)
-        asset.name = name
-
-    def get_asset_by_id(self, asset_id: str) -> None | material.Material:
-        """Returns the Asset for the given id"""
-        for asset in self._assets:
-            if str(asset_id) == str(asset.mat_id):
-                return asset
-        return None
-
-    def set_asset_cat(self, asset_id: str, cat: str) -> None:
-        """Sets the category for the given material (asset_id)"""
-        self.check_add_category(cat)
-        asset = self.get_asset_by_id(asset_id)
-        asset.set_categories(cat)
-
-    def set_asset_tag(self, asset_id: str, tag: str) -> None:
-        """Sets the tag for the given material (asset_id)"""
-        asset = self.get_asset_by_id(asset_id)
-        asset.set_tags(tag)
-
-    def set_asset_fav(self, asset_id: str, fav: bool) -> None:
-        """Sets the fav for the given material (asset_id)"""
-        asset = self.get_asset_by_id(asset_id)
-        asset.fav = fav
-
-    def get_asset_fav(self, asset_id: str) -> bool:
-        """Gets the fav for the given material (asset_id) as 0/1"""
-        asset = self.get_asset_by_id(asset_id)
-        return asset.fav
-
-    def update_asset_date(self, asset_id: str) -> None:
-        asset = self.get_asset_by_id(asset_id)
-        asset.set_date()
-
-    def remove_asset(self, asset_id: str) -> None:
+    def remove_asset(self, index: QtCore.QModelIndex) -> None:
         """Removes a material from this Library and Disk"""
-        for asset in self._assets:
-            if asset_id == asset.mat_id:
-                self._assets.remove(asset)
 
-                # Remove Files from Disk
-                asset_file_path = os.path.join(
-                    self.path,
-                    self.settings.asset_dir,
-                    str(asset_id) + self.settings.ext,
-                )
-                img_file_path = os.path.join(
-                    self.path,
-                    self.settings.img_dir,
-                    str(asset_id) + self.settings.img_ext,
-                )
-                interface_file_path = os.path.join(
-                    self.path,
-                    self.settings.asset_dir,
-                    str(asset_id) + ".interface",
-                )
+        asset = self._assets[index.row()]
 
-                if os.path.exists(asset_file_path):
-                    os.remove(asset_file_path)
-                if os.path.exists(img_file_path):
-                    os.remove(img_file_path)
-                if os.path.exists(interface_file_path):
-                    os.remove(interface_file_path)
+        # Remove Files from Disk
+        asset_file_path = os.path.join(
+            self.path,
+            self.settings.asset_dir,
+            asset.mat_id + self.settings.ext,
+        )
+        img_file_path = os.path.join(
+            self.path,
+            self.settings.img_dir,
+            asset.mat_id + self.settings.img_ext,
+        )
+        interface_file_path = os.path.join(
+            self.path,
+            self.settings.asset_dir,
+            asset.mat_id + ".interface",
+        )
 
-                self.save()
-                return
+        if os.path.exists(asset_file_path):
+            os.remove(asset_file_path)
+        if os.path.exists(img_file_path):
+            os.remove(img_file_path)
+        if os.path.exists(interface_file_path):
+            os.remove(interface_file_path)
+
+        self._assets.remove(asset)
+        self.removeRow(index.row())
+        # self._remove_thumb(index.row())
+        self.save()
 
     def check_add_category(self, cat: str) -> None:
         """Checks if this category exists and adds it if needed"""
@@ -437,10 +404,10 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             elif node.type().name() == "subnet":
                 for n in node.children():
                     if "mtlx" in n.type().name():
-                        renderer = "MatX"
+                        renderer = "MaterialX"
                         builder = 0
             elif node.type().name() == "collect":
-                renderer = "MatX"
+                renderer = "MaterialX"
                 builder = 0
 
             date = str(datetime.datetime.now())
