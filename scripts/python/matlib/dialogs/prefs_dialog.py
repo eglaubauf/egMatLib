@@ -46,7 +46,7 @@ class PrefsDialog(QtWidgets.QDialog):
 
     # Apply Prefs Change
     def confirm(self):
-        self.prefs.set_dir(self.line_workdir.text())
+        self.prefs.dir = self.line_workdir.text()
         self.prefs.save()
 
         self.library.rendersize = int(self.line_rendersize.text())
