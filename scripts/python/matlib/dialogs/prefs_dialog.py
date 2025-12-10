@@ -3,15 +3,11 @@ import os
 from PySide6 import QtWidgets, QtCore, QtUiTools
 
 
-# TODO: Remove references to library and make shure this is a view only
-
-
 class PrefsDialog(QtWidgets.QDialog):
-    def __init__(self, library, prefs) -> None:
+    def __init__(self, prefs) -> None:
         super(PrefsDialog, self).__init__()
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-        self.library = library
         self.prefs = prefs
         self.canceled = False
 
@@ -47,13 +43,12 @@ class PrefsDialog(QtWidgets.QDialog):
     # Apply Prefs Change
     def confirm(self):
         self.prefs.dir = self.line_workdir.text()
+
+        self.prefs.rendersize = int(self.line_rendersize.text())
+        self.prefs.thumbsize = int(self.line_thumbsize.text())
+        self.prefs.render_on_import = int(self.cbx_render_on_import.isChecked())
         self.prefs.save()
 
-        self.library.rendersize = int(self.line_rendersize.text())
-        self.library.thumbsize = int(self.line_thumbsize.text())
-        self.library.render_on_import = int(self.cbx_render_on_import.isChecked())
-
-        self.library.save()
         self.accept()
 
     # Cancel Prefs Change
@@ -64,9 +59,9 @@ class PrefsDialog(QtWidgets.QDialog):
     # Fill UI
     def fill_values(self) -> None:
         self.directory = self.prefs.dir
-        self.rendersize = self.library.rendersize
-        self.thumbsize = self.library.thumbsize
-        self.render_on_import = self.library.render_on_import
+        self.rendersize = self.prefs.rendersize
+        self.thumbsize = self.prefs.thumbsize
+        self.render_on_import = self.prefs.render_on_import
 
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setText(str(self.rendersize))

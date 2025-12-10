@@ -299,7 +299,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        prefs = prefs_dialog.PrefsDialog(self.material_model, self.prefs)
+        prefs = prefs_dialog.PrefsDialog(self.prefs)
         prefs.exec_()
 
         if prefs.canceled:

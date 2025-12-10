@@ -4,5 +4,8 @@
     "img_extension": ".png",
     "done_file": "/done.txt",
     "img_dir": "img/",
-    "asset_dir": "mat/"
+    "asset_dir": "mat/",
+    "rendersize": 256,
+    "thumbsize": 128,
+    "render_on_import": 1
 }

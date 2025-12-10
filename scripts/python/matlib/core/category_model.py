@@ -9,9 +9,9 @@ class Categories(QtCore.QAbstractListModel):
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
         super().__init__()
 
-        perferences = prefs.Prefs()
+        preferences = prefs.Prefs()
         db = database.DatabaseConnector()
-        _data = db.load(perferences.dir)
+        _data = db.load(preferences.dir)
         self._categories = _data["categories"]
 
     def rowCount(

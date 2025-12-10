@@ -22,6 +22,9 @@ class Prefs:
         self.data["done_file"] = self.done_file
         self.data["img_dir"] = self._img_dir
         self.data["asset_dir"] = self._asset_dir
+        self.data["rendersize"] = self._rendersize
+        self.data["thumbsize"] = self._thumbsize
+        self.data["render_on_import"] = self._render_on_import
 
         with open(self.path + ("/settings.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self.data, lib_json, indent=4)
@@ -35,6 +38,9 @@ class Prefs:
             self.done_file = data["done_file"]
             self._img_dir = data["img_dir"]
             self._asset_dir = data["asset_dir"]
+            self._rendersize = data["rendersize"]
+            self._thumbsize = data["thumbsize"]
+            self._render_on_import = data["render_on_import"]
 
             self.get_dir_from_user()
 
@@ -57,6 +63,30 @@ class Prefs:
     @dir.setter
     def dir(self, val: str) -> None:
         self._directory = val
+
+    @property
+    def rendersize(self) -> int:
+        return self._rendersize
+
+    @rendersize.setter
+    def rendersize(self, val: int) -> None:
+        self._rendersize = val
+
+    @property
+    def thumbsize(self) -> int:
+        return self._thumbsize
+
+    @thumbsize.setter
+    def thumbsize(self, val: int) -> None:
+        self._thumbsize = val
+
+    @property
+    def render_on_import(self) -> int:
+        return self._render_on_import
+
+    @render_on_import.setter
+    def render_on_import(self, val: int) -> None:
+        self._render_on_import = val
 
     @property
     def img_dir(self) -> str:
