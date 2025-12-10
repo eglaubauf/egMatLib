@@ -1,0 +1,32 @@
+from PySide6 import QtCore
+
+
+class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
+    def __init__(self, parent: QtCore.QObject | None = ...) -> None:
+        super().__init__()
+        self._filters = {}
+
+    def setFilter(self, filter_role, filter_value):
+        self._filters[filter_role] = filter_value
+        self.invalidateFilter()
+
+    def filterAcceptsRow(
+        self,
+        source_row: int,
+        source_parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
+    ) -> bool:
+        if not self._filters:
+            return True
+
+        for role, filter in self._filters.items():
+            index = self.sourceModel().index(source_row, 0, source_parent)
+            data = index.data(role)
+            if isinstance(data, (list, tuple)):
+                if filter.lower() not in str(data).lower():
+                    return False
+            elif isinstance(data, bool):
+                if filter != data and filter != "":
+                    return False
+            elif filter.lower() not in data.lower():
+                return False
+        return True

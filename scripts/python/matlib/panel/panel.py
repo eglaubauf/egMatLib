@@ -7,8 +7,7 @@ from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 
 import hou
 
-from matlib.core import models
-from matlib.core import category_model
+from matlib.core import library_model, category_model, multifilterproxy_model
 from matlib.dialogs import (
     about_dialog,
     material_dialog,
@@ -18,7 +17,7 @@ from matlib.dialogs import (
 from matlib.prefs import prefs
 from matlib.helpers import ui_helpers
 
-importlib.reload(models)
+importlib.reload(library_model)
 importlib.reload(prefs)
 importlib.reload(ui_helpers)
 
@@ -26,37 +25,6 @@ importlib.reload(material_dialog)
 importlib.reload(about_dialog)
 importlib.reload(prefs_dialog)
 importlib.reload(usd_dialog)
-
-
-class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
-    def __init__(self, parent: QtCore.QObject | None = ...) -> None:
-        super().__init__()
-        self._filters = {}
-
-    def setFilter(self, filter_role, filter_value):
-        self._filters[filter_role] = filter_value
-        self.invalidateFilter()
-
-    def filterAcceptsRow(
-        self,
-        source_row: int,
-        source_parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex,
-    ) -> bool:
-        if not self._filters:
-            return True
-
-        for role, filter in self._filters.items():
-            index = self.sourceModel().index(source_row, 0, source_parent)
-            data = index.data(role)
-            if isinstance(data, (list, tuple)):
-                if filter.lower() not in str(data).lower():
-                    return False
-            elif isinstance(data, bool):
-                if filter != data and filter != "":
-                    return False
-            elif filter.lower() not in data.lower():
-                return False
-        return True
 
 
 class MatLibPanel(QtWidgets.QWidget):
@@ -76,8 +44,8 @@ class MatLibPanel(QtWidgets.QWidget):
         self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.category_sorted_model.sort(0)
 
-        self.material_model = models.MaterialLibrary()
-        self.material_sorted_model = MultiFilterProxyModel()
+        self.material_model = library_model.MaterialLibrary()
+        self.material_sorted_model = multifilterproxy_model.MultiFilterProxyModel()
         self.material_sorted_model.setSourceModel(self.material_model)
         self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.material_sorted_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
@@ -103,7 +71,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def open(self) -> None:
         self.material_model.save()
-        self.material_model = models.MaterialLibrary()
+        self.material_model = library_model.MaterialLibrary()
         self.prefs.load()
         self.load()
         hou.ui.displayMessage("Library Reloaded successfully!")
