@@ -78,6 +78,9 @@ class Material:
     def date(self, date: str = "") -> None:
         self._date = date if date != "" else str(datetime.datetime.now())[:-7]
 
+    def set_current_date(self) -> None:
+        self.date = ""
+
     @property
     def fav(self) -> bool:
         return self._fav

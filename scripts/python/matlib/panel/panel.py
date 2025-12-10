@@ -546,77 +546,21 @@ class MatLibPanel(QtWidgets.QWidget):
 
     # Update Views
     def user_update_asset(self) -> None:
-        self.user_update_cats()
-        self.user_update_name()
-        self.user_update_tags()
-        self.user_update_fav()
-        self.user_update_date()
+        indexes = self.material_selection_model.selectedIndexes()
+        self.material_model.layoutAboutToBeChanged.emit()
+        self.category_model.layoutAboutToBeChanged.emit()
+        for index in indexes:
+            idx = self.material_model.index(
+                self.material_sorted_model.mapToSource(index).row()
+            )
+            name = self.line_name.text()
+            tags = self.line_tags.text()
+            cats = self.line_cat.text()
+            fav = self.box_fav.isChecked()
+            self.material_model.set_assetdata(idx, name, cats, tags, fav)
 
-    def user_update_cats(self) -> None:
-        """Apply change in Detail view to Library"""
-        items = self.last_selected_items
-        for item in items:
-            asset_id = self.get_id_from_thumblist(item)
-            txt = self.line_cat.text()
-            pos = txt.find(",")
-            if pos != -1:
-                txt = txt[:pos]
-            self.material_model.set_asset_cat(asset_id, txt)
-
-        self.material_model.save()
-
-    def user_update_name(self) -> None:
-        """Apply change in Detail view to Library"""
-        items = self.last_selected_items
-        for item in items:
-            asset_id = self.get_id_from_thumblist(item)
-            self.material_model.set_asset_name_by_id(asset_id, self.line_name.text())
-        self.material_model.save()
-
-    def user_update_tags(self) -> None:
-        """Apply change in Detail view to Library"""
-        # if not self.edit:
-        #     return
-        items = self.last_selected_items
-        for item in items:
-            asset_id = self.get_id_from_thumblist(item)
-            txt = self.line_tags.text()
-            pos = txt.find(",")
-            if pos != -1:
-                txt = txt[-pos]
-            self.material_model.set_asset_tag(asset_id, txt)
-
-        self.material_model.save()
-
-    def user_update_fav(self) -> None:
-        """Apply change in Detail View - Favorite"""
-
-        items = self.material_selection_model.selectedIndexes()
-        if not items:
-            return
-
-        asset_ids = []
-        for item in items:
-            asset_id = self.get_id_from_thumblist(item)
-            asset_ids.append(asset_id)
-            if self.box_fav.checkState() is QtCore.Qt.Checked:
-                self.material_model.set_asset_fav(asset_id, True)
-            else:
-                self.material_model.set_asset_fav(asset_id, False)
-
-        index = self.thumblist.selectedIndexes()
-
-        self.material_model.save()
-
-        for i in index:
-            item = self.thumblist.itemFromIndex(i)
-            self.thumblist.setCurrentItem(item)
-
-    def user_update_date(self) -> None:
-        items = self.last_selected_items
-        for item in items:
-            asset_id = self.get_id_from_thumblist(item)
-            self.material_model.update_asset_date(asset_id)
+        self.material_model.layoutChanged.emit()
+        self.category_model.layoutChanged.emit()
 
     def update_details_view(self) -> None:
         """Update upon changes in Detail view"""

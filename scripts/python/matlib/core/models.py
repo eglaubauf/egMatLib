@@ -1,4 +1,5 @@
 import os
+from tkinter import N
 import uuid
 import datetime
 import time
@@ -107,11 +108,11 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.rendersize = self._data["rendersize"]
         self.render_on_import = self._data["render_on_import"]
 
-        self.IdRole = QtCore.Qt.ItemDataRole.UserRole
-        self.CategoryRole = QtCore.Qt.ItemDataRole.UserRole + 1
+        self.IdRole = QtCore.Qt.ItemDataRole.UserRole  # 256
+        self.CategoryRole = QtCore.Qt.ItemDataRole.UserRole + 1  # 257
         self.FavoriteRole = QtCore.Qt.ItemDataRole.UserRole + 2
         self.RendererRole = QtCore.Qt.ItemDataRole.UserRole + 3
-        self.TagRole = QtCore.Qt.ItemDataRole.UserRole + 4
+        self.TagRole = QtCore.Qt.ItemDataRole.UserRole + 4  # 260
         self.DateRole = QtCore.Qt.ItemDataRole.UserRole + 5
 
         self.default_image = QtGui.QImage(missing).scaled(
@@ -274,6 +275,19 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     @render_on_import.setter
     def render_on_import(self, val: bool) -> None:
         self._render_on_import = val
+
+    def set_assetdata(self, index: QtCore.QModelIndex, name, cats, tags, fav) -> None:
+
+        self.check_add_category(cats)
+        self.check_add_tags(tags)
+
+        asset = self._assets[index.row()]
+        asset.name = name
+        asset.categories = cats
+        asset.tags = tags
+        asset.fav = fav
+        asset.set_current_date()
+        self.save()
 
     def set_asset_name_by_id(self, asset_id: str, name: str) -> None:
         """Sets the Name for the given Asset (asset_id)"""
