@@ -33,6 +33,18 @@
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="sizePolicy">
@@ -48,7 +60,7 @@
        <enum>Qt::Orientation::Horizontal</enum>
       </property>
       <property name="handleWidth">
-       <number>5</number>
+       <number>3</number>
       </property>
       <widget class="QListView" name="catview">
        <property name="sizePolicy">
@@ -94,6 +106,12 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>500</width>
@@ -102,6 +120,13 @@
             </property>
             <property name="placeholderText">
              <string>Filter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cb_FavsOnly">
+            <property name="text">
+             <string>Favs only</string>
             </property>
            </widget>
           </item>
@@ -115,33 +140,11 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>100</width>
+              <width>50</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="contextMenuPolicy">
-             <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LayoutDirection::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string>IconSize  </string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-            </property>
-           </widget>
           </item>
           <item>
            <layout class="QVBoxLayout" name="slider_layout">
@@ -155,7 +158,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>250</width>
+                <width>200</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -200,7 +203,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>10</width>
+              <width>5</width>
               <height>20</height>
              </size>
             </property>
@@ -296,9 +299,15 @@
        </layout>
       </widget>
       <widget class="QWidget" name="details_widget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>250</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>400</width>
+         <width>250</width>
          <height>16777215</height>
         </size>
        </property>
@@ -349,8 +358,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>230</width>
-             <height>773</height>
+             <width>250</width>
+             <height>797</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -483,13 +492,6 @@
                </size>
               </property>
              </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="cb_FavsOnly">
-              <property name="text">
-               <string>Show Favorites only</string>
-              </property>
-             </widget>
             </item>
             <item>
              <widget class="QGroupBox" name="import_group">
