@@ -4,12 +4,9 @@ import sys
 import subprocess
 import importlib
 from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
-
-from matlib.core import library
-from matlib.core import category
 import hou
 
-from matlib.core import multifilterproxy_model
+from matlib.core import library, category, multifilterproxy_model
 from matlib.dialogs import (
     about_dialog,
     material_dialog,
