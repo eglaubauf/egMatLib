@@ -5,9 +5,11 @@ import subprocess
 import importlib
 from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 
+from matlib.core import library
+from matlib.core import category
 import hou
 
-from matlib.core import library_model, category_model, multifilterproxy_model
+from matlib.core import multifilterproxy_model
 from matlib.dialogs import (
     about_dialog,
     material_dialog,
@@ -17,7 +19,8 @@ from matlib.dialogs import (
 from matlib.prefs import prefs
 from matlib.helpers import ui_helpers
 
-importlib.reload(library_model)
+importlib.reload(library)
+importlib.reload(category)
 importlib.reload(prefs)
 importlib.reload(ui_helpers)
 
@@ -38,13 +41,13 @@ class MatLibPanel(QtWidgets.QWidget):
         self.selected_cat = None
 
         # Attach models to views
-        self.category_model = category_model.Categories()
+        self.category_model = category.Categories()
         self.category_sorted_model = QtCore.QSortFilterProxyModel()
         self.category_sorted_model.setSourceModel(self.category_model)
         self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.category_sorted_model.sort(0)
 
-        self.material_model = library_model.MaterialLibrary()
+        self.material_model = library.MaterialLibrary()
         self.material_sorted_model = multifilterproxy_model.MultiFilterProxyModel()
         self.material_sorted_model.setSourceModel(self.material_model)
         self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
@@ -71,7 +74,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def open(self) -> None:
         self.material_model.save()
-        self.material_model = library_model.MaterialLibrary()
+        self.material_model = library.MaterialLibrary()
         self.prefs.load()
         self.load()
         hou.ui.displayMessage("Library Reloaded successfully!")
