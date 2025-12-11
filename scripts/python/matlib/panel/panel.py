@@ -141,10 +141,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
         self.action_open.triggered.connect(self.open)
 
-        self.action_force_update = self.ui.findChild(
-            QtGui.QAction, "action_force_update"
-        )
-
         self.thumblist = self.ui.findChild(QtWidgets.QListView, "thumbview")
         self.thumblist.doubleClicked.connect(self.import_asset)
         self.thumblist.clicked.connect(self.update_details_view)
@@ -223,11 +219,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.a_files = self.ui.findChild(QtGui.QAction, "action_import_files")
         self.a_files.setDisabled(True)
         self.a_files.setVisible(False)
-
-        # # Import Group Disable
-        # self.import_group = self.ui.findChild(QtWidgets.QGroupBox, "import_group")
-        # self.import_group.setDisabled(True)
-        # self.import_group.setVisible(False)
 
         # set main layout and attach to widget
         mainlayout = QtWidgets.QVBoxLayout()

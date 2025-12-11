@@ -656,7 +656,6 @@
     <addaction name="action_show_cat"/>
     <addaction name="action_show_details"/>
     <addaction name="separator"/>
-    <addaction name="action_force_update"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menuView"/>
