@@ -131,3 +131,21 @@ class Material:
         for index, cat in enumerate(self._cats):
             if old == cat:
                 self._cats[index] = new
+
+    def set_data(
+        self,
+        name: str | None,
+        cats: str,
+        tags: str,
+        fav: bool,
+        renderer: str | None,
+    ) -> None:
+
+        self.categories = cats
+        self.tags = tags
+        self.fav = fav
+        if renderer:
+            self._renderer = renderer
+        if name:
+            self.name = name
+        self.set_current_date()
