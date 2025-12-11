@@ -1,7 +1,7 @@
 import os
 import hou
-import time
-from matlib.render import thumbnail_scene, thumbs
+
+from matlib.render import thumbs
 from matlib.core import material
 from matlib.prefs import prefs
 from matlib.helpers import helpers
@@ -10,6 +10,7 @@ from matlib.helpers import helpers
 class NodeHandler:
     def __init__(self, preferences: prefs.Prefs) -> None:
         self._preferences = preferences
+        self._builder_node = hou.node("/stage")
         self._builder = 0
         self._renderer = ""
         self._import_path = None
@@ -26,13 +27,16 @@ class NodeHandler:
         return None
 
     @property
+    def builder_node(self) -> hou.Node:
+        return self._builder_node
+
+    @property
     def builder(self) -> int:
         return self._builder
 
     @property
     def renderer(self) -> str:
         return self._renderer
-
 
     def get_renderer_from_node(self, node: hou.Node) -> str:
         if node.type().name() == "redshift_vopnet":
@@ -133,7 +137,7 @@ class NodeHandler:
             builder = self._import_path.createNode("subnet")
             builder.setName(mat.name, unique_name=True)
             builder.setGenericFlag(hou.nodeFlag.Material, True)
-            self._builder = builder
+            self._builder_node = builder
             for n in builder.children():
                 n.destroy()
 
@@ -173,7 +177,7 @@ class NodeHandler:
             new_mat = hou.moveNodesTo((builder,), self._import_path)  # type: ignore
             new_mat[0].moveToGoodPosition()
             builder = new_mat[0]
-        self._builder = builder
+        self._builder_node = builder
 
     def load_interface_other(self, parms_file_name, mat, builder_name) -> None:
         if os.path.exists(parms_file_name):
@@ -192,7 +196,7 @@ class NodeHandler:
         for node in builder.children():
             node.destroy()
 
-        self._builder = builder
+        self._builder_node = builder
 
     def load_items_file(self, mat):
         file_name = (
@@ -202,14 +206,14 @@ class NodeHandler:
             + self._preferences.ext
         )
         try:
-            self._builder.loadItemsFromFile(file_name, ignore_load_warnings=False)
+            self._builder_node.loadItemsFromFile(file_name, ignore_load_warnings=False)
         except OSError:
             hou.ui.displayMessage("Failure on Import. Please Check Files.")  # type: ignore
             return None
 
-        new_mat = hou.moveNodesTo((self._builder,), self._import_path)  # type: ignore
+        new_mat = hou.moveNodesTo((self._builder_node,), self._import_path)  # type: ignore
         new_mat[0].moveToGoodPosition()
-        self._builder = new_mat[0]
+        self._builder_node = new_mat[0]
 
     def save_node(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Save Node wrapper for different Material Types"""
@@ -239,10 +243,10 @@ class NodeHandler:
             ):
                 val = self.save_node_octane(node, asset_id, update)
         elif "MaterialX" in self._renderer:
-                if node.type().name() == "collect":
-                    val = self.save_node_collect(node, asset_id, update)
-                else:
-                    val = self.save_node_mtlx(node, asset_id, update)
+            if node.type().name() == "collect":
+                val = self.save_node_collect(node, asset_id, update)
+            else:
+                val = self.save_node_mtlx(node, asset_id, update)
         else:
             hou.ui.displayMessage("Selected Node is not a Material Builder")  # type: ignore
         return val
@@ -319,7 +323,7 @@ class NodeHandler:
                 return True
 
         thumber = thumbs.ThumbNailRenderer(self._preferences)
-        return thumber.create_thumb_mtlx(children, asset_id)
+        return thumber.create_thumb_mtlx(node, asset_id)
 
     def save_node_mantra(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Saves the Mantra node to disk - does not add to library"""
@@ -396,34 +400,8 @@ class NodeHandler:
             if not self._preferences.render_on_import:
                 return True
 
-        # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene()
-        sc.setup("Redshift")
-        thumb = sc.get_node()
-        thumb.parm("mat").set(node.path())
-
-        # Build path
-        path = (
-            self._preferences.dir
-            + self._preferences.img_dir
-            + str(asset_id)
-            + self._preferences.img_ext
-        )
-
-        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
-        thumb.parm("path").set(path)
-        exclude = "* ^" + thumb.name()
-        thumb.parm("obj_exclude").set(exclude)
-        lights = thumb.name() + "/*"
-        thumb.parm("lights").set(lights)
-        thumb.parm("resx").set(self.rendersize)
-        thumb.parm("resy").set(self.rendersize)
-
-        # Render Frame
-        thumb.parm("execute").pressButton()
-        # CleanUp
-        thumb.destroy()
-        return True
+        thumber = thumbs.ThumbNailRenderer(self._preferences)
+        return thumber.create_thumb_redshift(node, asset_id)
 
     def save_node_octane(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         # Filepath where to save stuff
@@ -453,35 +431,8 @@ class NodeHandler:
         if not update:
             if not self._preferences.render_on_import:
                 return True
-
-        # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene()
-        sc.setup("Octane")
-        thumb = sc.get_node()
-        thumb.parm("mat").set(node.path())
-        # Build path
-        path = (
-            self._preferences.dir
-            + self._preferences.img_dir
-            + str(asset_id)
-            + self._preferences.img_ext
-        )
-
-        # Set Rendersettings and Object Exclusions for Thumbnail Rendering
-        thumb.parm("path").set(path)
-        exclude = "* ^" + thumb.name()
-        thumb.parm("obj_exclude").set(exclude)
-        lights = thumb.name() + "/*"
-        thumb.parm("lights").set(lights)
-        thumb.parm("resx").set(self.rendersize)
-        thumb.parm("resy").set(self.rendersize)
-
-        # Render Frame
-        thumb.parm("render").pressButton()
-
-        # CleanUp
-        thumb.destroy()
-        return True
+        thumber = thumbs.ThumbNailRenderer(self._preferences)
+        return thumber.create_thumb_octane(node, asset_id)
 
     def save_node_arnold(
         self, node: hou.Node, asset_id: str, update: bool
@@ -514,39 +465,5 @@ class NodeHandler:
             if not self._preferences.render_on_import:
                 return True
 
-        # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene()
-        sc.setup("Arnold")
-        thumb = sc.get_node()
-        thumb.parm("mat").set(node.path())
-
-        # Build path
-        path = self._preferences.dir + self._preferences.img_dir + str(asset_id)
-
-        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
-        thumb.parm("path").set(path + ".exr")
-        thumb.parm("cop_out_img").set(path + self._preferences.img_ext)
-
-        exclude = "* ^" + thumb.name()
-        thumb.parm("obj_exclude").set(exclude)
-        lights = thumb.name() + "/*"
-        thumb.parm("lights").set(lights)
-        thumb.parm("resx").set(self.rendersize)
-        thumb.parm("resy").set(self.rendersize)
-        thumb.parm("render").pressButton()
-
-        # WaitForRender - A really bad hack
-        done_path = hou.getenv("EGMATLIB") + "/lib/done.txt"
-        mustend = time.time() + 60.0
-        while time.time() < mustend:
-            if os.path.exists(done_path):
-                os.remove(done_path)
-                time.sleep(2)
-                break
-            time.sleep(1)
-
-        thumb.destroy()
-        if os.path.exists(path + ".exr"):
-            os.remove(path + ".exr")
-
-        return True
+        thumber = thumbs.ThumbNailRenderer(self._preferences)
+        return thumber.create_thumb_arnold(node, asset_id)

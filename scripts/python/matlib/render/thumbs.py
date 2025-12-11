@@ -1,9 +1,9 @@
 import os
+import time
 import hou
 
 from matlib.core import material
-from matlib.render import nodes
-from matlib.render import thumbnail_scene
+from matlib.render import nodes, thumbnail_scene
 from matlib.prefs import prefs
 
 
@@ -29,20 +29,25 @@ class ThumbNailRenderer:
             "Rendering", "Performing Tasks", open_interrupt_dialog=True
         ):
             if self._mat.renderer == "MaterialX":
-                self.create_thumb_mtlx(
-                    node_handler.builder.children(), self._mat.mat_id
-                )
+                self.create_thumb_mtlx(node_handler.builder_node, self._mat.mat_id)
             elif self._mat.renderer == "Mantra":
-                self.create_thumb_mantra(
-                    node_handler.builder.children(), self._mat.mat_id
-                )
+                self.create_thumb_mantra(node_handler.builder_node, self._mat.mat_id)
+            elif self._mat.renderer == "Redshift":
+                self.create_thumb_redshift(node_handler.builder_node, self._mat.mat_id)
+            elif self._mat.renderer == "Octane":
+                self.create_thumb_octane(node_handler.builder_node, self._mat.mat_id)
+            elif self._mat.renderer == "Arnold":
+                self.create_thumb_arnold(node_handler.builder_node, self._mat.mat_id)
+
             else:
                 pass
         node_handler.cleanup()
 
-    def create_thumb_mtlx(self, children: list[hou.Node], asset_id: str) -> bool:
+    def create_thumb_mtlx(self, node: hou.Node, asset_id: str) -> bool:
         # Build path
-        path = self._preferences.dir + self._preferences.img_dir + str(asset_id) + ".exr"
+        path = (
+            self._preferences.dir + self._preferences.img_dir + str(asset_id) + ".exr"
+        )
 
         # Create Thumbnail
         net = hou.node("/obj").createNode("lopnet")
@@ -70,7 +75,7 @@ class ThumbNailRenderer:
         lib = net.createNode("materiallibrary")
         lib.setFirstInput(lib1)
 
-        nodes = hou.copyNodesTo((children), lib)  # type: ignore
+        nodes = hou.copyNodesTo((node.children()), lib)  # type: ignore
         collect = 0
         for n in nodes:
             if n.type().name() == "collect":
@@ -236,3 +241,102 @@ class ThumbNailRenderer:
                 if asset_id == mat.mat_id:
                     return mat.builder
         return None
+
+    def create_thumb_redshift(self, node: hou.Node, asset_id: str) -> bool:
+
+        # Create Thumbnail
+        sc = thumbnail_scene.ThumbNailScene()
+        sc.setup("Redshift")
+        thumb = sc.get_node()
+        thumb.parm("mat").set(node.path())
+
+        # Build path
+        path = (
+            self._preferences.dir
+            + self._preferences.img_dir
+            + str(asset_id)
+            + self._preferences.img_ext
+        )
+
+        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
+        thumb.parm("path").set(path)
+        exclude = "* ^" + thumb.name()
+        thumb.parm("obj_exclude").set(exclude)
+        lights = thumb.name() + "/*"
+        thumb.parm("lights").set(lights)
+        thumb.parm("resx").set(self.rendersize)
+        thumb.parm("resy").set(self.rendersize)
+
+        # Render Frame
+        thumb.parm("execute").pressButton()
+        # CleanUp
+        thumb.destroy()
+        return True
+
+    def create_thumb_octane(self, node: hou.Node, asset_id: str) -> bool:
+        # Create Thumbnail
+        sc = thumbnail_scene.ThumbNailScene()
+        sc.setup("Octane")
+        thumb = sc.get_node()
+        thumb.parm("mat").set(node.path())
+        # Build path
+        path = (
+            self._preferences.dir
+            + self._preferences.img_dir
+            + str(asset_id)
+            + self._preferences.img_ext
+        )
+
+        # Set Rendersettings and Object Exclusions for Thumbnail Rendering
+        thumb.parm("path").set(path)
+        exclude = "* ^" + thumb.name()
+        thumb.parm("obj_exclude").set(exclude)
+        lights = thumb.name() + "/*"
+        thumb.parm("lights").set(lights)
+        thumb.parm("resx").set(self.rendersize)
+        thumb.parm("resy").set(self.rendersize)
+
+        # Render Frame
+        thumb.parm("render").pressButton()
+
+        # CleanUp
+        thumb.destroy()
+        return True
+
+    def create_thumb_arnold(self, node: hou.Node, asset_id: str) -> bool:
+        # Create Thumbnail
+        sc = thumbnail_scene.ThumbNailScene()
+        sc.setup("Arnold")
+        thumb = sc.get_node()
+        thumb.parm("mat").set(node.path())
+
+        # Build path
+        path = self._preferences.dir + self._preferences.img_dir + str(asset_id)
+
+        #  Set Rendersettings and Object Exclusions for Thumbnail Rendering
+        thumb.parm("path").set(path + ".exr")
+        thumb.parm("cop_out_img").set(path + self._preferences.img_ext)
+
+        exclude = "* ^" + thumb.name()
+        thumb.parm("obj_exclude").set(exclude)
+        lights = thumb.name() + "/*"
+        thumb.parm("lights").set(lights)
+        thumb.parm("resx").set(self.rendersize)
+        thumb.parm("resy").set(self.rendersize)
+        thumb.parm("render").pressButton()
+
+        # WaitForRender - A really bad hack
+        done_path = hou.getenv("EGMATLIB") + "/lib/done.txt"
+        mustend = time.time() + 60.0
+        while time.time() < mustend:
+            if os.path.exists(done_path):
+                os.remove(done_path)
+                time.sleep(2)
+                break
+            time.sleep(1)
+
+        thumb.destroy()
+        if os.path.exists(path + ".exr"):
+            os.remove(path + ".exr")
+
+        return True
