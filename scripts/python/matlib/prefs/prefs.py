@@ -25,6 +25,11 @@ class Prefs:
         self.data["rendersize"] = self._rendersize
         self.data["thumbsize"] = self._thumbsize
         self.data["render_on_import"] = self._render_on_import
+        self.data["renderer_materialx"] = self._renderer_matx_enabled
+        self.data["renderer_mantra"] = self._renderer_mantra_enabled
+        self.data["renderer_redshift"] = self._renderer_redshift_enabled
+        self.data["renderer_octane"] = self._renderer_octane_enabled
+        self.data["renderer_arnold"] = self._renderer_arnold_enabled
 
         with open(self.path + ("/settings.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self.data, lib_json, indent=4)
@@ -41,6 +46,11 @@ class Prefs:
             self._rendersize = data["rendersize"]
             self._thumbsize = data["thumbsize"]
             self._render_on_import = data["render_on_import"]
+            self._renderer_matx_enabled = data["renderer_materialx"]
+            self._renderer_mantra_enabled = data["renderer_mantra"]
+            self._renderer_redshift_enabled = data["renderer_redshift"]
+            self._renderer_octane_enabled = data["renderer_octane"]
+            self._renderer_arnold_enabled = data["renderer_arnold"]
 
             self.get_dir_from_user()
 
@@ -107,3 +117,43 @@ class Prefs:
     def get_done_file(self) -> str:
         """Get Extension for done_file for singaling rendering process within houdini"""
         return self.done_file
+
+    @property
+    def renderer_matx_enabled(self) -> bool:
+        return self._renderer_matx_enabled
+
+    @renderer_matx_enabled.setter
+    def renderer_matx_enabled(self, val: bool) -> None:
+        self._renderer_matx_enabled = val
+
+    @property
+    def renderer_mantra_enabled(self) -> bool:
+        return self._renderer_mantra_enabled
+
+    @renderer_mantra_enabled.setter
+    def renderer_mantra_enabled(self, val: bool) -> None:
+        self._renderer_mantra_enabled = val
+
+    @property
+    def renderer_arnold_enabled(self) -> bool:
+        return self._renderer_arnold_enabled
+
+    @renderer_arnold_enabled.setter
+    def renderer_arnold_enabled(self, val: bool) -> None:
+        self._renderer_arnold_enabled = val
+
+    @property
+    def renderer_redshift_enabled(self) -> bool:
+        return self._renderer_redshift_enabled
+
+    @renderer_redshift_enabled.setter
+    def renderer_redshift_enabled(self, val: bool) -> None:
+        self._renderer_redshift_enabled = val
+
+    @property
+    def renderer_octane_enabled(self) -> bool:
+        return self._renderer_octane_enabled
+
+    @renderer_octane_enabled.setter
+    def renderer_octane_enabled(self, val: bool) -> None:
+        self._renderer_octane_enabled = val

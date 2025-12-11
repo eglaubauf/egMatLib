@@ -33,9 +33,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Initialize
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-
-        self.material_model = None
-        self.selected_cat = None
+        self.prefs = prefs.Prefs()
 
         # Attach models to views
         self.category_model = category.Categories()
@@ -65,8 +63,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.filter_renderer()
         self.slide()
 
-        # Load prefs and open library
-        self.prefs = prefs.Prefs()
         self.load()
 
     def open(self) -> None:
@@ -185,6 +181,12 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cb_octane = self.ui.findChild(QtWidgets.QRadioButton, "cb_Octane")
         self.cb_matx = self.ui.findChild(QtWidgets.QRadioButton, "cb_MatX")
 
+        self.cb_matx.setVisible(self.prefs.renderer_matx_enabled)
+        self.cb_mantra.setVisible(self.prefs.renderer_mantra_enabled)
+        self.cb_arnold.setVisible(self.prefs.renderer_arnold_enabled)
+        self.cb_redshift.setVisible(self.prefs.renderer_redshift_enabled)
+        self.cb_octane.setVisible(self.prefs.renderer_octane_enabled)
+
         self.cb_showcat = self.ui.findChild(QtWidgets.QCheckBox, "cb_showCat")
 
         self.cb_redshift.toggled.connect(self.filter_renderer)
@@ -222,10 +224,10 @@ class MatLibPanel(QtWidgets.QWidget):
         self.a_files.setDisabled(True)
         self.a_files.setVisible(False)
 
-        # Import Group Disable
-        self.import_group = self.ui.findChild(QtWidgets.QGroupBox, "import_group")
-        self.import_group.setDisabled(True)
-        self.import_group.setVisible(False)
+        # # Import Group Disable
+        # self.import_group = self.ui.findChild(QtWidgets.QGroupBox, "import_group")
+        # self.import_group.setDisabled(True)
+        # self.import_group.setVisible(False)
 
         # set main layout and attach to widget
         mainlayout = QtWidgets.QVBoxLayout()
@@ -302,9 +304,6 @@ class MatLibPanel(QtWidgets.QWidget):
         prefs = prefs_dialog.PrefsDialog(self.prefs)
         prefs.exec_()
 
-        if prefs.canceled:
-            return
-
         # Update Thumblist Grid
         self.thumblist.setIconSize(
             QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
@@ -314,6 +313,11 @@ class MatLibPanel(QtWidgets.QWidget):
                 self.material_model.thumbsize + 10, self.material_model.thumbsize + 40
             )
         )
+        self.cb_matx.setVisible(self.prefs.renderer_matx_enabled)
+        self.cb_mantra.setVisible(self.prefs.renderer_mantra_enabled)
+        self.cb_arnold.setVisible(self.prefs.renderer_arnold_enabled)
+        self.cb_redshift.setVisible(self.prefs.renderer_redshift_enabled)
+        self.cb_octane.setVisible(self.prefs.renderer_octane_enabled)
 
     def cleanup_db(self) -> None:
         if not self.material_model:

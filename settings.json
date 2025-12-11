@@ -7,5 +7,10 @@
     "asset_dir": "mat/",
     "rendersize": 256,
     "thumbsize": 128,
-    "render_on_import": 1
+    "render_on_import": 0,
+    "renderer_materialx": true,
+    "renderer_mantra": true,
+    "renderer_redshift": false,
+    "renderer_octane": false,
+    "renderer_arnold": false
 }
