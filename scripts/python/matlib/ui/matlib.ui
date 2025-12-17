@@ -22,15 +22,21 @@
     <height>400</height>
    </size>
   </property>
+  <property name="acceptDrops">
+   <bool>false</bool>
+  </property>
   <property name="windowTitle">
    <string>MatLib</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="DragDropCentralWidget" name="centralwidget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="acceptDrops">
+    <bool>true</bool>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="leftMargin">
@@ -52,6 +58,9 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
       </property>
       <property name="lineWidth">
        <number>0</number>
@@ -78,6 +87,9 @@
        <property name="contextMenuPolicy">
         <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
        </property>
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
        </property>
@@ -85,7 +97,13 @@
         <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
        </property>
        <property name="showDropIndicator" stdset="0">
-        <bool>false</bool>
+        <bool>true</bool>
+       </property>
+       <property name="dragDropOverwriteMode">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
        </property>
        <property name="alternatingRowColors">
         <bool>false</bool>
@@ -117,6 +135,9 @@
               <width>500</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="acceptDrops">
+             <bool>false</bool>
             </property>
             <property name="placeholderText">
              <string>Filter</string>
@@ -212,15 +233,21 @@
          </layout>
         </item>
         <item>
-         <widget class="QListView" name="thumbview">
+         <widget class="DragDropListView" name="thumbview">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
           <property name="contextMenuPolicy">
            <enum>Qt::ContextMenuPolicy::CustomContextMenu</enum>
+          </property>
+          <property name="acceptDrops">
+           <bool>false</bool>
           </property>
           <property name="frameShape">
            <enum>QFrame::Shape::NoFrame</enum>
@@ -241,16 +268,19 @@
            <set>QAbstractItemView::EditTrigger::CurrentChanged|QAbstractItemView::EditTrigger::DoubleClicked|QAbstractItemView::EditTrigger::SelectedClicked</set>
           </property>
           <property name="showDropIndicator" stdset="0">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="dragEnabled">
-           <bool>false</bool>
+           <bool>true</bool>
+          </property>
+          <property name="dragDropOverwriteMode">
+           <bool>true</bool>
           </property>
           <property name="dragDropMode">
            <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
           </property>
           <property name="defaultDropAction">
-           <enum>Qt::DropAction::IgnoreAction</enum>
+           <enum>Qt::DropAction::CopyAction</enum>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
@@ -260,6 +290,9 @@
           </property>
           <property name="horizontalScrollMode">
            <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
+          </property>
+          <property name="movement">
+           <enum>QListView::Movement::Snap</enum>
           </property>
           <property name="flow">
            <enum>QListView::Flow::LeftToRight</enum>
@@ -311,6 +344,9 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <property name="spacing">
          <number>0</number>
@@ -334,6 +370,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="acceptDrops">
+           <bool>false</bool>
           </property>
           <property name="frameShape">
            <enum>QFrame::Shape::NoFrame</enum>
@@ -361,6 +400,9 @@
              <width>261</width>
              <height>782</height>
             </rect>
+           </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <property name="spacing">
@@ -401,6 +443,9 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -411,7 +456,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="line_cat"/>
+                  <widget class="QLineEdit" name="line_cat">
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QLabel" name="Tags">
@@ -421,7 +470,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="line_tags"/>
+                  <widget class="QLineEdit" name="line_tags">
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QLabel" name="id">
@@ -448,7 +501,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="line_date"/>
+                  <widget class="QLineEdit" name="line_date">
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QCheckBox" name="cb_set_fav">
@@ -497,6 +554,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="acceptDrops">
+               <bool>false</bool>
               </property>
               <property name="autoFillBackground">
                <bool>false</bool>
@@ -633,10 +693,16 @@
      <height>24</height>
     </rect>
    </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
    <property name="nativeMenuBar">
     <bool>false</bool>
    </property>
    <widget class="QMenu" name="menu_file">
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Library</string>
     </property>
@@ -650,6 +716,9 @@
     <addaction name="action_about"/>
    </widget>
    <widget class="QMenu" name="menuView">
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>View</string>
     </property>
@@ -743,6 +812,19 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DragDropCentralWidget</class>
+   <extends>QWidget</extends>
+   <header>dragdrop_widgets.py</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DragDropListView</class>
+   <extends>QListView</extends>
+   <header>dragdrop_widgets.py</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <buttongroups>

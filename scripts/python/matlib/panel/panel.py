@@ -3,9 +3,11 @@ import shutil
 import sys
 import subprocess
 import importlib
+
 from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 import hou
 
+from matlib.panel import dragdrop_widgets
 from matlib.core import library, category, multifilterproxy_model
 from matlib.dialogs import (
     about_dialog,
@@ -25,12 +27,13 @@ importlib.reload(material_dialog)
 importlib.reload(about_dialog)
 importlib.reload(prefs_dialog)
 importlib.reload(usd_dialog)
+importlib.reload(dragdrop_widgets)
 
 
 class MatLibPanel(QtWidgets.QWidget):
+
     def __init__(self) -> None:
         super(MatLibPanel, self).__init__()
-
         # Initialize
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         self.prefs = prefs.Prefs()
@@ -111,6 +114,10 @@ class MatLibPanel(QtWidgets.QWidget):
         # Load UI from ui.file
         loader = QtUiTools.QUiLoader()
         file = QtCore.QFile(self.script_path + "/ui/matlib.ui")
+        # Override Widgets for Drag and Drop Support
+        loader.registerCustomWidget(dragdrop_widgets.DragDropCentralWidget)
+        loader.registerCustomWidget(dragdrop_widgets.DragDropListView)
+
         file.open(QtCore.QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -120,7 +127,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.menuGoto = self.ui.findChild(QtWidgets.QMenu, "menu_file")
         self.action_prefs = self.ui.findChild(QtGui.QAction, "action_prefs")
         self.action_prefs.triggered.connect(self.show_prefs)
-
         self.menu_view = self.ui.findChild(QtWidgets.QMenu, "menu_view")
         self.action_catview = self.ui.findChild(QtGui.QAction, "action_show_cat")
         self.action_catview.triggered.connect(self.toggle_catview)
@@ -141,7 +147,9 @@ class MatLibPanel(QtWidgets.QWidget):
         self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
         self.action_open.triggered.connect(self.open)
 
-        self.thumblist = self.ui.findChild(QtWidgets.QListView, "thumbview")
+        # Overwrite the widgets for Drag and Drop in dragdrop_widgets.py
+        self.centralwidget = self.ui.centralwidget
+        self.thumblist = self.ui.thumbview
         self.thumblist.doubleClicked.connect(self.import_asset)
         self.thumblist.clicked.connect(self.update_details_view)
 
@@ -226,11 +234,6 @@ class MatLibPanel(QtWidgets.QWidget):
         mainlayout.setContentsMargins(0, 0, 0, 0)  # Remove Margins
 
         self.setLayout(mainlayout)
-
-        # Cleanup UI
-        self.setStyleSheet("""  font-family: Lato; """)
-        self.menu.setStyleSheet(""" font-family: Lato; """)
-        self.menuGoto.setStyleSheet("""  font-family: Lato; """)
 
     # RC Menus
     def thumblist_rc_menu(self) -> None:
@@ -584,7 +587,6 @@ class MatLibPanel(QtWidgets.QWidget):
     def import_asset(self):
         """Import Material to scene"""
         for index in self.thumblist.selectedIndexes():
-
             self.material_model.import_asset_to_scene(
                 self.material_sorted_model.mapToSource(index)
             )
@@ -593,7 +595,6 @@ class MatLibPanel(QtWidgets.QWidget):
     def slide(self) -> None:
 
         self.material_model.thumbsize = self.click_slider.value()
-        # Update Thumblist Grid
 
         self.thumblist.setGridSize(
             QtCore.QSize(

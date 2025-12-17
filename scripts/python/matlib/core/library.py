@@ -84,6 +84,12 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._get__mat_paths()
         self._start_worker()
 
+    def flags(
+        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex
+    ) -> QtCore.Qt.ItemFlag:
+        default = super().flags(index)
+        return default | QtCore.Qt.ItemFlag.ItemIsDragEnabled
+
     def _get__mat_paths(self):
         self._mat_paths = []
         for elem in range(self.rowCount()):
