@@ -325,57 +325,64 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             self.save()
 
     def cleanup_db(self) -> None:
-        assets = self._assets
         mark_rmv = 0
         mark_render = 0
 
-        for asset in assets:
-            if asset.mat_id > 0:
-                interface_path = os.path.join(
-                    self.path,
-                    self.preferences.asset_dir,
-                    str(asset.mat_id) + ".interface",
-                )
-                mat_path = os.path.join(
-                    self.path, self.preferences.asset_dir, str(asset.mat_id) + ".mat"
-                )
-                img_path = os.path.join(
-                    self.path,
-                    self.preferences.img_dir,
-                    str(asset.mat_id) + self.preferences.img_ext,
-                )
+        for row, asset in enumerate(self._assets):
+            interface_path = os.path.join(
+                self.path,
+                self.preferences.asset_dir,
+                str(asset.mat_id) + ".interface",
+            )
+            mat_path = os.path.join(
+                self.path, self.preferences.asset_dir, str(asset.mat_id) + ".mat"
+            )
+            img_path = os.path.join(
+                self.path,
+                self.preferences.img_dir,
+                str(asset.mat_id) + self.preferences.img_ext,
+            )
 
-                # asset_path = asset.path
-                if not os.path.exists(interface_path):
-                    print("Asset %d missing on disk. Removing.", asset.mat_id)
-                    mark_rmv = 1
-                    self.library.remove_asset(asset.mat_id)
-                if not os.path.exists(mat_path):
-                    print("Asset %d missing on disk. Removing.", asset.mat_id)
-                    mark_rmv = 1
-                    self.library.remove_asset(asset.mat_id)
-                if not os.path.exists(img_path):
-                    mark_render = 1
-                    print(
-                        f"Image for Asset { asset.mat_id} missing on disk. Needs Rendering."
-                    )
+            if not os.path.exists(interface_path) or not os.path.exists(mat_path):
+                print("Asset %d missing on disk -> Removed from disk!", asset.mat_id)
+                mark_rmv = 1
+                self.remove_asset(self.index(row))
+            if not os.path.exists(img_path):
+                mark_render = 1
+                print(
+                    f"Image for Asset { asset.mat_id} missing on disk -> Needs Rendering!"
+                )
 
         mats_path = os.path.join(self.path, self.preferences.asset_dir)
         mark_lone = 0
         for f in os.listdir(mats_path):
             if f.endswith(".mat") or f.endswith(".interface"):
                 split = f.split(".")[0]
-                mark_found = 0
-                for a in assets:
-                    if str(split) in str(a.get_id()):
-                        mark_found = 1
-                        break
-                if not mark_found:
+                found = [mat for mat in self._assets if str(split) in str(mat.mat_id)]
+                if not found:
+                    print(
+                        f"Lonely File at {os.path.join(mats_path, f)} found -> Removed from disk!"
+                    )
+                    try:
+                        os.remove(os.path.join(mats_path, f))
+                        mark_lone = 1
+                    except OSError:
+                        pass
+
+        mats_path = os.path.join(self.path, self.preferences.img_dir)
+        for f in os.listdir(mats_path):
+            if f.endswith(".png"):
+                split = f.split(".")[0]
+                found = [mat for mat in self._assets if str(split) in str(mat.mat_id)]
+                if not found:
                     print(
                         f"Lonely File at {os.path.join(mats_path, f)} found. Removing from disk"
                     )
-                    os.remove(os.path.join(mats_path, f))
-                    mark_lone = 1
+                    try:
+                        os.remove(os.path.join(mats_path, f))
+                        mark_lone = 1
+                    except OSError:
+                        pass
 
         if mark_rmv:
             hou.ui.displayMessage(
