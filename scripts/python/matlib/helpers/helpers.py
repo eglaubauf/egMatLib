@@ -1,3 +1,7 @@
+"""
+Module with helpful utility functions used in and around houdini
+"""
+
 import os
 import re
 
@@ -5,6 +9,14 @@ import hou
 
 
 def get_children_recursive(nodes: list[hou.Node]) -> hou.Node | None:
+    """
+    Get Children recursively for the given list of nodes
+
+    :param nodes: Description
+    :type nodes: list[hou.Node]
+    :return: Description
+    :rtype: Node | None
+    """
     for node in nodes.children():
         if node.type().name() == "subnet":
             for n in node.children():
@@ -16,6 +28,15 @@ def get_children_recursive(nodes: list[hou.Node]) -> hou.Node | None:
 
 
 def get_connected_nodes(node: hou.Node) -> list[hou.Node]:
+    """
+    Get all connected nodes for the given node
+    Returns Input and Output Nodes in a single list
+
+    :param node: Description
+    :type node: hou.Node
+    :return: Description
+    :rtype: list[Node]
+    """
     nodes = [node]
     in_nodes = get_connected_input_nodes(nodes, selected=[])
     out_nodes = get_connected_output_nodes(nodes, selected=[])
@@ -25,6 +46,17 @@ def get_connected_nodes(node: hou.Node) -> list[hou.Node]:
 def get_connected_input_nodes(
     nodes: list[hou.Node], selected: list[hou.Node]
 ) -> list[hou.Node]:
+    """
+    Get all connected Input nodes for the given node
+    Returns only Input Nodes in a single list
+
+    :param nodes: Description
+    :type nodes: list[hou.Node]
+    :param selected: Description
+    :type selected: list[hou.Node]
+    :return: Description
+    :rtype: list[Node]
+    """
     for node in nodes:
         if node is not None:
             selected.append(node)
@@ -35,6 +67,17 @@ def get_connected_input_nodes(
 def get_connected_output_nodes(
     nodes: list[hou.Node], selected: list[hou.Node]
 ) -> list[hou.Node]:
+    """
+    Get all connected Input nodes for the given node
+    Returns only Input Nodes in a single list
+
+    :param nodes: Description
+    :type nodes: list[hou.Node]
+    :param selected: Description
+    :type selected: list[hou.Node]
+    :return: Description
+    :rtype: list[Node]
+    """
     for node in nodes:
         if node is not None:
             selected.append(node)
@@ -43,6 +86,9 @@ def get_connected_output_nodes(
 
 
 def break_materialrefs() -> None:
+    """
+    Breaks all Material References for the currently selected Node
+    """
     sel_nodes = hou.selectedNodes()
 
     for node in sel_nodes:
@@ -65,6 +111,9 @@ def break_materialrefs() -> None:
 
 
 def save_selected_hda() -> None:
+    """
+    Save the selected Nodes as HDA
+    """
     sel = hou.selectedNodes()
     for node in sel:
         if node.type().definition() is None or node.matchesCurrentDefinition():
@@ -74,6 +123,9 @@ def save_selected_hda() -> None:
 
 
 def show_all_nodes() -> None:
+    """
+    Unhides All selected Nodes
+    """
     # Get All Nodes
     sel = hou.selectedNodes()
     all_nodes = sel if sel else hou.node("/obj").allSubChildren()
@@ -84,6 +136,9 @@ def show_all_nodes() -> None:
 
 
 def fix_fbx_mats() -> None:
+    """
+    Fixes all FBX Materials to Metal Rough Workflow
+    """
     for mat in hou.selectedNodes():
         # Move Reflect Tex
         if "metal" in mat.parm("reflect_texture").evalAsString():
@@ -98,7 +153,6 @@ def fix_fbx_mats() -> None:
         if mat.parm("rough_useTexture").evalAsInt():
             mat.parm("rough").set(1)
 
-        # TODO: create an Inteface for the replacement function
         # Fetch Color Texture from disk
         if not mat.parm("basecolor_useTexture").evalAsInt():
             if "rough" in mat.parm("rough_texture").evalAsString():
@@ -131,6 +185,9 @@ def fix_fbx_mats() -> None:
 
 
 def networkbox() -> None:
+    """
+    Draw a named Network Box around the selected Nodes
+    """
     sel = hou.selectedNodes()
     nbox = sel[0].parent().createNetworkBox()
 
@@ -155,14 +212,17 @@ def networkbox() -> None:
 
 
 def container():
+    """
+    Return the Parm_Container for the current Node
+    """
     parm_pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.Parm)  # type: ignore
     parmnode = parm_pane.currentNode()
     parm_container = parmnode.parent()
     return parm_container
 
 
-# Find Parms Ref This
 def find_parm(parmname: str) -> None:
+    """Find Parms which reference the selected Parameter"""
     if parmname is None:
         text = hou.ui.readInput("Search text:", buttons=("Search", "Cancel"))[1]  # type: ignore
     else:
@@ -200,6 +260,14 @@ def find_parm(parmname: str) -> None:
 
 
 def sanitize_usd_path(path: str) -> str:
+    """
+    Sanitze String for usage in .usd files and Solaris
+
+    :param path: Description
+    :type path: str
+    :return: Description
+    :rtype: str
+    """
     clean_path = path.replace(" ", "_")
     clean_path = clean_path.replace("-", "_")
     clean_path = re.sub("[^a-z^A-Z^0-9]", "_", path)
@@ -207,6 +275,14 @@ def sanitize_usd_path(path: str) -> str:
 
 
 def subframe_splits(node: hou.Node) -> str:
+    """
+    Allow for Subframe Input/Outputs on Filecaches
+
+    :param node: Description
+    :type node: hou.Node
+    :return: Description
+    :rtype: str
+    """
     if node.parm("trange").evalAsString() != "off":
         if node.parm("f3").evalAsFloat() < 1:
 
@@ -220,9 +296,16 @@ def subframe_splits(node: hou.Node) -> str:
     return ""
 
 
-# Make Key Value Pairs for Filenames
 def texture_lookup(files: list[str] | str) -> dict:
-    # Keys for Texture Lookup. Add as it pleases
+    """
+    Make Key Value Pairs for Filenames and return Dict
+
+    :param files: Description
+    :type files: list[str] | str
+    :return: Description
+    :rtype: dict[Any, Any]
+    """
+
     diffuse_lookup = [
         "base_color",
         "basecolor",

@@ -1,9 +1,17 @@
+"""
+About Info Widget attached to the MatLibPanel
+"""
+
 import os
 
 from PySide6 import QtWidgets, QtCore, QtUiTools
 
 
 class AboutDialog(QtWidgets.QDialog):
+    """
+    About Info Widget attached to the MatLibPanel
+    """
+
     def __init__(self):
         super(AboutDialog, self).__init__()
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))

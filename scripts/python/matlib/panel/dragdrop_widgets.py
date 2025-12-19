@@ -1,20 +1,28 @@
+"""
+Module For Drag and Drop Widgets handling the Drag and Drop from and to Houdini
+"""
+
+from datetime import datetime
 from PySide6 import QtWidgets, QtGui
 import hou
-from datetime import datetime
 
 
 class DragDropListView(QtWidgets.QListView):
+    """
+    Handle Dragging and Dropping from the Thumblist View in the MatLib Panel
+    This comes into effect when the Details Panel is closed
+    """
+
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         self.state = False
         self.currtime = 0
         super().__init__(parent)
 
     def dragLeaveEvent(self, e: QtGui.QDragLeaveEvent) -> None:
-
         panel = None
         if not self.state:
-            if hou.ui.paneTabUnderCursor():
-                if hou.ui.paneTabUnderCursor().type().name() != "PythonPanel":
+            if hou.ui.paneTabUnderCursor():  # type: ignore
+                if hou.ui.paneTabUnderCursor().type().name() != "PythonPanel":  # type: ignore
                     self.state = True
                     panel = (
                         self.parentWidget()
@@ -24,14 +32,21 @@ class DragDropListView(QtWidgets.QListView):
                         .parentWidget()
                     )
 
-        # Avoid multiple imports since dragLeave is fired multiple times and houdini as no way to catch a drop from another panel
+        # Avoid multiple imports since dragLeave is fired multiple times
+        # and houdini as no way to catch a drop from another panel
         if self.state:
             if panel:
                 panel.import_asset()
                 self.state = False
+                e.accept()
 
 
 class DragDropCentralWidget(QtWidgets.QWidget):
+    """
+    Handle Dragging and Dropping from the Central Widget
+    This comes into effect when the Details Panel is open
+    """
+
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
         self.state = False
@@ -51,15 +66,16 @@ class DragDropCentralWidget(QtWidgets.QWidget):
     def dragLeaveEvent(self, event: QtGui.QDragLeaveEvent) -> None:
         print("Leave")
         if not self.state:
-            if hou.ui.paneTabUnderCursor():
-                if hou.ui.paneTabUnderCursor().type().name() != "PythonPanel":
+            if hou.ui.paneTabUnderCursor():  # type: ignore
+                if hou.ui.paneTabUnderCursor().type().name() != "PythonPanel":  # type: ignore
                     self.state = True
                     panel = self.parentWidget().parentWidget()
                     # Restore Selection if we need it
                     for index in self.index_saved:
                         panel.thumblist.setCurrentIndex(index)
 
-        # Avoid multiple imports since dragLeave is fired multiple times and houdini as no way to catch a drop from another panel
+        # Avoid multiple imports since dragLeave is fired multiple times
+        # and houdini as no way to catch a drop from another panel
         if self.state:
             print("Import")
             # Import if we didn't register an import recently

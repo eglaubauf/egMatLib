@@ -20,11 +20,6 @@ class ThumbNailRenderer:
         if self._mat:
             node_handler.import_asset_to_scene(self._mat)
 
-        if "MaterialX" in self._mat.renderer:
-            self.context = hou.node("/stage")
-        else:
-            self.context = hou.node("/mat")
-
         with hou.InterruptableOperation(
             "Rendering", "Performing Tasks", open_interrupt_dialog=True
         ):
@@ -75,9 +70,9 @@ class ThumbNailRenderer:
         lib = net.createNode("materiallibrary")
         lib.setFirstInput(lib1)
 
-        nodes = hou.copyNodesTo((node.children()), lib)  # type: ignore
+        curr_nodes = hou.copyNodesTo((node.children()), lib)  # type: ignore
         collect = 0
-        for n in nodes:
+        for n in curr_nodes:
             if n.type().name() == "collect":
                 n.setGenericFlag(hou.nodeFlag.Material, True)
                 collect = 1
@@ -86,7 +81,7 @@ class ThumbNailRenderer:
                     p.set(1)
 
         if not collect:
-            for n in nodes:
+            for n in curr_nodes:
                 if n.type().name() == "mtlxstandard_surface":
                     n.setGenericFlag(hou.nodeFlag.Material, True)
                     break
@@ -107,7 +102,7 @@ class ThumbNailRenderer:
         preferences.parm("resolutiony").set(self._preferences.rendersize)
         preferences.parm("engine").set("xpu")
         preferences.parm("engine").pressButton()
-        preferences.parm("pathtracedsamples").set(32)  # TODO: set to 256 again
+        preferences.parm("pathtracedsamples").set(256)
         preferences.parm("enabledof").set(0)
         preferences.parm("enablemblur").set(0)
         preferences.parm("picture").set(path)
@@ -204,8 +199,7 @@ class ThumbNailRenderer:
 
     def create_thumb_mantra(self, node: hou.Node, asset_id: str) -> bool:
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene()
-        sc.setup("Mantra")
+        sc = thumbnail_scene.ThumbNailScene("Mantra")
         thumb = sc.get_node()
 
         thumb.parm("mat").set(node.path())
@@ -220,8 +214,8 @@ class ThumbNailRenderer:
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
-        thumb.parm("resx").set(self.rendersize)
-        thumb.parm("resy").set(self.rendersize)
+        thumb.parm("resx").set(self._preferences.rendersize)
+        thumb.parm("resy").set(self._preferences.rendersize)
 
         # Render Frame
         thumb.parm("render").pressButton()
@@ -231,22 +225,10 @@ class ThumbNailRenderer:
             os.remove(path + ".exr")
         return True
 
-    def check_materialbuilder_by_id(self, asset_id: str) -> int | None:
-        """Return if the Material is a Builder (Mantra) as a 0/1"""
-        for mat in self._assets:
-            if isinstance(asset_id, int):
-                if int(asset_id) == mat.mat_id:
-                    return mat.builder
-            else:
-                if asset_id == mat.mat_id:
-                    return mat.builder
-        return None
-
     def create_thumb_redshift(self, node: hou.Node, asset_id: str) -> bool:
 
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene()
-        sc.setup("Redshift")
+        sc = thumbnail_scene.ThumbNailScene("Redshift")
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
 
@@ -264,8 +246,8 @@ class ThumbNailRenderer:
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
-        thumb.parm("resx").set(self.rendersize)
-        thumb.parm("resy").set(self.rendersize)
+        thumb.parm("resx").set(self._preferences.rendersize)
+        thumb.parm("resy").set(self._preferences.rendersize)
 
         # Render Frame
         thumb.parm("execute").pressButton()
@@ -275,8 +257,7 @@ class ThumbNailRenderer:
 
     def create_thumb_octane(self, node: hou.Node, asset_id: str) -> bool:
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene()
-        sc.setup("Octane")
+        sc = thumbnail_scene.ThumbNailScene("Octane")
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
         # Build path
@@ -293,8 +274,8 @@ class ThumbNailRenderer:
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
-        thumb.parm("resx").set(self.rendersize)
-        thumb.parm("resy").set(self.rendersize)
+        thumb.parm("resx").set(self._preferences.rendersize)
+        thumb.parm("resy").set(self._preferences.rendersize)
 
         # Render Frame
         thumb.parm("render").pressButton()
@@ -305,8 +286,7 @@ class ThumbNailRenderer:
 
     def create_thumb_arnold(self, node: hou.Node, asset_id: str) -> bool:
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene()
-        sc.setup("Arnold")
+        sc = thumbnail_scene.ThumbNailScene("Arnold")
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
 
@@ -321,8 +301,8 @@ class ThumbNailRenderer:
         thumb.parm("obj_exclude").set(exclude)
         lights = thumb.name() + "/*"
         thumb.parm("lights").set(lights)
-        thumb.parm("resx").set(self.rendersize)
-        thumb.parm("resy").set(self.rendersize)
+        thumb.parm("resx").set(self._preferences.rendersize)
+        thumb.parm("resy").set(self._preferences.rendersize)
         thumb.parm("render").pressButton()
 
         # WaitForRender - A really bad hack

@@ -1,3 +1,5 @@
+"""Constructs the Python panel Widget for the MatLib and provides Views to the Models"""
+
 import os
 import shutil
 import sys
@@ -11,7 +13,6 @@ from matlib.panel import dragdrop_widgets
 from matlib.core import library, category, multifilterproxy_model
 from matlib.dialogs import (
     about_dialog,
-    material_dialog,
     prefs_dialog,
     usd_dialog,
 )
@@ -23,7 +24,6 @@ importlib.reload(category)
 importlib.reload(prefs)
 importlib.reload(ui_helpers)
 
-importlib.reload(material_dialog)
 importlib.reload(about_dialog)
 importlib.reload(prefs_dialog)
 importlib.reload(usd_dialog)
@@ -31,6 +31,7 @@ importlib.reload(dragdrop_widgets)
 
 
 class MatLibPanel(QtWidgets.QWidget):
+    """Constructs the Python panel Widget for the MatLib and provides Views to the Models"""
 
     def __init__(self) -> None:
         super(MatLibPanel, self).__init__()
@@ -69,13 +70,16 @@ class MatLibPanel(QtWidgets.QWidget):
         self.load()
 
     def open(self) -> None:
+        """Open the currently in preferences specified library"""
         self.material_model.save()
         self.material_model = library.MaterialLibrary()
         self.prefs.load()
         self.load()
-        hou.ui.displayMessage("Library Reloaded successfully!")
+        hou.ui.displayMessage("Library Reloaded successfully!")  # type: ignore
 
     def load(self) -> None:
+        """Load the currently in preferences specified library
+        Copies necessary data to the target directory if not created yet"""
         new_folder = False
         if not os.path.exists(self.prefs.dir + "/library.json"):
             oldpath = (
@@ -92,6 +96,7 @@ class MatLibPanel(QtWidgets.QWidget):
             hou.ui.displayMessage(msg)  # type: ignore
 
     def toggle_catview(self) -> None:
+        """Show and Hide the Category View via Menu"""
         if self.action_catview.isChecked():
             self.cat_list.setVisible(True)
             self.action_catview.setChecked(True)
@@ -100,6 +105,7 @@ class MatLibPanel(QtWidgets.QWidget):
             self.action_catview.setChecked(False)
 
     def toggle_detailsview(self) -> None:
+        """Show and Hide the Details View via Menu"""
         details_widget = self.ui.findChild(QtWidgets.QWidget, "details_widget")
 
         if self.action_detailsview.isChecked():
@@ -124,10 +130,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Load Ui Element so self
         self.menu = self.ui.findChild(QtWidgets.QMenuBar, "menubar")
-        self.menuGoto = self.ui.findChild(QtWidgets.QMenu, "menu_file")
         self.action_prefs = self.ui.findChild(QtGui.QAction, "action_prefs")
         self.action_prefs.triggered.connect(self.show_prefs)
-        self.menu_view = self.ui.findChild(QtWidgets.QMenu, "menu_view")
         self.action_catview = self.ui.findChild(QtGui.QAction, "action_show_cat")
         self.action_catview.triggered.connect(self.toggle_catview)
 
@@ -159,6 +163,10 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.line_filter = self.ui.findChild(QtWidgets.QLineEdit, "line_filter")
         self.line_filter.textEdited.connect(self.filter_thumb_view)
+
+        self.cb_favsonly = self.ui.findChild(QtWidgets.QCheckBox, "cb_FavsOnly")
+        self.cb_favsonly.stateChanged.connect(self.filter_favs)
+
         # Updated Details UI
         self.details = self.ui.findChild(QtWidgets.QTableWidget, "details_widget")
         self.line_name = self.ui.findChild(QtWidgets.QLineEdit, "line_name")
@@ -173,10 +181,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.box_fav = self.ui.findChild(QtWidgets.QCheckBox, "cb_set_fav")
         self.btn_update = self.ui.findChild(QtWidgets.QPushButton, "btn_update")
         self.btn_update.clicked.connect(self.user_update_asset)
-
-        # Options
-        self.cb_favsonly = self.ui.findChild(QtWidgets.QCheckBox, "cb_FavsOnly")
-        self.cb_favsonly.stateChanged.connect(self.filter_favs)
 
         # Material
         self.cb_redshift = self.ui.findChild(QtWidgets.QRadioButton, "cb_Redshift")
@@ -220,14 +224,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.thumblist.customContextMenuRequested.connect(self.thumblist_rc_menu)
         self.cat_list.customContextMenuRequested.connect(self.catlist_rc_menu)
 
-        self.a_folder = self.ui.findChild(QtGui.QAction, "action_import_folder")
-        self.a_folder.setDisabled(True)
-        self.a_folder.setVisible(False)
-
-        self.a_files = self.ui.findChild(QtGui.QAction, "action_import_files")
-        self.a_files.setDisabled(True)
-        self.a_files.setVisible(False)
-
         # set main layout and attach to widget
         mainlayout = QtWidgets.QVBoxLayout()
         mainlayout.addWidget(self.ui)
@@ -235,8 +231,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.setLayout(mainlayout)
 
-    # RC Menus
     def thumblist_rc_menu(self) -> None:
+        """Handle Right Click Menus available in Thumblist"""
         cmenu = QtWidgets.QMenu(self)
 
         action_import = cmenu.addAction("Import to Scene")
@@ -262,6 +258,7 @@ class MatLibPanel(QtWidgets.QWidget):
             self.toggle_fav()
 
     def catlist_rc_menu(self) -> None:
+        """Handle Right Click Menus available in the Categegory list"""
         cmenu = QtWidgets.QMenu(self)
 
         action_remove = cmenu.addAction("Remove Category")
@@ -278,6 +275,7 @@ class MatLibPanel(QtWidgets.QWidget):
         return
 
     def toggle_fav(self) -> None:
+        """Toggle the Favorite Stat for the currently selected Index"""
         self.material_model.layoutAboutToBeChanged.emit()
         indexes = self.material_selection_model.selectedIndexes()
         for index in indexes:
@@ -286,17 +284,17 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model.layoutChanged.emit()
         self.update_details_view()
 
-    # User Stuff
     def show_about(self) -> None:
+        """Show the About Dialog"""
         about = about_dialog.AboutDialog()
         about.exec_()
 
     def show_prefs(self) -> None:
+        """Show the Preferences Dialog"""
         if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        prefs = prefs_dialog.PrefsDialog(self.prefs)
-        prefs.exec_()
+        prefs_dialog.PrefsDialog(self.prefs).exec_()
 
         # Update Thumblist Grid
         self.thumblist.setIconSize(
@@ -314,12 +312,14 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cb_octane.setVisible(self.prefs.renderer_octane_enabled)
 
     def cleanup_db(self) -> None:
+        """Removes orphan data from disk and highlights missing thumbnails"""
         if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
         self.material_model.cleanup_db()
 
     def open_usdlib_folder(self) -> None:
+        """Open the Library Folder in the System explorer"""
         if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
@@ -336,6 +336,8 @@ class MatLibPanel(QtWidgets.QWidget):
             os.startfile(lib_dir)
 
     def add_category_user(self) -> None:
+        """User adds a new category via a given string -
+        if not yet in the library the category will be added"""
         choice, cat = hou.ui.readInput("Please enter the new category name:")  # type: ignore
         if choice:  # Return if no
             return
@@ -394,22 +396,27 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def filter_favs(self) -> None:
         """Get Filter from user and trigger view update"""
-        filter = (
+        fav_filter = (
             True
             if self.cb_favsonly.checkState() == QtCore.Qt.CheckState.Checked
             else ""
         )
 
-        self.material_sorted_model.setFilter(self.material_model.FavoriteRole, filter)
+        self.material_sorted_model.setFilter(
+            self.material_model.FavoriteRole, fav_filter
+        )
         self.material_sorted_model.sort(0)
 
     def filter_renderer(self) -> None:
         """Get Filter from user and trigger view update"""
-        filter = self.cb_matx.group().checkedButton().text()
-        self.material_sorted_model.setFilter(self.material_model.RendererRole, filter)
+        render_filter = self.cb_matx.group().checkedButton().text()
+        self.material_sorted_model.setFilter(
+            self.material_model.RendererRole, render_filter
+        )
         self.material_sorted_model.sort(0)
 
     def user_update_asset(self) -> None:
+        """User modifies an assete in the detailview"""
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
         self.category_model.layoutAboutToBeChanged.emit()
@@ -520,7 +527,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     # Rerender Selected Asset
     def update_single_asset(self) -> None:
-        """Rerenders a single Asset in the library - The UI is blocked for the duration of the render"""
+        """Rerenders a single Asset in the library
+        The UI is blocked for the duration of the render"""
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
         for index in indexes:
@@ -556,7 +564,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.material_model:
             hou.ui.displayMessage(
                 "Please set a Materiallibrary first. Please use the MatLib Panel - Library/Open Dialog."  # type: ignore
-            )  # type: ignore
+            )
             return
         self.get_material_info_user(sel)
 
@@ -591,9 +599,8 @@ class MatLibPanel(QtWidgets.QWidget):
                 self.material_sorted_model.mapToSource(index)
             )
 
-    # Set IconSize via Slider
     def slide(self) -> None:
-
+        """Set IconSize via Slider"""
         self.material_model.thumbsize = self.click_slider.value()
 
         self.thumblist.setGridSize(
@@ -605,6 +612,6 @@ class MatLibPanel(QtWidgets.QWidget):
             QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
         )
         # Also need to resize the images!
-        self.material_model.setCustomIconSize(
+        self.material_model.set_custom_iconsize(
             QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
         )

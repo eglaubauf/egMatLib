@@ -1,3 +1,7 @@
+"""
+Stores the Category Model for the MatLib Panel and provides the data to it's corresponding view
+Uses QtCore.QAbstractListModel as a Base Class
+"""
 from typing import Any
 from PySide6 import QtCore
 
@@ -6,6 +10,10 @@ from matlib.core import database
 
 
 class Categories(QtCore.QAbstractListModel):
+    """
+    Stores the Category Model for the MatLib Panel and provides the data to it's corresponding view
+    Uses QtCore.QAbstractListModel as a Base Class
+    """
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
         super().__init__()
 
@@ -15,7 +23,7 @@ class Categories(QtCore.QAbstractListModel):
         self._categories = _data["categories"]
 
     def rowCount(
-        self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
+        self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex | None = None
     ) -> int:
         return len(self._categories)
 

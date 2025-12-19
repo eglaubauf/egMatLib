@@ -1,12 +1,16 @@
+"""
+Generates a ShaderBall Scene and allows for Rendering Material Preview
+"""
+
 import hou
 
 
-class ShaderBallSetup:  # See if we can remove the class here
+class ShaderBallSetup:
+    """
+    Generates a ShaderBall Scene and allows for Rendering Material Preview
+    """
 
-    def __init__(self):
-        pass
-
-    def setup(
+    def __init__(
         self, renderer: str = "Mantra", parent: hou.Node = hou.node("/obj")
     ) -> None:
 
@@ -35,7 +39,6 @@ class ShaderBallSetup:  # See if we can remove the class here
         self.out.setName("OUT", True)
         self.out.setInput(0, self.switch, 0)
 
-        # Add Parms on top
         self.geo_node.setName("ShaderBallScene", True)
 
         data_template = hou.StringParmTemplate(
@@ -67,7 +70,6 @@ class ShaderBallSetup:  # See if we can remove the class here
 
         self.mat_plane.parm("shop_materialpath1").set("../matnet1/Plane")
 
-        # TO BE FILLED BY USER
         self.mat_ball.parm("shop_materialpath1").set(self.geo_node.parm("mat_ball"))
         self.switch.parm("input").set(self.geo_node.parm("do_show_ball_only"))
         self.geo_node.parm("do_show_ball_only").set(0)
@@ -78,7 +80,9 @@ class ShaderBallSetup:  # See if we can remove the class here
         self.geo_node.layoutChildren()
 
     def apply_initial_materials(self, renderer: str) -> None:
-
+        """
+        Apply Default Materials for the given Renderer
+        """
         if "Mantra" in renderer:
             self.mat = self.matnet.createNode("principledshader::2.0")
 
@@ -146,4 +150,7 @@ class ShaderBallSetup:  # See if we can remove the class here
             self.mat.setName("Plane", True)
 
     def get_geo_node(self) -> hou.Node:
+        """
+        Get the currently attached GeoNode
+        """
         return self.geo_node

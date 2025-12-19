@@ -1,7 +1,11 @@
+"""
+This Module holds the Model for the MaterialView/Thumbview for the MatlibPanel
+"""
+
 import os
 import importlib
-from PySide6 import QtCore, QtGui
 from typing import Any
+from PySide6 import QtCore, QtGui
 
 import hou
 
@@ -16,10 +20,14 @@ importlib.reload(thumbs)
 
 favicon = hou.getenv("EGMATLIB") + "/scripts/python/matlib/res/def/Favorite.png"
 missing = hou.getenv("EGMATLIB") + "/scripts/python/matlib/res/img/missing.jpg"
-base_size = 512
+BASE_SIZE = 512
 
 
 class ThumbnailWorker(QtCore.QThread):
+    """
+    Processes Thumbnails in a threaded Manner
+    """
+
     thumbnail_ready = QtCore.Signal(int, QtGui.QImage)
 
     def __init__(self, items, size: int, parent: QtCore.QObject | None = None) -> None:
@@ -28,17 +36,18 @@ class ThumbnailWorker(QtCore.QThread):
         self._size = size
 
     def run(self) -> None:
+        """Creates Thumbnails for previously passed items and emits signals when each image is created"""
         for data in self._items:
 
-            img = QtGui.QImage(data[0]).scaled(QtCore.QSize(base_size, base_size))
+            img = QtGui.QImage(data[0]).scaled(QtCore.QSize(BASE_SIZE, BASE_SIZE))
             if img.isNull():
                 continue
             if data[1]:
                 fav_img = QtGui.QImage(favicon).scaled(
-                    QtCore.QSize(base_size, base_size)
+                    QtCore.QSize(BASE_SIZE, BASE_SIZE)
                 )
                 composite = QtGui.QImage(
-                    QtCore.QSize(base_size, base_size), QtGui.QImage.Format_ARGB32
+                    QtCore.QSize(BASE_SIZE, BASE_SIZE), QtGui.QImage.Format_ARGB32
                 )
                 painter = QtGui.QPainter(composite)
                 painter.drawImage(0, 0, img)
@@ -50,6 +59,9 @@ class ThumbnailWorker(QtCore.QThread):
 
 
 class MaterialLibrary(QtCore.QAbstractListModel):
+    """The Model for the ThumbList View in the MatLibPanel
+    Subclasses QtCore.QAbstractListModel
+    """
 
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
         super().__init__()
@@ -63,7 +75,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         db = database.DatabaseConnector()
         self._data = db.load(self.preferences.dir)
 
-        # Map Data to Model
         self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
         self._categories = self._data["categories"]
         self._tags = self._data["tags"]
@@ -76,7 +87,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.DateRole = QtCore.Qt.ItemDataRole.UserRole + 5  # 261
 
         self.default_image = QtGui.QImage(missing).scaled(
-            QtCore.QSize(base_size, base_size)
+            QtCore.QSize(BASE_SIZE, BASE_SIZE)
         )
 
         self._thumbs = [0 for x in range(self.rowCount())]
@@ -136,12 +147,13 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             self.index(elem), self.index(elem), QtCore.Qt.ItemDataRole.DecorationRole
         )
 
-    def setCustomIconSize(self, size: QtCore.QSize) -> None:
+    def set_custom_iconsize(self, size: QtCore.QSize) -> None:
+        """Sets a custom IconSize - usually called via the View - Thumbnail Size Slider"""
         self.default_image = QtGui.QImage(missing).scaled(size)
         self._thumbsize = size.width()
 
     def rowCount(
-        self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...
+        self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex | None = None
     ) -> int:
         return len(self._assets)
 
@@ -185,41 +197,70 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         db.set(data)
         db.save()
 
-    def check_exists_in_lib(self, path: str) -> bool:
-        return any(asset.path == path for asset in self._assets)
-
-    def run_dir(self, path: str, entries: list) -> list[str]:
-        for file in os.listdir(path):
-            if os.path.isdir(os.path.join(path, file)):
-                self.run_dir(os.path.join(path, file), entries)
-            else:
-                if file.endswith(".usd"):
-                    usd_file = os.path.join(path, file)
-                    entries.append(usd_file)
-        return entries
-
     @property
     def path(self) -> str:
+        """
+        Docstring for path
+
+        :param self: Description
+        :return: Description
+        :rtype: str
+        """
         return self._path
 
     @path.setter
     def path(self, path: str) -> None:
+        """
+        Docstring for path
+
+        :param self: Description
+        :param path: Description
+        :type path: str
+        """
         self._path = path
 
     @property
     def assets(self) -> list:
+        """
+        Docstring for assets
+
+        :param self: Description
+        :return: Description
+        :rtype: list[Any]
+        """
         return self._assets
 
     @property
     def categories(self) -> list:
+        """
+        Docstring for categories
+
+        :param self: Description
+        :return: Description
+        :rtype: list[Any]
+        """
         return self._categories
 
     @property
     def tags(self) -> list:
+        """
+        Docstring for tags
+
+        :param self: Description
+        :return: Description
+        :rtype: list[Any]
+        """
         return self._tags
 
     @property
     def thumbsize(self) -> int:
+        """
+        Docstring for thumbsize
+
+        :param self: Description
+        :return: Description
+        :rtype: int
+        """
         return self._thumbsize
 
     @thumbsize.setter
@@ -227,7 +268,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._thumbsize = val
 
     def set_assetdata(self, index: QtCore.QModelIndex, name, cats, tags, fav) -> None:
-
+        """Set Assetdata for the given index and parameters
+        the library is saved immidiately after"""
         self.check_add_category(cats)
         self.check_add_tags(tags)
 
@@ -236,7 +278,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.save()
 
     def remove_asset(self, index: QtCore.QModelIndex) -> None:
-        """Removes a material from this Library and Disk"""
+        """Removes a material from this Library and Disk
+        the library is saved immediately after"""
 
         asset = self._assets[index.row()]
 
@@ -309,9 +352,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         for asset in self._assets:
             asset.rename_category(old, new)
 
-    def add_asset(
-        self, node: hou.Node, cats: str, tags: str, fav: bool, use_usd: int = 0
-    ) -> None:
+    def add_asset(self, node: hou.Node, cats: str, tags: str, fav: bool) -> None:
         """Add a Material to this Library"""
         handler = nodes.NodeHandler(self.preferences)
         renderer = handler.get_renderer_from_node(node)
@@ -325,6 +366,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             self.save()
 
     def cleanup_db(self) -> None:
+        """Removes orphan data from disk and highlights missing thumbnails"""
         mark_rmv = 0
         mark_render = 0
 
@@ -396,15 +438,36 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             hou.ui.displayMessage("Lone files have been found and removed from disk.")  # type: ignore
 
     def toggle_fav(self, index: QtCore.QModelIndex) -> None:
+        """
+        Toggle the Favorite Parameter for the given QModelIndex
+
+        :param self: Description
+        :param index: Description
+        :type index: QtCore.QModelIndex
+        """
         self._assets[index.row()].fav = False if self._assets[index.row()].fav else True
         self.save()
         self._update_thumb_paths(index)
 
     def render_thumbnail(self, index: QtCore.QModelIndex) -> None:
+        """
+        Render the Thumbnail for the given QModelIndex
+
+        :param self: Description
+        :param index: Description
+        :type index: QtCore.QModelIndex
+        """
         renderer = thumbs.ThumbNailRenderer(self.preferences, self._assets[index.row()])
         renderer.create_thumbnail()
         self._update_thumb_paths(index)
 
     def import_asset_to_scene(self, index: QtCore.QModelIndex) -> None:
+        """
+        Import the given QModelIndex to the current Houdini Scene/Network Editor
+
+        :param self: Description
+        :param index: Description
+        :type index: QtCore.QModelIndex
+        """
         importer = nodes.NodeHandler(self.preferences)
         importer.import_asset_to_scene(self._assets[index.row()])

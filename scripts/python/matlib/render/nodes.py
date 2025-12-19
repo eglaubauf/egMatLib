@@ -1,3 +1,7 @@
+"""
+Handles all Node Interaction with Houdini
+"""
+
 import os
 import hou
 
@@ -8,6 +12,10 @@ from matlib.helpers import helpers
 
 
 class NodeHandler:
+    """
+    Handles all Node Interaction with Houdini
+    """
+
     def __init__(self, preferences: prefs.Prefs) -> None:
         self._preferences = preferences
         self._builder_node = hou.node("/stage")
@@ -15,9 +23,6 @@ class NodeHandler:
         self._renderer = ""
         self._import_path = None
         self._hou_parent = None
-
-    def cleanup(self):
-        self._builder.destroy()
 
     def get_current_network_node(self) -> None | hou.Node:
         """Return thre current Node in the Network Editor"""
@@ -28,17 +33,47 @@ class NodeHandler:
 
     @property
     def builder_node(self) -> hou.Node:
+        """
+        Docstring for builder_node
+
+        :param self: Description
+        :return: Description
+        :rtype: Node
+        """
         return self._builder_node
 
     @property
     def builder(self) -> int:
+        """
+        Docstring for builder
+
+        :param self: Description
+        :return: Description
+        :rtype: int
+        """
         return self._builder
 
     @property
     def renderer(self) -> str:
+        """
+        Docstring for renderer
+
+        :param self: Description
+        :return: Description
+        :rtype: str
+        """
         return self._renderer
 
     def get_renderer_from_node(self, node: hou.Node) -> str:
+        """
+        Get the renderer based on the node type of the given node
+
+        :param self: Description
+        :param node: Description
+        :type node: hou.Node
+        :return: Description
+        :rtype: str
+        """
         if node.type().name() == "redshift_vopnet":
             self._renderer = "Redshift"
             self._builder = 1
@@ -64,7 +99,7 @@ class NodeHandler:
             self._builder = 0
         return self._renderer
 
-    def import_asset_to_scene(self, mat: material.Material) -> None | hou.Node:
+    def import_asset_to_scene(self, mat: material.Material) -> None:
         """Import a Material to the Nework Editor/Scene"""
 
         parms_file_name = (
@@ -102,7 +137,15 @@ class NodeHandler:
         # Cleanup
         self._hou_parent.destroy()
 
+    def cleanup(self):
+        self._builder_node.destroy()
+
     def update_context(self) -> None:
+        """
+        Update the current Houdini Context given on where the user Network Editor is currently
+
+        :param self: Description
+        """
         curr = self.get_current_network_node()
         curr_typename = curr.type().name()
 
@@ -127,7 +170,14 @@ class NodeHandler:
         else:  # Default to Solaris if antyhing else is current
             self._import_path = hou.node("/stage").createNode("materiallibrary")
 
-    def load_interface_mtlx(self, parms_file_name, mat) -> None:
+    def load_interface_mtlx(self, parms_file_name, mat: material.Material) -> None:
+        """
+        Loads the Interface File from disk
+
+        :param self: Description
+        :param parms_file_name: Description
+        :param mat: Description
+        """
         if os.path.exists(parms_file_name):
             interface_file = open(parms_file_name, "r", encoding="utf-8")
             code = interface_file.read()
@@ -145,10 +195,17 @@ class NodeHandler:
             return
 
     def load_interface_mantra(self, parms_file_name, mat: material.Material) -> None:
+        """
+        Loads the Interface File from disk
+
+        :param self: Description
+        :param parms_file_name: Description
+        :param mat: Description
+        """
         builder = None
         if os.path.exists(parms_file_name):
             # Only load parms if MatBuilder
-            if self.check_materialbuilder_by_id(mat.mat_id):
+            if mat.builder:
                 interface_file = open(parms_file_name, "r", encoding="utf-8")
                 code = interface_file.read()
                 hou_parent = self._hou_parent  # needed for exec
@@ -179,7 +236,21 @@ class NodeHandler:
             builder = new_mat[0]
         self._builder_node = builder
 
-    def load_interface_other(self, parms_file_name, mat, builder_name) -> None:
+    def load_interface_other(
+        self, parms_file_name: str, mat: material.Material, builder_name: str
+    ) -> None:
+        """
+        Loads the Interface File Configuration from Disk
+
+        :param self: Description
+        :param parms_file_name: Description
+        :type parms_file_name: str
+        :param mat: Description
+        :type mat: material.Material
+        :param builder_name: Description
+        :type builder_name: str
+        """
+
         if os.path.exists(parms_file_name):
             interface_file = open(parms_file_name, "r", encoding="utf-8")
             code = interface_file.read()
@@ -198,7 +269,13 @@ class NodeHandler:
 
         self._builder_node = builder
 
-    def load_items_file(self, mat):
+    def load_items_file(self, mat: material.Material) -> None:
+        """
+        Loads the actual Node Configuration from Disk
+
+        :param self: Description
+        :param mat: Description
+        """
         file_name = (
             self._preferences.dir
             + self._preferences.asset_dir
@@ -335,7 +412,7 @@ class NodeHandler:
             + self._preferences.ext
         )
 
-        origNode = node
+        orig_node = node
         builder = ""
         if node.type().name() != "materialbuilder":
             builder = hou.node("/mat").createNode("materialbuilder")
@@ -358,7 +435,7 @@ class NodeHandler:
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
 
-        node = origNode
+        node = orig_node
         if builder != "":
             builder.destroy()
 
@@ -404,6 +481,20 @@ class NodeHandler:
         return thumber.create_thumb_redshift(node, asset_id)
 
     def save_node_octane(self, node: hou.Node, asset_id: str, update: bool) -> bool:
+        """
+        Saves a node for octane renderer to disk
+
+        :param self: Description
+        :param node: Description
+        :type node: hou.Node
+        :param asset_id: Description
+        :type asset_id: str
+        :param update: Description
+        :type update: bool
+        :return: Description
+        :rtype: bool
+        """
+
         # Filepath where to save stuff
         file_name = (
             self._preferences.dir
@@ -422,7 +513,6 @@ class NodeHandler:
         children = node.children()
 
         interface_file = open(parms_file_name, "w", encoding="utf-8")
-        # interface_file.write(node.parmTemplateGroup().asCode())
         interface_file.write(node.asCode())
 
         node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
@@ -434,11 +524,8 @@ class NodeHandler:
         thumber = thumbs.ThumbNailRenderer(self._preferences)
         return thumber.create_thumb_octane(node, asset_id)
 
-    def save_node_arnold(
-        self, node: hou.Node, asset_id: str, update: bool
-    ) -> bool:  # ARNOLD
+    def save_node_arnold(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Saves the Arnold node to disk - does not add to library"""
-        # Filepath where to save stuff
         file_name = (
             self._preferences.dir
             + self._preferences.asset_dir
@@ -446,7 +533,6 @@ class NodeHandler:
             + self._preferences.ext
         )
 
-        # interface-stuff
         parms_file_name = (
             self._preferences.dir
             + self._preferences.asset_dir

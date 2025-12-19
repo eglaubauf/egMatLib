@@ -1,7 +1,16 @@
+"""
+Holds useful UI Elements
+"""
+
 from PySide6 import QtWidgets, QtCore, QtGui
 
 
 class ClickSlider(QtWidgets.QSlider):
+    """
+    The slider provides continuous updates on slideing
+    and allows for snapping to mouse on click
+    """
+
     def __init__(self) -> None:
         super(ClickSlider, self).__init__()
 

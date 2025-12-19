@@ -1,3 +1,7 @@
+"""
+Preferences Dialog attached to the MatLibPanel
+"""
+
 import os
 
 from PySide6 import QtWidgets, QtCore, QtUiTools
@@ -5,20 +9,22 @@ from PySide6.QtGui import QCloseEvent
 
 
 class PrefsDialog(QtWidgets.QDialog):
+    """
+    Preferences Dialog attached to the MatLibPanel
+    """
+
     def __init__(self, prefs) -> None:
         super(PrefsDialog, self).__init__()
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
         self._prefs = prefs
 
-        # Load UI from ui.file
         loader = QtUiTools.QUiLoader()
         file = QtCore.QFile(self.script_path + "/ui/prefs.ui")
         file.open(QtCore.QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
 
-        # UI
         self.line_workdir = self.ui.findChild(QtWidgets.QLineEdit, "line_workdir")
         self.line_thumbsize = self.ui.findChild(QtWidgets.QSpinBox, "line_thumbsize")
         self.line_rendersize = self.ui.findChild(QtWidgets.QSpinBox, "line_rendersize")
@@ -47,44 +53,95 @@ class PrefsDialog(QtWidgets.QDialog):
         self.setLayout(mainlayout)
 
     def toggle_matx(self):
+        """
+        Docstring for toggle_matx
+
+        :param self: Description
+        """
         self._prefs.renderer_matx_enabled = (
             True if self._cbx_matx.isChecked() else False
         )
 
     def toggle_mantra(self):
+        """
+        En/Disable Renderer Mantra
+
+        :param self: Description
+        """
         self._prefs.renderer_mantra_enabled = (
             True if self._cbx_mantra.isChecked() else False
         )
 
     def toggle_arnold(self):
+        """
+        En/Disable Renderer Mantra
+
+        :param self: Description
+        """
         self._prefs.renderer_arnold_enabled = (
             True if self._cbx_arnold.isChecked() else False
         )
 
     def toggle_redshift(self):
+        """
+        En/Disable Renderer Mantra
+
+        :param self: Description
+        """
         self._prefs.renderer_redshift_enabled = (
             True if self._cbx_redshift.isChecked() else False
         )
 
     def toggle_octane(self):
+        """
+        En/Disable Renderer Mantra
+
+        :param self: Description
+        """
         self._prefs.renderer_octane_enabled = (
             True if self._cbx_octane.isChecked() else False
         )
 
     def set_rendersize(self):
+        """
+        Set Rendersize (Disk)
+
+        :param self: Description
+        """
         self._prefs.rendersize = self.line_rendersize.value()
 
     def set_thumbsize(self):
+        """
+        Set ThumbSize (View)
+        :param self: Description
+        """
         self._prefs.thumbsize = self.line_thumbsize.value()
 
     def set_render_on_import(self):
+        """
+        Set if Thumbnails should be rendered on import to MatLib
+
+        :param self: Description
+        """
         self._prefs.render_on_import = int(self.cbx_render_on_import.isChecked())
 
     def closeEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Save Preferences on Close
+
+        :param self: Description
+        :param arg__1: Description
+        :type arg__1: QCloseEvent
+        """
         self._prefs.save()
 
     # Fill UI
     def fill_values(self) -> None:
+        """
+        Fill UI
+
+        :param self: Description
+        """
         self.directory = self._prefs.dir
         self.rendersize = self._prefs.rendersize
         self.thumbsize = self._prefs.thumbsize

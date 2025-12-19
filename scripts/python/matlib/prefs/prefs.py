@@ -1,9 +1,17 @@
+"""
+Holds and loads the Preferences for the Matlib
+"""
+
+import os
 import json
 import hou
-import os
 
 
 class Prefs:
+    """
+    Holds and loads the Preferences for the Matlib
+    """
+
     def __init__(self) -> None:
         self.path: str = hou.getenv("EGMATLIB")
         self._directory = ""
@@ -11,6 +19,9 @@ class Prefs:
         self.load()
 
     def save(self) -> None:
+        """
+        Sanitize and Save the Preferences to disk as json
+        """
         # Sanitize Filepath
         if not self._directory.endswith("/"):
             self._directory = self._directory + "/"
@@ -35,6 +46,9 @@ class Prefs:
             json.dump(self.data, lib_json, indent=4)
 
     def load(self) -> None:
+        """
+        Load the Preferences from disk as json
+        """
         with open(self.path + ("/settings.json"), encoding="utf-8") as lib_json:
             data = json.load(lib_json)
             self._directory = data["directory"]
@@ -114,10 +128,6 @@ class Prefs:
     def ext(self) -> str:
         return self._ext
 
-    def get_done_file(self) -> str:
-        """Get Extension for done_file for singaling rendering process within houdini"""
-        return self.done_file
-
     @property
     def renderer_matx_enabled(self) -> bool:
         return self._renderer_matx_enabled
@@ -157,3 +167,7 @@ class Prefs:
     @renderer_octane_enabled.setter
     def renderer_octane_enabled(self, val: bool) -> None:
         self._renderer_octane_enabled = val
+
+    def get_done_file(self) -> str:
+        """Get Extension for done_file for singaling rendering process within houdini"""
+        return self.done_file

@@ -1,17 +1,20 @@
+"""
+Generates a Thumbnail Scene and allows for Rendering Material Preview
+"""
+
+import importlib
 import hou
 from matlib.render import shaderball_scene
-import importlib
 
 importlib.reload(shaderball_scene)
 
 
 class ThumbNailScene:
+    """
+    Generates a Thumbnail Scene and allows for Rendering Material Preview
+    """
 
-    def __init__(self):
-        pass
-
-    def setup(self, renderer: str = "Mantra") -> hou.Node:
-
+    def __init__(self, renderer: str = "Mantra"):
         # Render Independemt Setup
         self.geo_node = hou.node("/obj").createNode("subnet")
         self.renderer = renderer
@@ -24,48 +27,53 @@ class ThumbNailScene:
         self.geo_node.parm("lights").set("*")
 
         if "Mantra" in renderer:
-            self.shaderBall = shaderball_scene.ShaderBallSetup()
-            self.shaderBall.setup(self.renderer, self.geo_node)
+            self.shaderball = shaderball_scene.ShaderBallSetup(
+                self.renderer, self.geo_node
+            )
 
             self.build_scene()
-            self.shaderBall.get_geo_node().parm("mat_ball").set(
+            self.shaderball.get_geo_node().parm("mat_ball").set(
                 self.geo_node.parm("mat")
             )
             self.comp.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Redshift" in renderer:
-            self.shaderBall = shaderball_scene.ShaderBallSetup()
-            self.shaderBall.setup(self.renderer, self.geo_node)
+            self.shaderball = shaderball_scene.ShaderBallSetup(
+                self.renderer, self.geo_node
+            )
 
             self.build_scene()
-            self.shaderBall.get_geo_node().parm("mat_ball").set(
+            self.shaderball.get_geo_node().parm("mat_ball").set(
                 self.geo_node.parm("mat")
             )
             self.rop.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Arnold" in renderer:
-            self.shaderBall = shaderball_scene.ShaderBallSetup()
-            self.shaderBall.setup(self.renderer, self.geo_node)
+            self.shaderball = shaderball_scene.ShaderBallSetup(
+                self.renderer, self.geo_node
+            )
 
             self.build_scene()
-            self.shaderBall.get_geo_node().parm("mat_ball").set(
+            self.shaderball.get_geo_node().parm("mat_ball").set(
                 self.geo_node.parm("mat")
             )
             self.shell.parm("execute").set(self.geo_node.parm("render"))
 
         elif "Octane" in renderer:
-            self.shaderBall = shaderball_scene.ShaderBallSetup()
-            self.shaderBall.setup(self.renderer, self.geo_node)
+            self.shaderball = shaderball_scene.ShaderBallSetup(
+                self.renderer, self.geo_node
+            )
 
             self.build_scene()
-            self.shaderBall.get_geo_node().parm("mat_ball").set(
+            self.shaderball.get_geo_node().parm("mat_ball").set(
                 self.geo_node.parm("mat")
             )
             self.rop.parm("execute").set(self.geo_node.parm("render"))
 
-        return self.geo_node
-
     def build_parm_templates(self) -> None:
+        """
+        Build ParmTemplate for Population of Parameters
+        """
         # Add Parms on top
         name = "Thumbnail_" + self.renderer
         self.geo_node.setName(name, True)
@@ -117,7 +125,9 @@ class ThumbNailScene:
         self.geo_node.addSpareParmTuple(data_template)
 
     def build_scene(self) -> None:
-
+        """
+        Build the entire Scene with Lights, Camera, Rops and Cops
+        """
         self.ropnet = self.geo_node.createNode("ropnet")
         self.copnet = self.geo_node.createNode("cop2net")
 
@@ -129,7 +139,9 @@ class ThumbNailScene:
         self.geo_node.layoutChildren()
 
     def build_lights(self) -> None:
-
+        """
+        Build Lights for the set Renderer
+        """
         if "Mantra" in self.renderer:
             # Lights
             self.lgt_right = self.geo_node.createNode("hlight::2.0")
@@ -333,7 +345,9 @@ class ThumbNailScene:
             target.setName("Octane_RenderTarget")
 
     def build_cam(self) -> None:
-        # Cam
+        """
+        Build Camera for the set Renderer
+        """
         self.cam = self.geo_node.createNode("cam")
 
         self.cam.parm("tx").set(0.235797)
@@ -371,7 +385,9 @@ class ThumbNailScene:
             self.geo_node.setSelected(True, True)
 
     def build_rops(self) -> None:
-
+        """
+        Build Rops for the set Renderer
+        """
         if "Mantra" in self.renderer:
             # RopNet Setup
             self.rop = self.ropnet.createNode("ifd")
@@ -506,6 +522,9 @@ f.close()
             )
 
     def build_cops(self) -> None:
+        """
+        Build COPs for the set Renderer
+        """
         if "Mantra" in self.renderer or "Arnold" in self.renderer:
             # CopNet Setup
             self.copnet.setName("exr_to_png")
@@ -576,4 +595,7 @@ f.close()
             self.cop_out.setName("OUT", True)
 
     def get_node(self) -> hou.Node:
+        """
+        Get the currently attached GeoNode
+        """
         return self.geo_node
