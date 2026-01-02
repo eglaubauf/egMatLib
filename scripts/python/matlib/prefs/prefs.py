@@ -16,7 +16,12 @@ class Prefs:
         self.path: str = hou.getenv("EGMATLIB")
         self._directory = ""
         self.data = {}
-        self.load()
+        self._renderer_matx_enabled = False
+        self._renderer_mantra_enabled = False
+        self._renderer_arnold_enabled = False
+        self._renderer_redshift_enabled = False
+        self._renderer_octane_enabled = False
+
 
     def save(self) -> None:
         """
@@ -66,19 +71,42 @@ class Prefs:
             self._renderer_octane_enabled = data["renderer_octane"]
             self._renderer_arnold_enabled = data["renderer_arnold"]
 
-            self.get_dir_from_user()
+            return self.get_dir_from_user(True)
 
-    def get_dir_from_user(self) -> None:
+    def get_dir_from_user(self, show=False) -> bool:
         """Get Directory from User and write into prefs"""
         count = 0
         while count < 3:
             if not os.path.exists(self.dir):
-                hou.ui.displayMessage("Please choose a valid path")  # type: ignore
+                if show:
+                    hou.ui.displayMessage("It looks like your library is not set up yet. Please choose a directory to store the library data")  # type: ignore
                 path = hou.ui.selectFile(file_type=hou.fileType.Directory)
+                if path == "": # Canceled
+                    return False
                 self.dir = hou.expandString(path)
             else:
-                return
+                print("MatLib: Library set successfully")
+                self.save()
+                return True
             count += 1
+        return False
+
+    def user_set_library(self) -> bool:
+        path = hou.ui.selectFile(file_type=hou.fileType.Directory)
+
+        if path == "": # Canceled
+            return False
+        path = hou.expandString(path)
+        if not os.path.exists(path): # Invalid
+            hou.ui.displayMessage("Invalid Path selected. Please try again")
+            return False
+
+        # Success
+        print("MatLib: Library set successfully")
+        self.dir = path
+        self.save()
+
+        return True
 
     @property
     def dir(self) -> str:

@@ -18,6 +18,7 @@ class Categories(QtCore.QAbstractListModel):
         super().__init__()
 
         preferences = prefs.Prefs()
+        preferences.load()
         db = database.DatabaseConnector()
         _data = db.load(preferences.dir)
         self._categories = _data["categories"]

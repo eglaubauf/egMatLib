@@ -67,6 +67,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         super().__init__()
 
         self.preferences = prefs.Prefs()
+        self.preferences.load()
         self._thumbsize = self.preferences.thumbsize
         self._rendersize = self.preferences.rendersize
         self._render_on_import = self.preferences.render_on_import

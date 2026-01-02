@@ -39,6 +39,14 @@ class MatLibPanel(QtWidgets.QWidget):
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         self.prefs = prefs.Prefs()
 
+        if self.prefs.load():
+            self.load()
+            self.setup()
+
+        else:
+            self.init_ui()
+
+    def setup(self):
         # Attach models to views
         self.category_model = category.Categories()
         self.category_sorted_model = QtCore.QSortFilterProxyModel()
@@ -67,7 +75,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.filter_renderer()
         self.slide()
 
-        self.load()
 
     def open(self) -> None:
         """Open the currently in preferences specified library"""
@@ -94,6 +101,18 @@ class MatLibPanel(QtWidgets.QWidget):
         if new_folder:
             msg = "A new library has been created successfully"
             hou.ui.displayMessage(msg)  # type: ignore
+
+
+    def set_library(self) -> None:
+        """
+        User Sets library via Menu Option so we have to reroute
+
+        """
+        if self.prefs.user_set_library():
+            self.prefs.load()
+            self.load()
+            self.setup()
+
 
     def toggle_catview(self) -> None:
         """Show and Hide the Category View via Menu"""
@@ -150,6 +169,9 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
         self.action_open.triggered.connect(self.open)
+
+        self.action_set_library = self.ui.findChild(QtGui.QAction, "action_set_library")
+        self.action_set_library.triggered.connect(self.set_library)
 
         # Overwrite the widgets for Drag and Drop in dragdrop_widgets.py
         self.centralwidget = self.ui.centralwidget
