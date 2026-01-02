@@ -96,6 +96,12 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._get__mat_paths()
         self._start_worker()
 
+    def rebuild_thumbs(self):
+        self._thumbs = [0 for x in range(self.rowCount())]
+        self._mat_paths = []
+        self._get__mat_paths()
+        self._start_worker()
+
     def flags(
         self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex
     ) -> QtCore.Qt.ItemFlag:
@@ -361,10 +367,26 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         new_mat.set_data(node.name(), cats, tags, fav, renderer)
 
         if handler.save_node(node, new_mat.mat_id, False):
-
             self._assets.append(new_mat)
             self._update_thumb_paths(self.index(self.rowCount() - 1, 0))
             self.save()
+
+    def add_asset_from_strings(
+        self, name: str, cats: str, tags: str, fav: bool, renderer: str
+    ):
+        """Append an assset from Strings only - the user has to take care of copying files on disk"""
+        new_asset = material.Material()
+        new_asset.set_data(
+            name,
+            cats,
+            tags,
+            fav,
+            renderer,
+        )
+        self._assets.append(new_asset)
+        # self._update_thumb_paths(self.index(self.rowCount() - 1, 0))
+        # self.save()
+        return self._assets[self.rowCount() - 1]
 
     def cleanup_db(self) -> None:
         """Removes orphan data from disk and highlights missing thumbnails"""

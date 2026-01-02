@@ -85,7 +85,7 @@
         </size>
        </property>
        <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
+        <enum>Qt::CustomContextMenu</enum>
        </property>
        <property name="acceptDrops">
         <bool>false</bool>
@@ -94,7 +94,7 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustIgnored</enum>
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
@@ -106,7 +106,7 @@
         <bool>true</bool>
        </property>
        <property name="dragDropMode">
-        <enum>QAbstractItemView::NoDragDrop</enum>
+        <enum>QAbstractItemView::DragDrop</enum>
        </property>
        <property name="alternatingRowColors">
         <bool>false</bool>
@@ -220,15 +220,15 @@
           <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
              <enum>QSizePolicy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>5</width>
-              <height>20</height>
+              <width>20</width>
+              <height>5</height>
              </size>
             </property>
            </spacer>
@@ -247,7 +247,7 @@
            <bool>false</bool>
           </property>
           <property name="contextMenuPolicy">
-           <enum>Qt::NoContextMenu</enum>
+           <enum>Qt::CustomContextMenu</enum>
           </property>
           <property name="acceptDrops">
            <bool>false</bool>
@@ -255,17 +255,20 @@
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
           <property name="lineWidth">
            <number>2</number>
           </property>
           <property name="sizeAdjustPolicy">
-           <enum>QAbstractScrollArea::AdjustIgnored</enum>
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
           </property>
           <property name="autoScrollMargin">
            <number>5</number>
           </property>
           <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
+           <set>QAbstractItemView::CurrentChanged|QAbstractItemView::DoubleClicked|QAbstractItemView::SelectedClicked</set>
           </property>
           <property name="showDropIndicator" stdset="0">
            <bool>true</bool>
@@ -277,13 +280,13 @@
            <bool>true</bool>
           </property>
           <property name="dragDropMode">
-           <enum>QAbstractItemView::NoDragDrop</enum>
+           <enum>QAbstractItemView::DragDrop</enum>
           </property>
           <property name="defaultDropAction">
-           <enum>Qt::IgnoreAction</enum>
+           <enum>Qt::CopyAction</enum>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::NoSelection</enum>
+           <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
           <property name="verticalScrollMode">
            <enum>QAbstractItemView::ScrollPerItem</enum>
@@ -292,7 +295,7 @@
            <enum>QAbstractItemView::ScrollPerItem</enum>
           </property>
           <property name="movement">
-           <enum>QListView::Static</enum>
+           <enum>QListView::Snap</enum>
           </property>
           <property name="flow">
            <enum>QListView::LeftToRight</enum>
@@ -301,10 +304,10 @@
            <bool>true</bool>
           </property>
           <property name="resizeMode">
-           <enum>QListView::Fixed</enum>
+           <enum>QListView::Adjust</enum>
           </property>
           <property name="layoutMode">
-           <enum>QListView::SinglePass</enum>
+           <enum>QListView::Batched</enum>
           </property>
           <property name="spacing">
            <number>0</number>
@@ -316,13 +319,19 @@
            </size>
           </property>
           <property name="viewMode">
-           <enum>QListView::ListMode</enum>
+           <enum>QListView::IconMode</enum>
           </property>
           <property name="uniformItemSizes">
            <bool>true</bool>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
+          </property>
+          <property name="selectionRectVisible">
+           <bool>true</bool>
+          </property>
+          <property name="itemAlignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -416,6 +425,12 @@
             </property>
             <item>
              <widget class="QGroupBox" name="groupBox_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="title">
                <string>Material Properties</string>
               </property>
@@ -544,10 +559,16 @@
             <item>
              <widget class="QGroupBox" name="groupBox">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
               </property>
               <property name="acceptDrops">
                <bool>false</bool>
@@ -658,12 +679,12 @@
                <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
+               <enum>QSizePolicy::MinimumExpanding</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>80</width>
-                <height>20</height>
+                <height>80</height>
                </size>
               </property>
              </spacer>
@@ -709,6 +730,8 @@
     <addaction name="action_open_folder"/>
     <addaction name="separator"/>
     <addaction name="action_about"/>
+    <addaction name="separator"/>
+    <addaction name="action_import_lib_v1"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="acceptDrops">
@@ -809,6 +832,11 @@
   <action name="action_set_library">
    <property name="text">
     <string>Set Library</string>
+   </property>
+  </action>
+  <action name="action_import_lib_v1">
+   <property name="text">
+    <string>Import from MatLib V1</string>
    </property>
   </action>
  </widget>

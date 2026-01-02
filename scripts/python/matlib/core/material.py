@@ -178,6 +178,10 @@ class Material:
         """
         return self._renderer
 
+    @renderer.setter
+    def renderer(self, value: str) -> None:
+        self._renderer = value
+
     @property
     def builder(self) -> int:
         """

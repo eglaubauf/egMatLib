@@ -10,7 +10,7 @@ from PySide6 import QtWidgets, QtGui, QtCore, QtUiTools
 import hou
 
 from matlib.panel import dragdrop_widgets
-from matlib.core import library, category, multifilterproxy_model
+from matlib.core import library, category, multifilterproxy_model, upgrader
 from matlib.dialogs import (
     about_dialog,
     prefs_dialog,
@@ -28,6 +28,8 @@ importlib.reload(about_dialog)
 importlib.reload(prefs_dialog)
 importlib.reload(usd_dialog)
 importlib.reload(dragdrop_widgets)
+
+importlib.reload(upgrader)
 
 
 class MatLibPanel(QtWidgets.QWidget):
@@ -75,7 +77,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.filter_renderer()
         self.slide()
 
-
     def open(self) -> None:
         """Open the currently in preferences specified library"""
         self.material_model.save()
@@ -102,7 +103,6 @@ class MatLibPanel(QtWidgets.QWidget):
             msg = "A new library has been created successfully"
             hou.ui.displayMessage(msg)  # type: ignore
 
-
     def set_library(self) -> None:
         """
         User Sets library via Menu Option so we have to reroute
@@ -112,7 +112,6 @@ class MatLibPanel(QtWidgets.QWidget):
             self.prefs.load()
             self.load()
             self.setup()
-
 
     def toggle_catview(self) -> None:
         """Show and Hide the Category View via Menu"""
@@ -172,6 +171,11 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.action_set_library = self.ui.findChild(QtGui.QAction, "action_set_library")
         self.action_set_library.triggered.connect(self.set_library)
+
+        self.action_import_lib_v1 = self.ui.findChild(
+            QtGui.QAction, "action_import_lib_v1"
+        )
+        self.action_import_lib_v1.triggered.connect(self.import_lib_v1)
 
         # Overwrite the widgets for Drag and Drop in dragdrop_widgets.py
         self.centralwidget = self.ui.centralwidget
@@ -339,6 +343,21 @@ class MatLibPanel(QtWidgets.QWidget):
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
         self.material_model.cleanup_db()
+
+    def import_lib_v1(self) -> None:
+
+        start_directory = self.prefs.dir
+        title = "Select a json file to import"
+        mask = "*.json"
+        path = hou.ui.selectFile(start_directory, title, pattern=mask)
+        path = hou.expandString(path)
+        if path.endswith(".json") and os.path.exists(path):
+            upg = upgrader.LibraryUpgrader(path, self.material_model, self.prefs)
+            upg.upgrade_v1_to_v2()
+            self.material_model.layoutChanged.emit()
+            self.category_model.layoutChanged.emit()
+        else:
+            hou.ui.displayMessage("Invalid Path. Please try again.")
 
     def open_usdlib_folder(self) -> None:
         """Open the Library Folder in the System explorer"""
