@@ -43,6 +43,6 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
             elif isinstance(data, bool):
                 if curr_filter != data and curr_filter != "":
                     return False
-            elif curr_filter.lower() != data.lower():
+            elif curr_filter.lower() not in data.lower():
                 return False
         return True
