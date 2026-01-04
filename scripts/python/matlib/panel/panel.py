@@ -28,6 +28,7 @@ importlib.reload(about_dialog)
 importlib.reload(prefs_dialog)
 importlib.reload(usd_dialog)
 importlib.reload(dragdrop_widgets)
+importlib.reload(multifilterproxy_model)
 
 importlib.reload(upgrader)
 

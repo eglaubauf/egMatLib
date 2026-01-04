@@ -37,11 +37,12 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
             index = self.sourceModel().index(source_row, 0, source_parent)
             data = index.data(role)
             if isinstance(data, (list, tuple)):
-                if curr_filter.lower() not in str(data).lower():
-                    return False
+                for elem in data:
+                    if curr_filter.lower() != str(elem).lower():
+                        return False
             elif isinstance(data, bool):
                 if curr_filter != data and curr_filter != "":
                     return False
-            elif curr_filter.lower() not in data.lower():
+            elif curr_filter.lower() != data.lower():
                 return False
         return True
