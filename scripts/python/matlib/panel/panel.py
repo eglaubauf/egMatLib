@@ -430,11 +430,25 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def filter_thumb_view(self) -> None:
         """Get Filter from user and trigger view update"""
-        # self.material_sorted_model.setFilterRole(0)
-        self.material_sorted_model.setFilter(
-            QtCore.Qt.ItemDataRole.DisplayRole, self.line_filter.text()
-        )
-        self.material_sorted_model.sort(0)
+        if self.line_filter.text().startswith(":"):
+            if len(self.line_filter.text()) > 1:
+                self.material_sorted_model.invalidate()
+                filter_text = self.line_filter.text()[1:]
+                self.material_sorted_model.setFilter(
+                    self.material_model.TagRole, filter_text
+                )
+                self.material_sorted_model.removeFilter(
+                    QtCore.Qt.ItemDataRole.DisplayRole
+                )
+                self.material_sorted_model.sort(0)
+        else:
+
+            self.material_sorted_model.invalidate()
+            self.material_sorted_model.setFilter(
+                QtCore.Qt.ItemDataRole.DisplayRole, self.line_filter.text()
+            )
+            self.material_sorted_model.removeFilter(self.material_model.TagRole)
+            self.material_sorted_model.sort(0)
 
     def filter_favs(self) -> None:
         """Get Filter from user and trigger view update"""
@@ -543,8 +557,10 @@ class MatLibPanel(QtWidgets.QWidget):
         """Update thumb view on change of category"""
         index = self.cat_list.selectedIndexes()[0]
         if index.data() == "All":
-            self.material_sorted_model.setFilter(self.material_model.CategoryRole, "")
+            self.material_sorted_model.invalidate()
+            self.material_sorted_model.removeFilter(self.material_model.CategoryRole)
         else:
+            self.material_sorted_model.invalidate()
             self.material_sorted_model.setFilter(
                 self.material_model.CategoryRole, index.data()
             )

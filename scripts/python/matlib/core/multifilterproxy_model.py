@@ -25,6 +25,10 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
         self._filters[filter_role] = filter_value
         self.invalidateFilter()
 
+    def removeFilter(self, filter_role):
+        if filter_role in self._filters.keys():
+            del self._filters[filter_role]
+
     def filterAcceptsRow(
         self,
         source_row: int,
@@ -34,6 +38,7 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
             return True
 
         for role, curr_filter in self._filters.items():
+
             index = self.sourceModel().index(source_row, 0, source_parent)
             data = index.data(role)
             if isinstance(data, (list, tuple)):
