@@ -88,7 +88,7 @@ class Prefs:
                     return False
                 self.dir = hou.expandString(path)
             else:
-                print("MatLib: Library set successfully")
+                # print("MatLib: Library set successfully")
                 self.save()
                 return True
             count += 1
