@@ -44,13 +44,13 @@ class MatLibPanel(QtWidgets.QWidget):
 
         if self.prefs.load():
             self.load()
+            self.init_ui()
             self.setup()
 
         else:
             self.init_ui()
 
     def setup(self):
-        # Attach models to views
         self.category_model = category.Categories()
         self.category_sorted_model = QtCore.QSortFilterProxyModel()
         self.category_sorted_model.setSourceModel(self.category_model)
@@ -67,7 +67,6 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_selection_model = QtCore.QItemSelectionModel(
             self.material_sorted_model
         )
-        self.init_ui()
 
         # Attach Models
         self.cat_list.setModel(self.category_sorted_model)
@@ -111,8 +110,16 @@ class MatLibPanel(QtWidgets.QWidget):
         """
         if self.prefs.user_set_library():
             self.prefs.load()
+
             self.load()
-            self.setup()
+            self.material_model.layoutAboutToBeChanged.emit()
+            self.category_model.layoutAboutToBeChanged.emit()
+
+            self.category_model.switch_model_data(self.prefs)
+            self.material_model.switch_model_data(self.prefs)
+
+            self.category_model.layoutChanged.emit()
+            self.material_model.layoutChanged.emit()
 
     def toggle_catview(self) -> None:
         """Show and Hide the Category View via Menu"""
