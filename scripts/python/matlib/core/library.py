@@ -91,10 +91,16 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             QtCore.QSize(BASE_SIZE, BASE_SIZE)
         )
 
-        self._thumbs = [0 for x in range(self.rowCount())]
-        self._mat_paths = []
-        self._get__mat_paths()
-        self._start_worker()
+        self.rebuild_thumbs()
+
+    def switch_model_data(self, preferences):
+        db = database.DatabaseConnector()
+        self._data = db.reload_with_path(preferences.dir)
+
+        self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
+        self._categories = self._data["categories"]
+        self._tags = self._data["tags"]
+        self.rebuild_thumbs()
 
     def rebuild_thumbs(self):
         self._thumbs = [0 for x in range(self.rowCount())]

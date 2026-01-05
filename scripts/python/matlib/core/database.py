@@ -43,3 +43,7 @@ class DatabaseConnector:
             return
         with open(self._path + ("/library.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self._data, lib_json, indent=4)
+
+    def reload_with_path(self, path: str) -> str:
+        self._data = None
+        return self.load(path)
