@@ -25,6 +25,8 @@ class Categories(QtCore.QAbstractListModel):
         self._data = db.load(preferences.dir)
         self._categories = self._data["categories"]
 
+        self.CatSortRole = QtCore.Qt.ItemDataRole.UserRole  # 256
+
     def rowCount(
         self, parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex | None = None
     ) -> int:
@@ -33,9 +35,14 @@ class Categories(QtCore.QAbstractListModel):
     def data(
         self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
     ) -> Any:
-        if role == QtCore.Qt.ItemDataRole.DisplayRole:
-
+        if role == self.CatSortRole:
             return self._categories[index.row()]
+
+        if role == QtCore.Qt.ItemDataRole.DisplayRole:
+            elem = self._categories[index.row()]
+            if elem.startswith("_"):
+                elem = elem[1:]
+            return elem
 
     def switch_model_data(self, preferences):
         db = database.DatabaseConnector()

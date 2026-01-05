@@ -55,6 +55,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.category_sorted_model = QtCore.QSortFilterProxyModel()
         self.category_sorted_model.setSourceModel(self.category_model)
         self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.category_sorted_model.setSortRole(self.category_model.CatSortRole)
         self.category_sorted_model.sort(0)
 
         self.material_model = library.MaterialLibrary()
