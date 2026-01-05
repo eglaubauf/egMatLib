@@ -70,7 +70,11 @@ class ThumbNailRenderer:
         lib = net.createNode("materiallibrary")
         lib.setFirstInput(lib1)
 
-        curr_nodes = hou.copyNodesTo((node.children()), lib)  # type: ignore
+        curr_items = node
+        if not isinstance(node, list):
+            curr_items = node.children()
+
+        curr_nodes = hou.copyNodesTo(curr_items, lib)  # type: ignore
         collect = 0
         for n in curr_nodes:
             if n.type().name() == "collect":
