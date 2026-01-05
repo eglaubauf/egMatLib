@@ -12,7 +12,7 @@ class UsdDialog(QtWidgets.QDialog):
     Material Import Dialog attached to the MatLibPanel
     """
 
-    def __init__(self) -> None:
+    def __init__(self, cat_list: list[str]) -> None:
         super(UsdDialog, self).__init__()
         self.script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -33,7 +33,11 @@ class UsdDialog(QtWidgets.QDialog):
 
         self.setLayout(mainlayout)
 
-        self.line_cats = self.ui.findChild(QtWidgets.QLineEdit, "line_categories")
+        self.combo_cats = self.ui.findChild(QtWidgets.QComboBox, "combo_categories")
+        for cat in cat_list:
+            self.combo_cats.addItem(cat)
+        self.combo_cats.setInsertPolicy(QtWidgets.QComboBox.InsertPolicy.InsertAtTop)
+
         self.line_tags = self.ui.findChild(QtWidgets.QLineEdit, "line_tags")
         self.cb_fav = self.ui.findChild(QtWidgets.QCheckBox, "cb_fav")
 
@@ -47,7 +51,8 @@ class UsdDialog(QtWidgets.QDialog):
 
         :param self: Description
         """
-        self.categories = self.line_cats.text()
+        # self.categories = self.line_cats.text()
+        self.categories = self.combo_cats.currentText()
         self.tags = self.line_tags.text()
         self.fav = self.cb_fav.isChecked()
         self.accept()

@@ -83,6 +83,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model = library.MaterialLibrary()
         self.prefs.load()
         self.load()
+        # self.material_model.rebuild_thumbs()
         hou.ui.displayMessage("Library Reloaded successfully!")  # type: ignore
 
     def load(self) -> None:
@@ -636,7 +637,19 @@ class MatLibPanel(QtWidgets.QWidget):
     def get_material_info_user(self, sel: list[hou.Node]) -> None:
         """Query user for input upon material-save"""
         # Get Stuff from User
-        dialog = usd_dialog.UsdDialog()
+        self.usd_dialog_category_model = QtCore.QSortFilterProxyModel()
+        self.usd_dialog_category_model.setSourceModel(self.category_sorted_model)
+        usd_filter = "^(?!All).*$"
+        self.usd_dialog_category_model.setFilterRegularExpression(usd_filter)
+        self.usd_dialog_category_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.usd_dialog_category_model.sort(0)
+
+        cats = []
+        for elem in range(self.usd_dialog_category_model.rowCount()):
+            idx = self.usd_dialog_category_model.index(elem, 0)
+            cats.append(self.usd_dialog_category_model.data(idx))
+
+        dialog = usd_dialog.UsdDialog(cats)
         r = dialog.exec_()
 
         if dialog.canceled or not r:

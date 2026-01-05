@@ -40,14 +40,23 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Categories(Comma separated)</string>
+           <string>Category</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="line_categories">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <widget class="QComboBox" name="combo_categories">
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="maxVisibleItems">
+           <number>15</number>
+          </property>
+          <property name="frame">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

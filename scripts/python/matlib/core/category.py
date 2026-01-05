@@ -34,6 +34,7 @@ class Categories(QtCore.QAbstractListModel):
         self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
     ) -> Any:
         if role == QtCore.Qt.ItemDataRole.DisplayRole:
+
             return self._categories[index.row()]
 
     def switch_model_data(self, preferences):
