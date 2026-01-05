@@ -22,7 +22,6 @@ class Prefs:
         self._renderer_redshift_enabled = False
         self._renderer_octane_enabled = False
 
-
     def save(self) -> None:
         """
         Sanitize and Save the Preferences to disk as json
@@ -40,12 +39,14 @@ class Prefs:
         self.data["asset_dir"] = self._asset_dir
         self.data["rendersize"] = self._rendersize
         self.data["thumbsize"] = self._thumbsize
+        self.data["rendersamples"] = self._rendersamples
         self.data["render_on_import"] = self._render_on_import
         self.data["renderer_materialx"] = self._renderer_matx_enabled
         self.data["renderer_mantra"] = self._renderer_mantra_enabled
         self.data["renderer_redshift"] = self._renderer_redshift_enabled
         self.data["renderer_octane"] = self._renderer_octane_enabled
         self.data["renderer_arnold"] = self._renderer_arnold_enabled
+        self.data["ballmode"] = self._ballmode
 
         with open(self.path + ("/settings.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self.data, lib_json, indent=4)
@@ -70,6 +71,8 @@ class Prefs:
             self._renderer_redshift_enabled = data["renderer_redshift"]
             self._renderer_octane_enabled = data["renderer_octane"]
             self._renderer_arnold_enabled = data["renderer_arnold"]
+            self._rendersamples = data["rendersamples"]
+            self._ballmode = data["ballmode"]
 
             return self.get_dir_from_user(True)
 
@@ -81,7 +84,7 @@ class Prefs:
                 if show:
                     hou.ui.displayMessage("It looks like your library is not set up yet. Please choose a directory to store the library data")  # type: ignore
                 path = hou.ui.selectFile(file_type=hou.fileType.Directory)
-                if path == "": # Canceled
+                if path == "":  # Canceled
                     return False
                 self.dir = hou.expandString(path)
             else:
@@ -94,10 +97,10 @@ class Prefs:
     def user_set_library(self) -> bool:
         path = hou.ui.selectFile(file_type=hou.fileType.Directory)
 
-        if path == "": # Canceled
+        if path == "":  # Canceled
             return False
         path = hou.expandString(path)
-        if not os.path.exists(path): # Invalid
+        if not os.path.exists(path):  # Invalid
             hou.ui.displayMessage("Invalid Path selected. Please try again")
             return False
 
@@ -123,6 +126,22 @@ class Prefs:
     @rendersize.setter
     def rendersize(self, val: int) -> None:
         self._rendersize = val
+
+    @property
+    def rendersamples(self) -> int:
+        return self._rendersamples
+
+    @rendersamples.setter
+    def rendersamples(self, val: int) -> None:
+        self._rendersamples = val
+
+    @property
+    def ballmode(self) -> int:
+        return self._ballmode
+
+    @ballmode.setter
+    def ballmode(self, val: int) -> None:
+        self._ballmode = val
 
     @property
     def thumbsize(self) -> int:

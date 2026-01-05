@@ -14,6 +14,7 @@ class ThumbNailRenderer:
         self._mat = mat
         self._preferences = preferences
         self._builder = None
+        self._preferences.load()
 
     def create_thumbnail(self) -> None:
         node_handler = nodes.NodeHandler(self._preferences)
@@ -48,11 +49,18 @@ class ThumbNailRenderer:
         net = hou.node("/obj").createNode("lopnet")
 
         ref = net.createNode("reference::2.0")
-        ref.parm("filepath1").set(
-            hou.getenv("EGMATLIB")
-            + "/scripts/python/matlib/res/usd/shaderBallScene.usd"
-        )
+        if self._preferences.ballmode:
+            ref.parm("filepath1").set(
+                hou.getenv("EGMATLIB")
+                + "/scripts/python/matlib/res/usd/shaderBallScene2.usd"
+            )
+        else:
+            ref.parm("filepath1").set(
+                hou.getenv("EGMATLIB")
+                + "/scripts/python/matlib/res/usd/shaderBallScene2_Simple.usd"
+            )
 
+        ref.parm("primpath1").set("/shaderBallScene")
         lib1 = net.createNode("materiallibrary")
         lib1.setFirstInput(ref)
         surf = lib1.createNode("mtlxstandard_surface")
@@ -95,7 +103,7 @@ class ThumbNailRenderer:
 
         lib.parm("fillmaterials").pressButton()
         lib.parm("assign1").set(1)
-        lib.parm("geopath1").set("/shaderBallScene/geo/ball/mesh_0")
+        lib.parm("geopath1").set("/shaderBallScene/geo/ball")
 
         preferences = net.createNode("karmarenderproperties")
         preferences.parm("camera").set("/shaderBallScene/cameras/RenderCam")
@@ -106,7 +114,7 @@ class ThumbNailRenderer:
         preferences.parm("resolutiony").set(self._preferences.rendersize)
         preferences.parm("engine").set("xpu")
         preferences.parm("engine").pressButton()
-        preferences.parm("pathtracedsamples").set(256)
+        preferences.parm("pathtracedsamples").set(self._preferences.rendersamples)
         preferences.parm("enabledof").set(0)
         preferences.parm("enablemblur").set(0)
         preferences.parm("picture").set(path)
@@ -203,9 +211,9 @@ class ThumbNailRenderer:
 
     def create_thumb_mantra(self, node: hou.Node, asset_id: str) -> bool:
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene("Mantra")
+        sc = thumbnail_scene.ThumbNailScene("Mantra", self._preferences.ballmode)
         thumb = sc.get_node()
-
+        thumb.setself._preferences.ballmode
         thumb.parm("mat").set(node.path())
 
         # Build path
@@ -232,7 +240,7 @@ class ThumbNailRenderer:
     def create_thumb_redshift(self, node: hou.Node, asset_id: str) -> bool:
 
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene("Redshift")
+        sc = thumbnail_scene.ThumbNailScene("Redshift", self._preferences.ballmode)
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
 
@@ -261,7 +269,7 @@ class ThumbNailRenderer:
 
     def create_thumb_octane(self, node: hou.Node, asset_id: str) -> bool:
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene("Octane")
+        sc = thumbnail_scene.ThumbNailScene("Octane", self._preferences.ballmode)
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
         # Build path
@@ -290,7 +298,7 @@ class ThumbNailRenderer:
 
     def create_thumb_arnold(self, node: hou.Node, asset_id: str) -> bool:
         # Create Thumbnail
-        sc = thumbnail_scene.ThumbNailScene("Arnold")
+        sc = thumbnail_scene.ThumbNailScene("Arnold", self._preferences.ballmode)
         thumb = sc.get_node()
         thumb.parm("mat").set(node.path())
 

@@ -14,7 +14,7 @@ class ThumbNailScene:
     Generates a Thumbnail Scene and allows for Rendering Material Preview
     """
 
-    def __init__(self, renderer: str = "Mantra"):
+    def __init__(self, renderer: str = "Mantra", ballmode: int = 0):
         # Render Independemt Setup
         self.geo_node = hou.node("/obj").createNode("subnet")
         self.renderer = renderer
@@ -28,7 +28,7 @@ class ThumbNailScene:
 
         if "Mantra" in renderer:
             self.shaderball = shaderball_scene.ShaderBallSetup(
-                self.renderer, self.geo_node
+                self.renderer, self.geo_node, ballmode
             )
 
             self.build_scene()
@@ -39,7 +39,7 @@ class ThumbNailScene:
 
         elif "Redshift" in renderer:
             self.shaderball = shaderball_scene.ShaderBallSetup(
-                self.renderer, self.geo_node
+                self.renderer, self.geo_node, ballmode
             )
 
             self.build_scene()
@@ -50,7 +50,7 @@ class ThumbNailScene:
 
         elif "Arnold" in renderer:
             self.shaderball = shaderball_scene.ShaderBallSetup(
-                self.renderer, self.geo_node
+                self.renderer, self.geo_node, ballmode
             )
 
             self.build_scene()
@@ -61,7 +61,7 @@ class ThumbNailScene:
 
         elif "Octane" in renderer:
             self.shaderball = shaderball_scene.ShaderBallSetup(
-                self.renderer, self.geo_node
+                self.renderer, self.geo_node, ballmode
             )
 
             self.build_scene()

@@ -11,9 +11,13 @@ class ShaderBallSetup:
     """
 
     def __init__(
-        self, renderer: str = "Mantra", parent: hou.Node = hou.node("/obj")
+        self,
+        renderer: str = "Mantra",
+        parent: hou.Node = hou.node("/obj"),
+        ball_mode: int = 0,
     ) -> None:
 
+        self.ballmode = ball_mode
         self.geo_node = parent.createNode("geo")
         self.filecache = self.geo_node.createNode("filecache::2.0")
 
@@ -59,9 +63,14 @@ class ShaderBallSetup:
 
         # Set Parms
         self.filecache.parm("loadfromdisk").set(1)
-        self.filecache.parm("file").set(
-            "$EGMATLIB/scripts/python/matlib/res/geo/ShaderBallScene.bgeo.sc"
-        )
+        if not self.ballmode:
+            self.filecache.parm("file").set(
+                "$EGMATLIB/scripts/python/matlib/res/geo/ShaderBallScene_Simple.bgeo.sc"
+            )
+        else:
+            self.filecache.parm("file").set(
+                "$EGMATLIB/scripts/python/matlib/res/geo/ShaderBallScene.bgeo.sc"
+            )
         self.filecache.parm("filemethod").set(1)
         self.filecache.parm("timedependent").set(0)
 

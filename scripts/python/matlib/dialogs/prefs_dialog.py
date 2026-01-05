@@ -28,9 +28,22 @@ class PrefsDialog(QtWidgets.QDialog):
         self.line_workdir = self.ui.findChild(QtWidgets.QLineEdit, "line_workdir")
         self.line_thumbsize = self.ui.findChild(QtWidgets.QSpinBox, "line_thumbsize")
         self.line_rendersize = self.ui.findChild(QtWidgets.QSpinBox, "line_rendersize")
+        self.line_rendersamples = self.ui.findChild(
+            QtWidgets.QSpinBox, "line_rendersamples"
+        )
+        self._combo_ballmode = self.ui.findChild(
+            QtWidgets.QComboBox, "combo_shaderball"
+        )
+
+        self._combo_ballmode.addItem("Simple")
+        self._combo_ballmode.addItem("Complex (V1)")
+
+        self._combo_ballmode.currentIndexChanged.connect(self.set_ballmode)
+
         self.cbx_render_on_import = self.ui.findChild(
             QtWidgets.QCheckBox, "cbx_renderOnImport"
         )
+
         self._cbx_matx = self.ui.findChild(QtWidgets.QCheckBox, "cbx_matx")
         self._cbx_matx.toggled.connect(self.toggle_matx)
         self._cbx_mantra = self.ui.findChild(QtWidgets.QCheckBox, "cbx_mantra")
@@ -117,6 +130,22 @@ class PrefsDialog(QtWidgets.QDialog):
         """
         self._prefs.thumbsize = self.line_thumbsize.value()
 
+    def set_rendersamples(self):
+        """
+        Set RenderSamples (Disk)
+
+        :param self: Description
+        """
+        self._prefs.rendersamples = self.line_rendersamples.value()
+
+    def set_ballmode(self):
+        """
+        Set Chosen Shaderball
+
+        :param self: Description
+        """
+        self._prefs.ballmode = self._combo_ballmode.currentIndex()
+
     def set_render_on_import(self):
         """
         Set if Thumbnails should be rendered on import to MatLib
@@ -146,10 +175,16 @@ class PrefsDialog(QtWidgets.QDialog):
         self.rendersize = self._prefs.rendersize
         self.thumbsize = self._prefs.thumbsize
         self.render_on_import = self._prefs.render_on_import
+        self.rendersamples = self._prefs.rendersamples
+        self.ballmode = self._prefs.ballmode
 
         self.line_workdir.setText(self.directory)
         self.line_rendersize.setValue(self.rendersize)
         self.line_thumbsize.setValue(self.thumbsize)
+        self.line_rendersamples.setValue(self.rendersamples)
+
+        self._combo_ballmode.setCurrentIndex(self.ballmode)
+
         self.cbx_render_on_import.setChecked(self.render_on_import)
 
         self._cbx_matx.setChecked(self._prefs.renderer_matx_enabled)
