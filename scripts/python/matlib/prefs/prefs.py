@@ -105,9 +105,11 @@ class Prefs:
             return False
 
         # Success
-        print("MatLib: Library set successfully")
-        self.dir = path
+
+        self._directory = path
         self.save()
+        hou.ui.displayMessage("Library set successfully")
+        print(f"MatLib: Library set successfully to {path}")
 
         return True
 
