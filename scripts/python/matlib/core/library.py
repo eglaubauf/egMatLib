@@ -94,8 +94,9 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.rebuild_thumbs()
 
     def switch_model_data(self, preferences):
+        self.preferences.load()
         db = database.DatabaseConnector()
-        self._data = db.reload_with_path(preferences.dir)
+        self._data = db.reload_with_path(self.preferences.dir)
 
         self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
         self._categories = self._data["categories"]
@@ -120,7 +121,10 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             mat_id = self._assets[elem].mat_id
             is_fav = self._assets[elem].fav
             path = (
-                self.path + self.preferences.img_dir + mat_id + self.preferences.img_ext
+                self.preferences.dir
+                + self.preferences.img_dir
+                + mat_id
+                + self.preferences.img_ext
             )
             self._mat_paths.append((path, is_fav, elem))
 
@@ -132,7 +136,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             if mat_id == self._assets[elem].mat_id:
                 is_fav = self._assets[elem].fav
                 path = (
-                    self.path
+                    self.preferences.dir
                     + self.preferences.img_dir
                     + mat_id
                     + self.preferences.img_ext
@@ -297,18 +301,19 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         asset = self._assets[index.row()]
 
         # Remove Files from Disk
+
         asset_file_path = os.path.join(
-            self.path,
+            self.preferences.dir,
             self.preferences.asset_dir,
             asset.mat_id + self.preferences.ext,
         )
         img_file_path = os.path.join(
-            self.path,
+            self.preferences.dir,
             self.preferences.img_dir,
             asset.mat_id + self.preferences.img_ext,
         )
         interface_file_path = os.path.join(
-            self.path,
+            self.preferences.dir,
             self.preferences.asset_dir,
             asset.mat_id + ".interface",
         )
@@ -401,15 +406,17 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         for row, asset in enumerate(self._assets):
             interface_path = os.path.join(
-                self.path,
+                self.preferences.dir,
                 self.preferences.asset_dir,
                 str(asset.mat_id) + ".interface",
             )
             mat_path = os.path.join(
-                self.path, self.preferences.asset_dir, str(asset.mat_id) + ".mat"
+                self.preferences.dir,
+                self.preferences.asset_dir,
+                str(asset.mat_id) + ".mat",
             )
             img_path = os.path.join(
-                self.path,
+                self.preferences.dir,
                 self.preferences.img_dir,
                 str(asset.mat_id) + self.preferences.img_ext,
             )
@@ -424,7 +431,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                     f"Image for Asset { asset.mat_id} missing on disk -> Needs Rendering!"
                 )
 
-        mats_path = os.path.join(self.path, self.preferences.asset_dir)
+        mats_path = os.path.join(self.preferences.dir, self.preferences.asset_dir)
         mark_lone = 0
         for f in os.listdir(mats_path):
             if f.endswith(".mat") or f.endswith(".interface"):
@@ -440,7 +447,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                     except OSError:
                         pass
 
-        mats_path = os.path.join(self.path, self.preferences.img_dir)
+        mats_path = os.path.join(self.preferences.dir, self.preferences.img_dir)
         for f in os.listdir(mats_path):
             if f.endswith(".png"):
                 split = f.split(".")[0]
