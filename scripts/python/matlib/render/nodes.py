@@ -138,7 +138,9 @@ class NodeHandler:
         self._hou_parent.destroy()
 
     def cleanup(self):
-        self._builder_node.destroy()
+
+        if self._import_path:
+            self._import_path.destroy()
 
     def update_context(self) -> None:
         """
