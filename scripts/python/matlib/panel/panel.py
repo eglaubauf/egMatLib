@@ -239,7 +239,7 @@ class MatLibPanel(QtWidgets.QWidget):
         # Set Up Clickable Slider
         self.click_slider = ui_helpers.ClickSlider()
         self.click_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.click_slider.setRange(32, 256)
+        self.click_slider.setRange(32, 512)
         self.click_slider.setValue(128)
         self.click_slider.setSingleStep(50)
         self.click_slider.setPageStep(50)
