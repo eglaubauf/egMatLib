@@ -288,8 +288,8 @@ class MatLibPanel(QtWidgets.QWidget):
             self.import_asset()
         elif action == action_renderall:
             self.update_all_assets()
-        elif action == action_thumb_viewport:
-            self.update_single_asset()
+        # elif action == action_thumb_viewport:
+        #     self.update_single_asset()
         elif action == action_toggle_fav:
             self.toggle_fav()
 
