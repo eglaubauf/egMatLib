@@ -1,5 +1,5 @@
 {
-    "directory": "/home/elmar/Documents/MatLibNew/",
+    "directory": "/home/elmar/Documents/BaseLib/",
     "extension": ".mat",
     "img_extension": ".png",
     "done_file": "/done.txt",
@@ -7,10 +7,12 @@
     "asset_dir": "mat/",
     "rendersize": 256,
     "thumbsize": 128,
-    "render_on_import": 0,
+    "rendersamples": 256,
+    "render_on_import": 1,
     "renderer_materialx": true,
     "renderer_mantra": true,
     "renderer_redshift": false,
     "renderer_octane": false,
-    "renderer_arnold": false
+    "renderer_arnold": false,
+    "ballmode": 1
 }
