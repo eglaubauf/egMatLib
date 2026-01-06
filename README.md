@@ -34,6 +34,7 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
   - Ability to en/disable renderers
   - Enable/Disable "Rendering On Import": This can be handy if you want to import a lot of materials
   - Set Samples for Houdini Karma
+  - Set Complex or simple Shaderball for Rendering
 - To import old Materiallibrary files please choose Library/Import from MatLib V1 and select the correspoding .json file
 
 ## Compatibility
