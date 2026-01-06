@@ -531,6 +531,7 @@ class MatLibPanel(QtWidgets.QWidget):
                 sel_cats.append(cat)
             for tag in curr_asset.data(self.material_model.TagRole):
                 sel_tags.append(tag)
+
             fav.append(curr_asset.data(self.material_model.FavoriteRole))
 
         msg = "Multiple Values..." if len(indexes) > 1 else name
@@ -559,7 +560,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         msg = (
             sel_tags[0]
-            if len(sel_cats) < 2
+            if len(sel_tags) < 2
             else ", ".join(list(filter(None, set(sel_tags))))
         )
         self.line_tags.setText(msg)
