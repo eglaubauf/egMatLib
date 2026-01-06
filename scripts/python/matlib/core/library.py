@@ -277,6 +277,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         asset = self._assets[index.row()]
         asset.set_data(name, cats, tags, fav, None)
+
+        self._update_thumb_paths(index)
         self.save()
 
     def remove_asset(self, index: QtCore.QModelIndex) -> None:
