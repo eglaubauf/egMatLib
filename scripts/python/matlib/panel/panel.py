@@ -275,7 +275,7 @@ class MatLibPanel(QtWidgets.QWidget):
         action_toggle_fav = cmenu.addAction("Toggle Favorite")
         action_render = cmenu.addAction("Rerender Thumbnail")
         action_renderall = cmenu.addAction("Render All Thumbnails")
-        action_thumb_viewport = cmenu.addAction("Thumbnail from Viewport")
+        # action_thumb_viewport = cmenu.addAction("Thumbnail from Viewport")
         cmenu.addSeparator()
         action_delete = cmenu.addAction("Delete Entry")
         action = cmenu.exec_(QtGui.QCursor.pos())
