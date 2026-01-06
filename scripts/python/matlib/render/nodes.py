@@ -187,6 +187,8 @@ class NodeHandler:
             exec(code)
 
             builder = self._import_path.createNode("subnet")
+
+            mat.name = helpers.sanitize_usd_path(mat.name)
             builder.setName(mat.name, unique_name=True)
             builder.setGenericFlag(hou.nodeFlag.Material, True)
             self._builder_node = builder
