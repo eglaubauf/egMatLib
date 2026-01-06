@@ -264,6 +264,8 @@ class Material:
         """
         if cat in self._cats:
             self._cats.remove(cat)
+            if not self._cats:
+                self._cats = ""
 
     def rename_category(self, old: str, new: str) -> None:
         """

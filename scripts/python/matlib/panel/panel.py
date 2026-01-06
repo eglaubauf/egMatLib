@@ -297,9 +297,9 @@ class MatLibPanel(QtWidgets.QWidget):
         """Handle Right Click Menus available in the Categegory list"""
         cmenu = QtWidgets.QMenu(self)
 
-        action_remove = cmenu.addAction("Remove Category")
-        action_rename = cmenu.addAction("Rename Entry")
         action_add = cmenu.addAction("Add Category")
+        action_rename = cmenu.addAction("Rename Category")
+        action_remove = cmenu.addAction("Remove Category")
         action = cmenu.exec_(QtGui.QCursor.pos())
 
         if action == action_remove:
@@ -428,10 +428,10 @@ class MatLibPanel(QtWidgets.QWidget):
             if index.data(QtCore.Qt.ItemDataRole.DisplayRole) == "All":
                 return
 
-            self.category_model.rename_category(
+            self.material_model.rename_category(
                 index.data(QtCore.Qt.ItemDataRole.DisplayRole), cat
             )
-            self.material_model.rename_category(
+            self.category_model.rename_category(
                 index.data(QtCore.Qt.ItemDataRole.DisplayRole), cat
             )
 
