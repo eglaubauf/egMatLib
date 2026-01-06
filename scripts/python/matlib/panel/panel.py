@@ -393,12 +393,8 @@ class MatLibPanel(QtWidgets.QWidget):
         if choice:  # Return if no
             return
 
-        self.material_model.layoutAboutToBeChanged.emit()
         self.category_model.layoutAboutToBeChanged.emit()
-
-        self.material_model.check_add_category(cat)
-
-        self.material_model.layoutChanged.emit()
+        self.category_model.check_add_category(cat)
         self.category_model.layoutChanged.emit()
 
     def rmv_category_user(self) -> None:
@@ -410,6 +406,9 @@ class MatLibPanel(QtWidgets.QWidget):
             if index.data(QtCore.Qt.ItemDataRole.DisplayRole) == "All":
                 return
             self.material_model.remove_category(
+                index.data(QtCore.Qt.ItemDataRole.DisplayRole)
+            )
+            self.category_model.remove_category(
                 index.data(QtCore.Qt.ItemDataRole.DisplayRole)
             )
 
@@ -429,6 +428,9 @@ class MatLibPanel(QtWidgets.QWidget):
             if index.data(QtCore.Qt.ItemDataRole.DisplayRole) == "All":
                 return
 
+            self.category_model.rename_category(
+                index.data(QtCore.Qt.ItemDataRole.DisplayRole), cat
+            )
             self.material_model.rename_category(
                 index.data(QtCore.Qt.ItemDataRole.DisplayRole), cat
             )
@@ -493,6 +495,7 @@ class MatLibPanel(QtWidgets.QWidget):
             tags = self.line_tags.text()
             cats = self.line_cat.text()
             fav = self.box_fav.isChecked()
+            self.category_model.check_add_category(cats)
             self.material_model.set_assetdata(idx, name, cats, tags, fav)
 
         self.material_model.layoutChanged.emit()
@@ -658,7 +661,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         # Check if Category or Tags already exist
         if dialog.categories:
-            self.material_model.check_add_category(dialog.categories)
+            self.category_model.check_add_category(dialog.categories)
         if dialog.tags:
             self.material_model.check_add_tags(dialog.tags)
 

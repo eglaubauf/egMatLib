@@ -34,12 +34,16 @@ class DatabaseConnector:
 
     def set(self, assets: dict) -> None:
         """Set Data without saving"""
-        self._data = assets
+        if "categories" in assets.keys():
+            self._data["categories"] = assets["categories"]
+        if "tags" in assets.keys():
+            self._data["tags"] = assets["tags"]
+        if "assets" in assets.keys():
+            self._data["assets"] = assets["assets"]
 
     def save(self) -> None:
         """Save Data to Disk"""
         if not self._data:
-            print("No Data")
             return
         with open(self._path + ("/library.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self._data, lib_json, indent=4)

@@ -77,7 +77,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._data = db.load(self.preferences.dir)
 
         self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
-        self._categories = self._data["categories"]
         self._tags = self._data["tags"]
 
         self.IdRole = QtCore.Qt.ItemDataRole.UserRole  # 256
@@ -99,7 +98,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._data = db.reload_with_path(self.preferences.dir)
 
         self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
-        self._categories = self._data["categories"]
         self._tags = self._data["tags"]
         self.rebuild_thumbs()
 
@@ -208,7 +206,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         """Save data to disk as json"""
         db = database.DatabaseConnector()
         data = {}
-        data["categories"] = self._categories
         data["tags"] = self._tags
         data["assets"] = [asset.get_as_dict() for asset in self._assets]
         db.set(data)
@@ -248,17 +245,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         return self._assets
 
     @property
-    def categories(self) -> list:
-        """
-        Docstring for categories
-
-        :param self: Description
-        :return: Description
-        :rtype: list[Any]
-        """
-        return self._categories
-
-    @property
     def tags(self) -> list:
         """
         Docstring for tags
@@ -287,7 +273,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     def set_assetdata(self, index: QtCore.QModelIndex, name, cats, tags, fav) -> None:
         """Set Assetdata for the given index and parameters
         the library is saved immidiately after"""
-        self.check_add_category(cats)
         self.check_add_tags(tags)
 
         asset = self._assets[index.row()]
@@ -330,14 +315,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         self.save()
 
-    def check_add_category(self, cat: str) -> None:
-        """Checks if this category exists and adds it if needed"""
-        for c in cat.split(","):
-            c = c.replace(" ", "")
-            if c != "" and c not in self._categories:
-                self._categories.append(c)
-        self.save()
-
     def check_add_tags(self, tag: str) -> None:
         """Checks if this tag exists and adds it if needed"""
         for t in tag.split(","):
@@ -355,17 +332,12 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
     def remove_category(self, cat: str) -> None:
         """Removes the given category from the library (and also in all assets)"""
-        self._categories.remove(cat)
         # check assets against category and remove there also:
         for asset in self._assets:
             asset.remove_category(cat)
 
     def rename_category(self, old: str, new: str) -> None:
         """Renames the given category in the library (and also in all assets)"""
-        # Update Categories with that name
-        for count, current in enumerate(self._categories):
-            if current == old:
-                self._categories[count] = new
         # Update all Categories with that name in all assets
         for asset in self._assets:
             asset.rename_category(old, new)

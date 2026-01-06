@@ -24,7 +24,6 @@ class Categories(QtCore.QAbstractListModel):
         db = database.DatabaseConnector()
         self._data = db.load(preferences.dir)
         self._categories = self._data["categories"]
-
         self.CatSortRole = QtCore.Qt.ItemDataRole.UserRole  # 256
 
     def rowCount(
@@ -48,3 +47,33 @@ class Categories(QtCore.QAbstractListModel):
         db = database.DatabaseConnector()
         data = db.reload_with_path(preferences.dir)
         self._categories = data["categories"]
+
+    def remove_category(self, cat: str) -> None:
+        """Removes the given category from the library (and also in all assets)"""
+        self._categories.remove(cat)
+        self.save()
+
+    def rename_category(self, old: str, new: str) -> None:
+        """Renames the given category in the library (and also in all assets)"""
+        # Update Categories with that name
+        for count, current in enumerate(self._categories):
+            if current == old:
+                self._categories[count] = new
+        self.save()
+
+    def check_add_category(self, cat: str) -> None:
+        """Checks if this category exists and adds it if needed"""
+        for c in cat.split(","):
+            c = c.replace(" ", "")
+            if c != "" and c not in self._categories:
+                self._categories.append(c)
+
+        self.save()
+
+    def save(self) -> None:
+        """Save data to disk as json"""
+        db = database.DatabaseConnector()
+        data = {}
+        data["categories"] = self._categories
+        db.set(data)
+        db.save()
