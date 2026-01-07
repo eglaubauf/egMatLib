@@ -28,7 +28,7 @@ class DatabaseConnector:
         """
         self._path = path
         if not self._data:
-            with open(self._path + ("/library.json"), encoding="utf_8") as lib_json:
+            with open(self._path + ("library.json"), encoding="utf_8") as lib_json:
                 self._data = json.load(lib_json)
         return self._data
 
@@ -45,7 +45,7 @@ class DatabaseConnector:
         """Save Data to Disk"""
         if not self._data:
             return
-        with open(self._path + ("/library.json"), "w", encoding="utf-8") as lib_json:
+        with open(self._path + ("library.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self._data, lib_json, indent=4)
 
     def reload_with_path(self, path: str) -> str:
