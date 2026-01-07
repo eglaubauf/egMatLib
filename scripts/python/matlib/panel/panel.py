@@ -118,8 +118,8 @@ class MatLibPanel(QtWidgets.QWidget):
             self.material_model.layoutAboutToBeChanged.emit()
             self.category_model.layoutAboutToBeChanged.emit()
 
-            self.category_model.switch_model_data(self.prefs)
-            self.material_model.switch_model_data(self.prefs)
+            self.category_model.switch_model_data()
+            self.material_model.switch_model_data()
 
             self.category_model.layoutChanged.emit()
             self.material_model.layoutChanged.emit()
@@ -348,9 +348,9 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cb_redshift.setVisible(self.prefs.renderer_redshift_enabled)
         self.cb_octane.setVisible(self.prefs.renderer_octane_enabled)
         self.prefs.load()
-        self.material_model.switch_model_data(self.prefs)
+        self.material_model.switch_model_data()
         self.click_slider.setValue(self.prefs.thumbsize)
-        self.category_model.switch_model_data(self.prefs)
+        self.category_model.switch_model_data()
 
     def cleanup_db(self) -> None:
         """Removes orphan data from disk and highlights missing thumbnails"""

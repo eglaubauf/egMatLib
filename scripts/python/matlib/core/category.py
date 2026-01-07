@@ -19,10 +19,10 @@ class Categories(QtCore.QAbstractListModel):
     def __init__(self, parent: QtCore.QObject | None = None) -> None:
         super().__init__()
 
-        preferences = prefs.Prefs()
-        preferences.load()
+        self.preferences = prefs.Prefs()
+        self.preferences.load()
         db = database.DatabaseConnector()
-        self._data = db.load(preferences.dir)
+        self._data = db.load(self.preferences.dir)
         self._categories = self._data["categories"]
         self.CatSortRole = QtCore.Qt.ItemDataRole.UserRole  # 256
 
@@ -43,9 +43,10 @@ class Categories(QtCore.QAbstractListModel):
                 elem = elem[1:]
             return elem
 
-    def switch_model_data(self, preferences):
+    def switch_model_data(self):
+        self.preferences.load()
         db = database.DatabaseConnector()
-        data = db.reload_with_path(preferences.dir)
+        data = db.reload_with_path(self.preferences.dir)
         self._categories = data["categories"]
 
     def remove_category(self, cat: str) -> None:
