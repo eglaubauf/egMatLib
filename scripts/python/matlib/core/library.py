@@ -262,6 +262,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         """Removes a material from this Library and Disk
         the library is saved immediately after"""
 
+        if len(self._assets) < index.row() + 1:
+            return
         asset = self._assets[index.row()]
 
         # Remove Files from Disk
