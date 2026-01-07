@@ -170,8 +170,6 @@ class PrefsDialog(QtWidgets.QDialog):
         :param arg__1: Description
         :type arg__1: QCloseEvent
         """
-        print(self._prefs.dir)
-        print(self._prefs.rendersize)
         self._prefs.save()
 
     # Fill UI
