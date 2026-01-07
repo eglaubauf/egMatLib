@@ -347,6 +347,10 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cb_arnold.setVisible(self.prefs.renderer_arnold_enabled)
         self.cb_redshift.setVisible(self.prefs.renderer_redshift_enabled)
         self.cb_octane.setVisible(self.prefs.renderer_octane_enabled)
+        self.prefs.load()
+        self.material_model.switch_model_data(self.prefs)
+        self.click_slider.setValue(self.prefs.thumbsize)
+        self.category_model.switch_model_data(self.prefs)
 
     def cleanup_db(self) -> None:
         """Removes orphan data from disk and highlights missing thumbnails"""
