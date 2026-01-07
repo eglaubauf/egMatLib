@@ -89,7 +89,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         self.rebuild_thumbs()
 
-    def switch_model_data(self, preferences):
+    def switch_model_data(self):
 
         self.preferences.load()
         db = database.DatabaseConnector()
@@ -138,10 +138,12 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                     + mat_id
                     + self.preferences.img_ext
                 )
+
                 paths.append((path, is_fav, index.row()))
         # Extend Thumbslist by 1 and fill later
         self._thumbs.append(0)
-        self._start_worker(paths)
+        if self.preferences.render_on_import:
+            self._start_worker(paths)
 
     def _remove_thumb(self, elem):
         self._thumbs.pop(elem)
@@ -332,6 +334,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         if handler.save_node(node, new_mat.mat_id, False):
             self._assets.append(new_mat)
+            # self._update_thumb_paths(self.index(self.rowCount() , 0))
             self._update_thumb_paths(self.index(self.rowCount() - 1, 0))
             self.save()
 
