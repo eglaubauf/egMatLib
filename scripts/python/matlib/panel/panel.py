@@ -46,9 +46,10 @@ class MatLibPanel(QtWidgets.QWidget):
             self.load()
             self.init_ui()
             self.setup()
-
         else:
             self.init_ui()
+            self.material_model = None
+            self.category_model = None
 
     def setup(self):
         self.category_model = category.Categories()
@@ -84,8 +85,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model = library.MaterialLibrary()
         self.prefs.load()
         self.load()
-        # self.material_model.rebuild_thumbs()
-        hou.ui.displayMessage("Library Reloaded successfully!")  # type: ignore
+        print("MatLib: Library Reloaded successfully!")  # type: ignore
 
     def load(self) -> None:
         """Load the currently in preferences specified library
@@ -102,16 +102,18 @@ class MatLibPanel(QtWidgets.QWidget):
             os.mkdir(self.prefs.dir + self.prefs.asset_dir)
             new_folder = True
         if new_folder:
-            msg = "A new library has been created successfully"
-            hou.ui.displayMessage(msg)  # type: ignore
+            print("MatLib: A new library has been created successfully")
 
     def set_library(self) -> None:
         """
         User Sets library via Menu Option so we have to reroute
 
         """
-        if self.prefs.user_set_library():
+        if self.prefs.get_dir_from_user():
             self.prefs.load()
+
+            if not self.material_model:
+                self.setup()
 
             self.load()
             self.material_model.layoutAboutToBeChanged.emit()
@@ -374,7 +376,7 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.material_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
-        lib_dir = self.material_model.path
+        lib_dir = self.prefs.dir
         lib_dir.encode("unicode_escape")
 
         if sys.platform == "linux" and sys.platform == "linux2":  # Linux

@@ -51,7 +51,7 @@ class Prefs:
         with open(self.path + ("/settings.json"), "w", encoding="utf-8") as lib_json:
             json.dump(self.data, lib_json, indent=4)
 
-    def load(self) -> None:
+    def load(self) -> bool:
         """
         Load the Preferences from disk as json
         """
@@ -74,44 +74,30 @@ class Prefs:
             self._rendersamples = data["rendersamples"]
             self._ballmode = data["ballmode"]
 
-            return self.get_dir_from_user(True)
+            if os.path.exists(self._directory):
+                return True
+            return False
+            # return self.get_dir_from_user(True)
 
-    def get_dir_from_user(self, show=False) -> bool:
+    def get_dir_from_user(self) -> bool:
         """Get Directory from User and write into prefs"""
         count = 0
         while count < 3:
-            if not os.path.exists(self.dir):
-                if show:
+            if not os.path.exists(self._directory) or count < 1:
+                if not os.path.exists(self._directory) and count < 1:
                     hou.ui.displayMessage("It looks like your library is not set up yet. Please choose a directory to store the library data")  # type: ignore
+                elif count > 0:
+                    hou.ui.displayMessage("Invalid Path selected. Please try again")
                 path = hou.ui.selectFile(file_type=hou.fileType.Directory)
                 if path == "":  # Canceled
                     return False
-                self.dir = hou.expandString(path)
+                self._directory = hou.expandString(path)
             else:
-                # print("MatLib: Library set successfully")
+                print(f"MatLib: Library set successfully to {self._directory}")
                 self.save()
                 return True
             count += 1
         return False
-
-    def user_set_library(self) -> bool:
-        path = hou.ui.selectFile(file_type=hou.fileType.Directory)
-
-        if path == "":  # Canceled
-            return False
-        path = hou.expandString(path)
-        if not os.path.exists(path):  # Invalid
-            hou.ui.displayMessage("Invalid Path selected. Please try again")
-            return False
-
-        # Success
-
-        self._directory = path
-        self.save()
-        hou.ui.displayMessage("Library set successfully")
-        print(f"MatLib: Library set successfully to {path}")
-
-        return True
 
     @property
     def dir(self) -> str:

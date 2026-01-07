@@ -69,9 +69,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.preferences = prefs.Prefs()
         self.preferences.load()
         self._thumbsize = self.preferences.thumbsize
-        self._rendersize = self.preferences.rendersize
-        self._render_on_import = self.preferences.render_on_import
-        self._path = self.preferences.dir
 
         db = database.DatabaseConnector()
         self._data = db.load(self.preferences.dir)
@@ -93,9 +90,11 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.rebuild_thumbs()
 
     def switch_model_data(self, preferences):
+
         self.preferences.load()
         db = database.DatabaseConnector()
         self._data = db.reload_with_path(self.preferences.dir)
+        self._thumbsize = self.preferences.thumbsize
 
         self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
         self._tags = self._data["tags"]
@@ -210,28 +209,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         data["assets"] = [asset.get_as_dict() for asset in self._assets]
         db.set(data)
         db.save()
-
-    @property
-    def path(self) -> str:
-        """
-        Docstring for path
-
-        :param self: Description
-        :return: Description
-        :rtype: str
-        """
-        return self._path
-
-    @path.setter
-    def path(self, path: str) -> None:
-        """
-        Docstring for path
-
-        :param self: Description
-        :param path: Description
-        :type path: str
-        """
-        self._path = path
 
     @property
     def assets(self) -> list:
