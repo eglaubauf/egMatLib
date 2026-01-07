@@ -379,8 +379,10 @@ class MatLibPanel(QtWidgets.QWidget):
         lib_dir = self.prefs.dir
         lib_dir.encode("unicode_escape")
 
-        if sys.platform == "linux" and sys.platform == "linux2":  # Linux
-            os.startfile(lib_dir)
+        if sys.platform == "linux" or sys.platform == "linux2":  # Linux
+            print(lib_dir)
+            opener = "open"
+            subprocess.call([opener, lib_dir])
             return
         elif sys.platform == "darwin":  # MacOS
             opener = "open"
