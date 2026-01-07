@@ -26,11 +26,18 @@ class PrefsDialog(QtWidgets.QDialog):
         file.close()
 
         self.line_workdir = self.ui.findChild(QtWidgets.QLineEdit, "line_workdir")
+        self.line_workdir.setDisabled(True)
+
         self.line_thumbsize = self.ui.findChild(QtWidgets.QSpinBox, "line_thumbsize")
+        self.line_thumbsize.valueChanged.connect(self.set_thumbsize)
+
         self.line_rendersize = self.ui.findChild(QtWidgets.QSpinBox, "line_rendersize")
+        self.line_rendersize.valueChanged.connect(self.set_rendersize)
+
         self.line_rendersamples = self.ui.findChild(
             QtWidgets.QSpinBox, "line_rendersamples"
         )
+        self.line_rendersamples.valueChanged.connect(self.set_rendersamples)
         self._combo_ballmode = self.ui.findChild(
             QtWidgets.QComboBox, "combo_shaderball"
         )
@@ -43,6 +50,7 @@ class PrefsDialog(QtWidgets.QDialog):
         self.cbx_render_on_import = self.ui.findChild(
             QtWidgets.QCheckBox, "cbx_renderOnImport"
         )
+        self.cbx_render_on_import.stateChanged.connect(self.set_render_on_import)
 
         self._cbx_matx = self.ui.findChild(QtWidgets.QCheckBox, "cbx_matx")
         self._cbx_matx.toggled.connect(self.toggle_matx)
@@ -162,6 +170,8 @@ class PrefsDialog(QtWidgets.QDialog):
         :param arg__1: Description
         :type arg__1: QCloseEvent
         """
+        print(self._prefs.dir)
+        print(self._prefs.rendersize)
         self._prefs.save()
 
     # Fill UI
