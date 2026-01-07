@@ -111,11 +111,10 @@ class MatLibPanel(QtWidgets.QWidget):
         """
         if self.prefs.get_dir_from_user():
             self.prefs.load()
-
+            self.load()
             if not self.material_model:
                 self.setup()
 
-            self.load()
             self.material_model.layoutAboutToBeChanged.emit()
             self.category_model.layoutAboutToBeChanged.emit()
 
@@ -380,7 +379,6 @@ class MatLibPanel(QtWidgets.QWidget):
         lib_dir.encode("unicode_escape")
 
         if sys.platform == "linux" or sys.platform == "linux2":  # Linux
-            print(lib_dir)
             opener = "open"
             subprocess.call([opener, lib_dir])
             return
