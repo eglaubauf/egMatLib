@@ -23,6 +23,7 @@ class NodeHandler:
         self._renderer = ""
         self._import_path = None
         self._hou_parent = None
+        self._use_existing_node = False
 
     def get_current_network_node(self) -> None | hou.Node:
         """Return thre current Node in the Network Editor"""
@@ -140,7 +141,12 @@ class NodeHandler:
     def cleanup(self):
 
         if self._import_path:
-            self._import_path.destroy()
+            if self._use_existing_node:
+                print("Import_Path: ", self._import_path)
+                print("Builder: ", self._builder_node)
+                self._builder_node.destroy()
+            else:
+                self._import_path.destroy()
 
     def update_context(self) -> None:
         """
@@ -155,6 +161,7 @@ class NodeHandler:
             self._import_path = curr.createNode("materiallibrary")
         elif "materiallibrary" in curr_typename:  # Solaris
             self._import_path = curr
+            self._use_existing_node = True
         elif (
             "subnet" in curr_typename
         ):  # Inside Subnet - go to stage - there is no clear identifier
@@ -163,10 +170,12 @@ class NodeHandler:
                 self._import_path = curr.parent().createNode("materiallibrary")
             elif "vop" in curr.parent().childTypeCategory().name().lower():
                 self._import_path = curr.parent()
+                self._use_existing_node = True
             elif "sop" in curr.parent().childTypeCategory().name().lower():
                 self._import_path = curr.parent().createNode("matnet")
         elif "matnet" in curr_typename or "mat" == curr_typename:  # OldSchool Matnet
             self._import_path = curr
+            self._use_existing_node = True
         elif "geo" in curr_typename:
             self._import_path = curr.createNode("matnet")
         else:  # Default to Solaris if antyhing else is current

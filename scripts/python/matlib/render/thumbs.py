@@ -6,6 +6,10 @@ from matlib.core import material
 from matlib.render import nodes, thumbnail_scene
 from matlib.prefs import prefs
 
+import importlib
+
+importlib.reload(nodes)
+
 
 class ThumbNailRenderer:
     def __init__(
