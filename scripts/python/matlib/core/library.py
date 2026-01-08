@@ -76,6 +76,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
         self._tags = self._data["tags"]
 
+        self._force_render = False  # Helper Var for Thumb Rendering
+
         self.IdRole = QtCore.Qt.ItemDataRole.UserRole  # 256
         self.CategoryRole = QtCore.Qt.ItemDataRole.UserRole + 1  # 257
         self.FavoriteRole = QtCore.Qt.ItemDataRole.UserRole + 2  # 258
@@ -142,7 +144,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
                 paths.append((path, is_fav, index.row()))
         # Extend Thumbslist by 1 and fill later
         self._thumbs.append(0)
-        if self.preferences.render_on_import:
+        if self.preferences.render_on_import or self._force_render:
             self._start_worker(paths)
 
     def _remove_thumb(self, elem):
@@ -152,6 +154,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         if not paths:
             paths = self._mat_paths
         items = paths
+
         self.worker = ThumbnailWorker(items, self._thumbsize)
         self.worker.thumbnail_ready.connect(self._on_thumb_ready)
         self.worker.start()
@@ -449,9 +452,11 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         :param index: Description
         :type index: QtCore.QModelIndex
         """
+        self._force_render = True
         renderer = thumbs.ThumbNailRenderer(self.preferences, self._assets[index.row()])
         renderer.create_thumbnail()
         self._update_thumb_paths(index)
+        self._force_render = False
 
     def import_asset_to_scene(self, index: QtCore.QModelIndex) -> None:
         """
