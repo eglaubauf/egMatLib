@@ -259,7 +259,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             ts.append(t)
 
         ts = set(ts)
-        new_tags = ", ".join(ts)
+        new_tags = ",".join(ts)
         return new_tags
 
     def set_assetdata(self, index: QtCore.QModelIndex, name, cats, tags, fav) -> None:
