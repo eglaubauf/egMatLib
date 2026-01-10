@@ -41,8 +41,12 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
 
             index = self.sourceModel().index(source_row, 0, source_parent)
             data = index.data(role)
+
             if isinstance(data, (list, tuple)):
                 for elem in data:
+                    if role == 260:  # is TagRole
+                        if curr_filter.lower() in str(elem).lower():
+                            return True
                     if curr_filter.lower() != str(elem).lower():
                         return False
             elif isinstance(data, bool):
