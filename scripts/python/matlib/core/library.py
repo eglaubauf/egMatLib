@@ -252,9 +252,20 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     def thumbsize(self, val: int) -> None:
         self._thumbsize = val
 
+    def sanitize_tags(self, tags):
+        ts = []
+        for t in tags.split(","):
+            t = t.replace(" ", "")
+            ts.append(t)
+
+        ts = set(ts)
+        new_tags = ", ".join(ts)
+        return new_tags
+
     def set_assetdata(self, index: QtCore.QModelIndex, name, cats, tags, fav) -> None:
         """Set Assetdata for the given index and parameters
         the library is saved immidiately after"""
+        tags = self.sanitize_tags(tags)
         self.check_add_tags(tags)
 
         asset = self._assets[index.row()]
@@ -333,6 +344,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         handler = nodes.NodeHandler(self.preferences)
         renderer = handler.get_renderer_from_node(node)
         new_mat = material.Material()
+        tags = self.sanitize_tags(tags)
         new_mat.set_data(node.name(), cats, tags, fav, renderer)
 
         if handler.save_node(node, new_mat.mat_id, False):
@@ -346,6 +358,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     ):
         """Append an assset from Strings only - the user has to take care of copying files on disk"""
         new_asset = material.Material()
+        tags = self.sanitize_tags(tags)
         new_asset.set_data(
             name,
             cats,
