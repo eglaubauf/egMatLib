@@ -77,6 +77,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.material_selection_model.selectionChanged.connect(self.update_details_view)
         self.filter_renderer()
+        self.click_slider.setValue(self.prefs.thumbsize)
         self.slide()
 
     def open(self) -> None:
@@ -120,7 +121,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
             self.category_model.switch_model_data()
             self.material_model.switch_model_data()
-
+            self.click_slider.setValue(self.prefs.thumbsize)
             self.category_model.layoutChanged.emit()
             self.material_model.layoutChanged.emit()
 
