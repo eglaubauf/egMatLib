@@ -461,12 +461,14 @@ class MatLibPanel(QtWidgets.QWidget):
                 self.material_sorted_model.sort(0)
         else:
 
+            self.material_model.layoutAboutToBeChanged.emit()
             self.material_sorted_model.invalidate()
+            self.material_sorted_model.removeFilter(self.material_model.TagRole)
             self.material_sorted_model.setFilter(
                 QtCore.Qt.ItemDataRole.DisplayRole, self.line_filter.text()
             )
-            self.material_sorted_model.removeFilter(self.material_model.TagRole)
             self.material_sorted_model.sort(0)
+            self.material_model.layoutChanged.emit()
 
     def filter_favs(self) -> None:
         """Get Filter from user and trigger view update"""
@@ -578,7 +580,8 @@ class MatLibPanel(QtWidgets.QWidget):
         index = self.cat_list.selectedIndexes()[0]
         if index.data() == "All":
             self.material_sorted_model.invalidate()
-            self.material_sorted_model.removeFilter(self.material_model.CategoryRole)
+            # self.material_sorted_model.removeFilter(self.material_model.CategoryRole)
+            self.material_sorted_model.setFilter(self.material_model.CategoryRole, "")
         else:
             self.material_sorted_model.invalidate()
             self.material_sorted_model.setFilter(

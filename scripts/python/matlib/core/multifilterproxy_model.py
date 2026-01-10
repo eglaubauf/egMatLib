@@ -47,6 +47,9 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
                     if role == 260:  # is TagRole
                         if curr_filter.lower() in str(elem).lower():
                             return True
+                    if role == 257:  # is CatRole:
+                        if curr_filter == "":
+                            continue
                     if curr_filter.lower() != str(elem).lower():
                         return False
             elif isinstance(data, bool):
