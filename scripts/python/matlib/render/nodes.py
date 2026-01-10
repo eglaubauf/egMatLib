@@ -334,9 +334,15 @@ class NodeHandler:
                 val = self.save_node_octane(node, asset_id, update)
         elif "MaterialX" in self._renderer:
             if node.type().name() == "collect":
-                val = self.save_node_collect(node, asset_id, update)
+                with hou.InterruptableOperation(
+                    "Rendering", "Performing Tasks", open_interrupt_dialog=True
+                ):
+                    val = self.save_node_collect(node, asset_id, update)
             else:
-                val = self.save_node_mtlx(node, asset_id, update)
+                with hou.InterruptableOperation(
+                    "Rendering", "Performing Tasks", open_interrupt_dialog=True
+                ):
+                    val = self.save_node_mtlx(node, asset_id, update)
         else:
             hou.ui.displayMessage("Selected Node is not a Material Builder")  # type: ignore
         return val
