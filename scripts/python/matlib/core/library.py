@@ -91,28 +91,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         self.rebuild_thumbs()
 
-    def switch_model_data(self):
-
-        self.preferences.load()
-        db = database.DatabaseConnector()
-        self._data = db.reload_with_path(self.preferences.dir)
-        self._thumbsize = self.preferences.thumbsize
-
-        self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
-        self._tags = self._data["tags"]
-        self.rebuild_thumbs()
-
-    def rebuild_thumbs(self):
-        self._thumbs = [0 for x in range(self.rowCount())]
-        self._mat_paths = []
-        self._get__mat_paths()
-        self._start_worker()
-
-    def flags(
-        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex
-    ) -> QtCore.Qt.ItemFlag:
-        default = super().flags(index)
-        return default | QtCore.Qt.ItemFlag.ItemIsDragEnabled
+        self._outofdate_thumb_list = []
 
     def _get__mat_paths(self):
         self._mat_paths = []
@@ -127,7 +106,49 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             )
             self._mat_paths.append((path, is_fav, elem))
 
-    def _update_thumb_paths(self, index: QtCore.QModelIndex):
+    def switch_model_data(self):
+
+        self.preferences.load()
+        db = database.DatabaseConnector()
+        self._data = db.reload_with_path(self.preferences.dir)
+        self._thumbsize = self.preferences.thumbsize
+
+        self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
+        self._tags = self._data["tags"]
+        self.rebuild_thumbs()
+
+    def flags(
+        self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex
+    ) -> QtCore.Qt.ItemFlag:
+        default = super().flags(index)
+        return default | QtCore.Qt.ItemFlag.ItemIsDragEnabled
+
+    def rebuild_thumbs(self):
+        self._thumbs = [0 for x in range(self.rowCount())]
+        self._mat_paths = []
+        self._get__mat_paths()
+        self._start_worker()
+
+    def update_outofdate_thumb_list(self):
+        paths = []
+        for curr_index in self._outofdate_thumb_list:
+            mat_id = self._assets[curr_index.row()].mat_id
+            for elem in range(self.rowCount()):
+                if mat_id == self._assets[elem].mat_id:
+                    is_fav = self._assets[elem].fav
+                    path = (
+                        self.preferences.dir
+                        + self.preferences.img_dir
+                        + mat_id
+                        + self.preferences.img_ext
+                    )
+
+                    paths.append((path, is_fav, curr_index.row()))
+
+        self._start_worker(paths)
+        self._outofdate_thumb_list.clear()
+
+    def _add_thumb_paths(self, index: QtCore.QModelIndex):
         mat_id = self._assets[index.row()].mat_id
 
         paths = []
@@ -271,12 +292,11 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         asset = self._assets[index.row()]
 
         name = name if name != "Multiple Values..." else asset.name
-        cats = name if tags != "Multiple Values..." else asset.categories
-        tags = name if tags != "Multiple Values..." else asset.tags
+        cats = cats if cats != "Multiple Values..." else asset.categories
+        tags = tags if tags != "Multiple Values..." else asset.tags
 
         asset.set_data(name, cats, tags, fav, None)
-
-        # self._update_thumb_paths(index)
+        self._outofdate_thumb_list.append(index)
         self.save()
 
     def remove_asset(self, index: QtCore.QModelIndex) -> None:
@@ -354,8 +374,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         if handler.save_node(node, new_mat.mat_id, False):
             self._assets.append(new_mat)
-            # self._update_thumb_paths(self.index(self.rowCount() , 0))
-            self._update_thumb_paths(self.index(self.rowCount() - 1, 0))
+            self._add_thumb_paths(self.index(self.rowCount() - 1, 0))
             self.save()
 
     def add_asset_from_strings(
@@ -372,7 +391,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             renderer,
         )
         self._assets.append(new_asset)
-        # self._update_thumb_paths(self.index(self.rowCount() - 1, 0))
+        # self._add_thumb_paths(self.index(self.rowCount() - 1, 0))
         # self.save()
         return self._assets[self.rowCount() - 1]
 
@@ -460,7 +479,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         """
         self._assets[index.row()].fav = False if self._assets[index.row()].fav else True
         self.save()
-        self._update_thumb_paths(index)
+        self._outofdate_thumb_list.append(index)
+        self.update_outofdate_thumb_list()
 
     def render_thumbnail(self, index: QtCore.QModelIndex) -> None:
         """
@@ -473,7 +493,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._force_render = True
         renderer = thumbs.ThumbNailRenderer(self.preferences, self._assets[index.row()])
         renderer.create_thumbnail()
-        self._update_thumb_paths(index)
+        self._add_thumb_paths(index)
         self._force_render = False
 
     def import_asset_to_scene(self, index: QtCore.QModelIndex) -> None:
