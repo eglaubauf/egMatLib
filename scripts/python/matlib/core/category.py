@@ -64,6 +64,8 @@ class Categories(QtCore.QAbstractListModel):
 
     def check_add_category(self, cat: str) -> None:
         """Checks if this category exists and adds it if needed"""
+        if "Multiple Values..." in cat:
+            return
         for c in cat.split(","):
             c = c.replace(" ", "")
             if c != "" and c not in self._categories:

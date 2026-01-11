@@ -217,6 +217,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.line_date.setDisabled(True)
 
         self.box_fav = self.ui.findChild(QtWidgets.QCheckBox, "cb_set_fav")
+        self.box_fav.clicked.connect(self.box_fav_clicktoggle)
         self.btn_update = self.ui.findChild(QtWidgets.QPushButton, "btn_update")
         self.btn_update.clicked.connect(self.user_update_asset)
 
@@ -507,10 +508,11 @@ class MatLibPanel(QtWidgets.QWidget):
             name = self.line_name.text()
             tags = self.line_tags.text()
             cats = self.line_cat.text()
+
             fav = self.box_fav.isChecked()
             self.category_model.check_add_category(cats)
             self.material_model.set_assetdata(idx, name, cats, tags, fav)
-
+        self.material_model.update_outofdate_thumb_list()
         self.material_model.layoutChanged.emit()
         self.category_model.layoutChanged.emit()
 
@@ -533,7 +535,7 @@ class MatLibPanel(QtWidgets.QWidget):
         sel_cats = []
         sel_tags = []
         fav = []
-        for idx in indexes:
+        for pos, idx in enumerate(indexes):
             curr_asset = self.material_model.index(
                 self.material_sorted_model.mapToSource(idx).row()
             )
@@ -543,8 +545,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
             for cat in curr_asset.data(self.material_model.CategoryRole):
                 sel_cats.append(cat)
-            for tag in curr_asset.data(self.material_model.TagRole):
-                sel_tags.append(tag)
+                # for tag in curr_asset.data(self.material_model.TagRole):
+            sel_tags.append(curr_asset.data(self.material_model.TagRole))
 
             fav.append(curr_asset.data(self.material_model.FavoriteRole))
 
@@ -562,25 +564,24 @@ class MatLibPanel(QtWidgets.QWidget):
             if fav[0] is True
             else QtCore.Qt.CheckState.Unchecked
         )
-        msg = QtCore.Qt.CheckState.PartiallyChecked if len(indexes) > 1 else msg
+        for f in fav:
+            if f != fav[0]:
+                msg = QtCore.Qt.CheckState.PartiallyChecked
+                break
         self.box_fav.setCheckState(msg)
 
         if sel_cats:
-            msg = (
-                sel_cats[0]
-                if len(sel_cats) < 2
-                else ", ".join(list(filter(None, set(sel_cats))))
-            )
+            msg = sel_cats[0] if len(sel_cats) < 2 else "Multiple Values..."
             self.line_cat.setText(msg)
         else:
             self.line_cat.setText("")
 
         if sel_tags:
-            msg = (
-                sel_tags[0]
-                if len(sel_tags) < 2
-                else ", ".join(list(filter(None, set(sel_tags))))
-            )
+            msg = msg = ", ".join(list(filter(None, set(sel_tags[0]))))
+            if len(sel_tags) > 1:
+                for elem in sel_tags:
+                    if elem != sel_tags[0]:
+                        msg = "Multiple Values..."
             self.line_tags.setText(msg)
         else:
             self.line_tags.setText("")
@@ -719,3 +720,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model.set_custom_iconsize(
             QtCore.QSize(self.material_model.thumbsize, self.material_model.thumbsize)
         )
+
+    def box_fav_clicktoggle(self):
+        if self.box_fav.checkState() == QtCore.Qt.CheckState.PartiallyChecked:
+            self.box_fav.nextCheckState()

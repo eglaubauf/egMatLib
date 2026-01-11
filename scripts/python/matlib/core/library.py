@@ -291,9 +291,9 @@ class MaterialLibrary(QtCore.QAbstractListModel):
 
         asset = self._assets[index.row()]
 
-        name = name if name != "Multiple Values..." else asset.name
-        cats = cats if cats != "Multiple Values..." else asset.categories
-        tags = tags if tags != "Multiple Values..." else asset.tags
+        name = name if "Multiple Values..." not in name else asset.name
+        cats = cats if "Multiple Values..." not in cats else ", ".join(asset.categories)
+        tags = tags if "Multiple Values..." not in tags else asset.tags
 
         asset.set_data(name, cats, tags, fav, None)
         self._outofdate_thumb_list.append(index)
