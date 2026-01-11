@@ -409,6 +409,7 @@ class MatLibPanel(QtWidgets.QWidget):
         # Prevent Deletion of "All" - Category
         self.material_model.layoutAboutToBeChanged.emit()
         self.category_model.layoutAboutToBeChanged.emit()
+        self.material_selection_model.clearSelection()
         for index in self.cat_list.selectedIndexes():
             if index.data(QtCore.Qt.ItemDataRole.DisplayRole) == "All":
                 return
@@ -497,10 +498,12 @@ class MatLibPanel(QtWidgets.QWidget):
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
         self.category_model.layoutAboutToBeChanged.emit()
+
         for index in indexes:
             idx = self.material_model.index(
                 self.material_sorted_model.mapToSource(index).row()
             )
+
             name = self.line_name.text()
             tags = self.line_tags.text()
             cats = self.line_cat.text()
@@ -523,6 +526,7 @@ class MatLibPanel(QtWidgets.QWidget):
             return
 
         indexes = self.material_selection_model.selectedIndexes()
+
         asset_id = ""
         name = ""
         date = ""
@@ -561,19 +565,25 @@ class MatLibPanel(QtWidgets.QWidget):
         msg = QtCore.Qt.CheckState.PartiallyChecked if len(indexes) > 1 else msg
         self.box_fav.setCheckState(msg)
 
-        msg = (
-            sel_cats[0]
-            if len(sel_cats) < 2
-            else ", ".join(list(filter(None, set(sel_cats))))
-        )
-        self.line_cat.setText(msg)
+        if sel_cats:
+            msg = (
+                sel_cats[0]
+                if len(sel_cats) < 2
+                else ", ".join(list(filter(None, set(sel_cats))))
+            )
+            self.line_cat.setText(msg)
+        else:
+            self.line_cat.setText("")
 
-        msg = (
-            sel_tags[0]
-            if len(sel_tags) < 2
-            else ", ".join(list(filter(None, set(sel_tags))))
-        )
-        self.line_tags.setText(msg)
+        if sel_tags:
+            msg = (
+                sel_tags[0]
+                if len(sel_tags) < 2
+                else ", ".join(list(filter(None, set(sel_tags))))
+            )
+            self.line_tags.setText(msg)
+        else:
+            self.line_tags.setText("")
 
     # Update the Views when selection changes
     def update_selected_cat(self) -> None:
