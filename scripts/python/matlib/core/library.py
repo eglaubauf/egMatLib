@@ -269,9 +269,14 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self.check_add_tags(tags)
 
         asset = self._assets[index.row()]
+
+        name = name if name != "Multiple Values..." else asset.name
+        cats = name if tags != "Multiple Values..." else asset.categories
+        tags = name if tags != "Multiple Values..." else asset.tags
+
         asset.set_data(name, cats, tags, fav, None)
 
-        self._update_thumb_paths(index)
+        # self._update_thumb_paths(index)
         self.save()
 
     def remove_asset(self, index: QtCore.QModelIndex) -> None:
