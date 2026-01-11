@@ -44,7 +44,6 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
         fav_filter = True
         tag_filter = True
         render_filter = True
-
         for role, curr_filter in self._filters.items():
             index = self.sourceModel().index(source_row, 0, source_parent)
             data = index.data(role)
@@ -55,11 +54,17 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
                 if curr_filter.lower() not in data.lower():
                     name_filter = False
             elif role == 257:  # Check Category:
-                for elem in data:
+                if len(data) < 1:
+                    cat_filter = False
                     if curr_filter == "":
                         cat_filter = True
-                    if curr_filter.lower() not in elem.lower():
-                        cat_filter = False
+                else:
+                    for elem in data:
+                        if curr_filter == "":
+                            cat_filter = True
+                        if curr_filter.lower() not in elem.lower():
+                            cat_filter = False
+
             elif role == 258:  # Check Favorite:
                 if curr_filter != data and curr_filter != "":
                     return False

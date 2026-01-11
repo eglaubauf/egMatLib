@@ -423,6 +423,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.material_model.save()
         self.material_model.layoutChanged.emit()
+
         self.category_model.layoutChanged.emit()
 
     def rename_category_user(self) -> None:
