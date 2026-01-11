@@ -572,7 +572,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.box_fav.setCheckState(msg)
 
         if sel_cats:
-            msg = sel_cats[0] if len(sel_cats) < 2 else "Multiple Values..."
+            msg = sel_cats[0] if len(set(sel_cats)) < 2 else "Multiple Values..."
             self.line_cat.setText(msg)
         else:
             self.line_cat.setText("")
