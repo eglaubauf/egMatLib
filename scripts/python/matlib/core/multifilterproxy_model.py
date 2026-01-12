@@ -62,7 +62,7 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
                     for elem in data:
                         if curr_filter == "":
                             cat_filter = True
-                        if curr_filter.lower() not in elem.lower():
+                        elif curr_filter.lower() != elem.lower():
                             cat_filter = False
 
             elif role == 258:  # Check Favorite:
