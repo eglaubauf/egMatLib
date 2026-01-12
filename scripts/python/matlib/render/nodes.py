@@ -142,8 +142,8 @@ class NodeHandler:
 
         if self._import_path:
             if self._use_existing_node:
-                print("Import_Path: ", self._import_path)
-                print("Builder: ", self._builder_node)
+                # print("Import_Path: ", self._import_path)
+                # print("Builder: ", self._builder_node)
                 self._builder_node.destroy()
             else:
                 self._import_path.destroy()
