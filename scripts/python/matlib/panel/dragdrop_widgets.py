@@ -64,7 +64,6 @@ class DragDropCentralWidget(QtWidgets.QWidget):
         self.state = False
 
     def dragLeaveEvent(self, event: QtGui.QDragLeaveEvent) -> None:
-        print("Leave")
         if not self.state:
             if hou.ui.paneTabUnderCursor():  # type: ignore
                 if hou.ui.paneTabUnderCursor().type().name() != "PythonPanel":  # type: ignore
@@ -77,7 +76,6 @@ class DragDropCentralWidget(QtWidgets.QWidget):
         # Avoid multiple imports since dragLeave is fired multiple times
         # and houdini as no way to catch a drop from another panel
         if self.state:
-            print("Import")
             # Import if we didn't register an import recently
             sec = datetime.time(datetime.now()).second
             msec = datetime.time(datetime.now()).microsecond / 1000000
