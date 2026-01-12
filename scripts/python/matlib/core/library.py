@@ -286,14 +286,17 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     def set_assetdata(self, index: QtCore.QModelIndex, name, cats, tags, fav) -> None:
         """Set Assetdata for the given index and parameters
         the library is saved immidiately after"""
-        tags = self.sanitize_tags(tags)
-        self.check_add_tags(tags)
 
         asset = self._assets[index.row()]
 
         name = name if "Multiple Values..." not in name else asset.name
         cats = cats if "Multiple Values..." not in cats else ", ".join(asset.categories)
-        tags = tags if "Multiple Values..." not in tags else asset.tags
+
+        if "Multiple Values..." not in tags:
+            tags = self.sanitize_tags(tags)
+            self.check_add_tags(tags)
+        else:
+            tags = ", ".join(asset.tags)
 
         asset.set_data(name, cats, tags, fav, None)
         self._outofdate_thumb_list.append(index)
