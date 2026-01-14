@@ -5,10 +5,14 @@ Handles all Node Interaction with Houdini
 import os
 import hou
 
+import importlib
+
 from matlib.render import thumbs
 from matlib.core import material
 from matlib.prefs import prefs
 from matlib.helpers import helpers
+
+importlib.reload(thumbs)
 
 
 class NodeHandler:

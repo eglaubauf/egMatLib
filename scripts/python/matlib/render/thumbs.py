@@ -9,6 +9,7 @@ from matlib.prefs import prefs
 import importlib
 
 importlib.reload(nodes)
+importlib.reload(thumbnail_scene)
 
 
 class ThumbNailRenderer:

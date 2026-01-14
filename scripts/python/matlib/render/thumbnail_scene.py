@@ -329,7 +329,18 @@ class ThumbNailScene:
                 )
                 target.parm("colorSpace").set("NAMED_COLOR_SPACE_ACESCG")
                 target.setName("Octane_RenderTarget")
+            elif "::2.2" in target.type().name():
+                # Octane FUTURE
+                target.parm("kernelMenu").set(3)
+                target.parm("environmentMenu").set(6)
 
+                target.parm("maxsamples").set(200)
+                target.parm("textureEnvPower_1").set(0.2)
+                target.parm("textureEnvFilename_1").set(
+                    "$EGMATLIB/scripts/python/matlib/res/img/photo_studio_01_4k_ACEScg.hdr"
+                )
+                target.parm("textureEnvColorSpace_1").set("NAMED_COLOR_SPACE_ACESCG")
+                target.setName("Octane_RenderTarget")
             else:
                 # Octane Current
                 target.parm("parmKernel").set(1)
@@ -498,7 +509,7 @@ f.close()
             self.rop = self.ropnet.createNode("Octane_ROP")
 
             self.rop.parm("HO_renderCamera").set("../../RenderCam")
-            self.rop.parm("HO_iprCamera").set("../../RenderCam")
+            # self.rop.parm("HO_iprCamera").set("../../RenderCam")
             self.rop.parm("HO_renderTarget").set("../../matnet1/Octane_RenderTarget")
 
             self.rop.parm("HO_renderToMPlay").set(0)
