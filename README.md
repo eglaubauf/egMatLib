@@ -43,7 +43,7 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 - USD/Solaris for Karma only
 - Python 3 support only
 - Redshift 3.5+ (untested)
-- Octane for 20.5.487 (untested)
+- Octane 2025 and 2026 for 21.0.559
 - HtoA 6.3.7.0 (untested)
 
 ## Installation
