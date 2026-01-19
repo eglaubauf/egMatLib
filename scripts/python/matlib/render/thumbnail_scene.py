@@ -330,7 +330,7 @@ class ThumbNailScene:
                 target.parm("colorSpace").set("NAMED_COLOR_SPACE_ACESCG")
                 target.setName("Octane_RenderTarget")
             elif "::2.2" in target.type().name():
-                # Octane FUTURE
+                # Octane 2026
                 target.parm("kernelMenu").set(3)
                 target.parm("environmentMenu").set(6)
 
@@ -341,6 +341,19 @@ class ThumbNailScene:
                 )
                 target.parm("textureEnvColorSpace_1").set("NAMED_COLOR_SPACE_ACESCG")
                 target.setName("Octane_RenderTarget")
+            elif "::2.1" in target.type().name():
+                # Octane 2025
+                target.parm("kernelMenu").set(3)
+                target.parm("environmentMenu").set(6)
+
+                target.parm("maxsamples").set(200)
+                target.parm("textureEnvPower").set(0.2)
+                target.parm("textureEnvironmentFilename").set(
+                    "$EGMATLIB/scripts/python/matlib/res/img/photo_studio_01_4k_ACEScg.hdr"
+                )
+                target.parm("colorSpace").set("NAMED_COLOR_SPACE_ACESCG")
+                target.setName("Octane_RenderTarget")
+
             else:
                 # Octane Current
                 target.parm("parmKernel").set(1)
