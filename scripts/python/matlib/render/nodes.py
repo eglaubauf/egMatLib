@@ -115,7 +115,7 @@ class NodeHandler:
         )
 
         self.update_context()
-        self._hou_parent = hou.node("obj").createNode("matnet")
+        self._hou_parent = hou.node("/obj").createNode("matnet")
         if "MaterialX" in mat.renderer:
             self.load_interface_mtlx(parms_file_name, mat)
             self.load_items_file(mat)
