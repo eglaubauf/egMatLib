@@ -1,5 +1,5 @@
 {
-    "directory": "/home/user/Documents/BaseLib/",
+    "directory": "C:/Users/elmar/Documents/Library/NewLibrary/",
     "extension": ".mat",
     "img_extension": ".png",
     "done_file": "/done.txt",
@@ -14,5 +14,5 @@
     "renderer_redshift": false,
     "renderer_octane": false,
     "renderer_arnold": false,
-    "ballmode": 1
+    "ballmode": 0
 }

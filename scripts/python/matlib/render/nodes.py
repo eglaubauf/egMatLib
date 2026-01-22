@@ -121,6 +121,7 @@ class NodeHandler:
             self.load_items_file(mat)
         elif mat.renderer == "Mantra":
             self.load_interface_mantra(parms_file_name, mat)
+            self.load_items_file(mat)
         elif "Redshift" in mat.renderer:
             self.load_interface_other(parms_file_name, mat, "redshift_vopnet")
             self.load_items_file(mat)
@@ -169,7 +170,6 @@ class NodeHandler:
         elif (
             "subnet" in curr_typename
         ):  # Inside Subnet - go to stage - there is no clear identifier
-            print(curr.parent().childTypeCategory().name())
             if "lop" in curr.parent().childTypeCategory().name().lower():
                 self._import_path = curr.parent().createNode("materiallibrary")
             elif "vop" in curr.parent().childTypeCategory().name().lower():
@@ -219,6 +219,11 @@ class NodeHandler:
         :param parms_file_name: Description
         :param mat: Description
         """
+        # Create temporary storage of nodes
+        tmp_matnet = hou.node("obj").createNode("matnet")
+        hou_parent = tmp_matnet  # needed for the code script below
+
+        self._import_path = hou.node("/stage").createNode("materiallibrary")
         builder = None
         if os.path.exists(parms_file_name):
             # Only load parms if MatBuilder
@@ -241,16 +246,6 @@ class NodeHandler:
         for node in builder.children():
             node.destroy()
 
-        # If node is Principled Shader
-        if not mat.builder:
-            n = builder.children()[0]
-            hou.moveNodesTo((n,), builder.parent())  # type: ignore
-            builder.destroy()
-            builder = hou.selectedNodes()[0]
-        else:
-            new_mat = hou.moveNodesTo((builder,), self._import_path)  # type: ignore
-            new_mat[0].moveToGoodPosition()
-            builder = new_mat[0]
         self._builder_node = builder
 
     def load_interface_other(
@@ -299,15 +294,16 @@ class NodeHandler:
             + mat.mat_id
             + self._preferences.ext
         )
+
         try:
-            self._builder_node.loadItemsFromFile(file_name, ignore_load_warnings=False)
+            self._builder_node.loadItemsFromFile(file_name, ignore_load_warnings=True)
         except OSError:
             hou.ui.displayMessage("Failure on Import. Please Check Files.")  # type: ignore
             return None
 
-        new_mat = hou.moveNodesTo((self._builder_node,), self._import_path)  # type: ignore
-        new_mat[0].moveToGoodPosition()
-        self._builder_node = new_mat[0]
+        # new_mat = hou.moveNodesTo((self._builder_node,), self._import_path)  # type: ignore
+        # new_mat[0].moveToGoodPosition()
+        # self._builder_node = new_mat[0]
 
     def save_node(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Save Node wrapper for different Material Types"""
