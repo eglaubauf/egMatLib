@@ -84,10 +84,15 @@ class ThumbNailRenderer:
         lib.setFirstInput(lib1)
 
         curr_items = node
-        if not isinstance(node, list):
+
+        if curr_items.type().name() == "subnet":
+            curr_items = (node,)
+        elif not isinstance(node, list):
             curr_items = node.children()
 
         curr_nodes = hou.copyNodesTo(curr_items, lib)  # type: ignore
+        curr_nodes[0].setSelected(True)
+
         collect = 0
         for n in curr_nodes:
             if n.type().name() == "collect":
@@ -96,6 +101,8 @@ class ThumbNailRenderer:
             for p in n.parms():
                 if "_activate_" in p.name():
                     p.set(1)
+                if "opacity" in p.name():
+                    p.set(0)
 
         if not collect:
             for n in curr_nodes:
