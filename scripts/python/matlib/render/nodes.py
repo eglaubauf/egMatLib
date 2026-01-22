@@ -220,10 +220,10 @@ class NodeHandler:
         :param mat: Description
         """
         # Create temporary storage of nodes
-        tmp_matnet = hou.node("obj").createNode("matnet")
-        hou_parent = tmp_matnet  # needed for the code script below
+        # tmp_matnet = hou.node("obj").createNode("matnet")
+        # hou_parent = tmp_matnet  # needed for the code script below
 
-        self._import_path = hou.node("/stage").createNode("materiallibrary")
+        # self._import_path = hou.node("/stage").createNode("materiallibrary")
         builder = None
         if os.path.exists(parms_file_name):
             # Only load parms if MatBuilder
@@ -262,22 +262,25 @@ class NodeHandler:
         :param builder_name: Description
         :type builder_name: str
         """
+        # Create temporary storage of nodes
+        # tmp_matnet = hou.node("obj").createNode("matnet")
+        # hou_parent = tmp_matnet  # needed for the code script below
 
         if os.path.exists(parms_file_name):
             interface_file = open(parms_file_name, "r", encoding="utf-8")
             code = interface_file.read()
             hou_parent = self._hou_parent  # needed for exec
             exec(code)
-
-            builder = hou.node("obj").createNode("matnet").children()[0]
+            builder = hou_parent.children()[0]
+            #    builder = hou.node("obj").createNode("matnet").children()[0]
         else:
             builder = hou.node(self._import_path).createNode(builder_name)
 
         builder.setName(mat.name, unique_name=True)
         builder.setGenericFlag(hou.nodeFlag.Material, True)
         # Delete Default children in RS-VopNet
-        for node in builder.children():
-            node.destroy()
+        # for node in builder.children():
+        #     node.destroy()
 
         self._builder_node = builder
 
@@ -301,9 +304,9 @@ class NodeHandler:
             hou.ui.displayMessage("Failure on Import. Please Check Files.")  # type: ignore
             return None
 
-        # new_mat = hou.moveNodesTo((self._builder_node,), self._import_path)  # type: ignore
-        # new_mat[0].moveToGoodPosition()
-        # self._builder_node = new_mat[0]
+        new_mat = hou.moveNodesTo((self._builder_node,), self._import_path)  # type: ignore
+        new_mat[0].moveToGoodPosition()
+        self._builder_node = new_mat[0]
 
     def save_node(self, node: hou.Node, asset_id: str, update: bool) -> bool:
         """Save Node wrapper for different Material Types"""
@@ -540,6 +543,7 @@ class NodeHandler:
         if not update:
             if not self._preferences.render_on_import:
                 return True
+
         thumber = thumbs.ThumbNailRenderer(self._preferences)
         return thumber.create_thumb_octane(node, asset_id)
 
