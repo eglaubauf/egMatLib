@@ -444,18 +444,26 @@ class ThumbNailScene:
             self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
             self.comp.parm("convertcolorspace").set(0)
 
-            self.aces_1_3 = False
-            if "v1.3" in hou.getenv("OCIO").lower():
-                self.aces_1_3 = True
-            else:
-                for item in self.cop_file.parm("ocio_space").menuItems():
-                    if "encoded" in item.lower():
-                        self.aces_1_3 = True
+            self.aces_version = 1.2
 
-            if self.aces_1_3:
+            if "v1.3" in hou.getenv("OCIO").lower():
+                self.aces_version = 1.3
+            if "v2." in hou.getenv("OCIO").lower():
+                self.aces_version = 2
+            if "v3." in hou.getenv("OCIO").lower():
+                self.aces_version = 3
+            if "v4." in hou.getenv("OCIO").lower():
+                self.aces_version = 4
+
+            if self.aces_version > 1.2:
                 self.comp.parm("convertcolorspace").set(3)
                 self.comp.parm("ocio_display").set("sRGB - Display")
                 self.comp.parm("ocio_view").set("ACES 1.0 - SDR Video")
+
+            if self.aces_version >= 3:
+                self.comp.parm("convertcolorspace").set(3)
+                self.comp.parm("ocio_display").set("sRGB - Display")
+                self.comp.parm("ocio_view").set("ACES 2.0 - SDR 100 nits (Rec.709)")
 
             self.comp.parm("trange").set(0)
 
@@ -500,10 +508,16 @@ class ThumbNailScene:
             self.comp.parm("coppath").set("../../exr_to_png/OUT")
             self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
             self.comp.parm("convertcolorspace").set(0)
-            if self.aces_1_3:
+
+            if self.aces_version > 1.2:
                 self.comp.parm("convertcolorspace").set(3)
                 self.comp.parm("ocio_display").set("sRGB - Display")
                 self.comp.parm("ocio_view").set("ACES 1.0 - SDR Video")
+            if self.aces_version >= 3:
+                self.comp.parm("convertcolorspace").set(3)
+                self.comp.parm("ocio_display").set("sRGB - Display")
+                self.comp.parm("ocio_view").set("ACES 2.0 - SDR 100 nits (Rec.709)")
+
             self.comp.parm("trange").set(0)
 
             self.shell = self.ropnet.createNode("shell")
@@ -572,23 +586,23 @@ f.close()
 
             self.cop_out = self.copnet.createNode("null")
 
-            self.aces_1_3 = False
-            self.cop_file.parm("colorspace").set(3)  # OCIO
+            self.aces_version = 1.2
 
             if "v1.3" in hou.getenv("OCIO").lower():
-                self.aces_1_3 = True
-            else:
-                for item in self.cop_file.parm("ocio_space").menuItems():
-                    if "encoded" in item.lower():
-                        self.aces_1_3 = True
-            # ACES 1.3
-            if self.aces_1_3:
+                self.aces_version = 1.3
+            if "v2." in hou.getenv("OCIO").lower():
+                self.aces_version = 2
+            if "v3." in hou.getenv("OCIO").lower():
+                self.aces_version = 3
+            if "v4." in hou.getenv("OCIO").lower():
+                self.aces_version = 4
+
+            if self.aces_version > 1.2:
                 self.cop_file.parm("colorspace").set(3)  # OCIO
                 self.cop_file.parm("ocio_space").set("ACEScg")
                 self.cop_out.setInput(0, self.cop_file)
 
             else:
-                # Vopnet
                 self.cop_vop = self.copnet.createNode("vopcop2filter")
                 gn = self.cop_vop.node("global1")
                 o = self.cop_vop.node("output1")

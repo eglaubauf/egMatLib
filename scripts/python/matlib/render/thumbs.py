@@ -144,18 +144,20 @@ class ThumbNailRenderer:
 
         cop_out = copnet.createNode("rop_comp")
 
-        aces_1_3 = False
+        aces_version = 1.2
         cop_file.parm("colorspace").set(3)  # OCIO
 
         if "v1.3" in hou.getenv("OCIO").lower():
-            aces_1_3 = True
-        else:
-            for item in cop_file.parm("ocio_space").menuItems():
-                if "encoded" in item.lower():
-                    aces_1_3 = True
+            aces_version = 1.3
+        if "v2." in hou.getenv("OCIO").lower():
+            aces_version = 2
+        if "v3." in hou.getenv("OCIO").lower():
+            aces_version = 3
+        if "v4." in hou.getenv("OCIO").lower():
+            aces_version = 4
 
         # ACES 1.3
-        if aces_1_3:
+        if aces_version > 1.2:
             cop_file.parm("colorspace").set(3)  # OCIO
             cop_file.parm("ocio_space").set("ACEScg")
 
@@ -163,6 +165,11 @@ class ThumbNailRenderer:
             cop_out.parm("convertcolorspace").set(3)
             cop_out.parm("ocio_display").set("sRGB - Display")
             cop_out.parm("ocio_view").set("ACES 1.0 - SDR Video")
+        if aces_version >= 3:
+            cop_out.setInput(0, cop_file)
+            cop_out.parm("convertcolorspace").set(3)
+            cop_out.parm("ocio_display").set("sRGB - Display")
+            cop_out.parm("ocio_view").set("ACES 2.0 - SDR 100 nits (Rec.709)")
 
         else:
             # ACES 1.2
@@ -218,7 +225,7 @@ class ThumbNailRenderer:
         # Create Thumbnail
         sc = thumbnail_scene.ThumbNailScene("Mantra", self._preferences.ballmode)
         thumb = sc.get_node()
-        thumb.setself._preferences.ballmode
+        # thumb.setself._preferences.ballmode
         thumb.parm("mat").set(node.path())
 
         # Build path
