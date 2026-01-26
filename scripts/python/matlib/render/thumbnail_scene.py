@@ -18,6 +18,20 @@ class ThumbNailScene:
         # Render Independemt Setup
         self.geo_node = hou.node("/obj").createNode("subnet")
         self.renderer = renderer
+
+        viewer = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.SceneViewer)
+        if not viewer:
+            return False
+
+        self.display = viewer.getOCIODisplay()
+        self.view = viewer.getOCIOView()
+
+        self.space = "ACESCg"
+        for s in hou.Color.ocio_spaces():
+            if "acescg" in s.lower():
+                self.space = s
+                break
+
         self.build_parm_templates()
 
         self.geo_node.parm("path").set("$HIP/render/$HIPNAME.$OS.$F4.exr")
@@ -412,6 +426,7 @@ class ThumbNailScene:
         """
         Build Rops for the set Renderer
         """
+
         if "Mantra" in self.renderer:
             # RopNet Setup
             self.rop = self.ropnet.createNode("ifd")
@@ -425,6 +440,7 @@ class ThumbNailScene:
             self.rop.parm("vm_renderengine").set("pbrraytrace")
             self.rop.parm("vm_samplesx").set(3)
             self.rop.parm("vm_samplesy").set(3)
+            self.rop.parm("vm_variance").set(0.025)
 
             self.rop.parm("vm_reflectlimit").set(1)
             self.rop.parm("vm_refractlimit").set(2)
@@ -440,30 +456,14 @@ class ThumbNailScene:
 
             self.rop.parm("soho_foreground").set(1)
 
+            self.rop.parm("vm_picture").set("`chs('../../path')`")
             self.comp.parm("coppath").set("../../exr_to_png/OUT")
             self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
             self.comp.parm("convertcolorspace").set(0)
 
-            self.aces_version = 1.2
-
-            if "v1.3" in hou.getenv("OCIO").lower():
-                self.aces_version = 1.3
-            if "v2." in hou.getenv("OCIO").lower():
-                self.aces_version = 2
-            if "v3." in hou.getenv("OCIO").lower():
-                self.aces_version = 3
-            if "v4." in hou.getenv("OCIO").lower():
-                self.aces_version = 4
-
-            if self.aces_version > 1.2:
-                self.comp.parm("convertcolorspace").set(3)
-                self.comp.parm("ocio_display").set("sRGB - Display")
-                self.comp.parm("ocio_view").set("ACES 1.0 - SDR Video")
-
-            if self.aces_version >= 3:
-                self.comp.parm("convertcolorspace").set(3)
-                self.comp.parm("ocio_display").set("sRGB - Display")
-                self.comp.parm("ocio_view").set("ACES 2.0 - SDR 100 nits (Rec.709)")
+            self.comp.parm("convertcolorspace").set(3)
+            self.comp.parm("ocio_display").set(self.display)
+            self.comp.parm("ocio_view").set(self.view)
 
             self.comp.parm("trange").set(0)
 
@@ -509,14 +509,9 @@ class ThumbNailScene:
             self.comp.parm("copoutput").set(self.geo_node.parm("cop_out_img"))
             self.comp.parm("convertcolorspace").set(0)
 
-            if self.aces_version > 1.2:
-                self.comp.parm("convertcolorspace").set(3)
-                self.comp.parm("ocio_display").set("sRGB - Display")
-                self.comp.parm("ocio_view").set("ACES 1.0 - SDR Video")
-            if self.aces_version >= 3:
-                self.comp.parm("convertcolorspace").set(3)
-                self.comp.parm("ocio_display").set("sRGB - Display")
-                self.comp.parm("ocio_view").set("ACES 2.0 - SDR 100 nits (Rec.709)")
+            self.comp.parm("convertcolorspace").set(3)
+            self.comp.parm("ocio_display").set(self.display)
+            self.comp.parm("ocio_view").set(self.view)
 
             self.comp.parm("trange").set(0)
 
@@ -567,13 +562,11 @@ f.close()
             # CopNet Setup
             self.copnet.setName("exr_to_png")
 
-            self.cop_file = self.copnet.createNode("file")
-
-            self.cop_file.parm("nodename").set(0)
-            self.cop_file.parm("overridedepth").set(2)
-            self.cop_file.parm("depth").set(4)
-
-            self.cop_file.parm("filename1").set(self.rop.parm("vm_picture"))
+            cop_file = self.copnet.createNode("file")
+            cop_file.parm("nodename").set(0)
+            cop_file.parm("filename1").set(self.rop.parm("vm_picture"))
+            cop_file.parm("colorspace").set(3)  # Set to OpenColorIO
+            cop_file.parm("ocio_space").set(self.space)
 
             if "Redshift" in self.renderer:
                 self.rop.parm("vm_picture").set(
@@ -585,48 +578,7 @@ f.close()
                 )
 
             self.cop_out = self.copnet.createNode("null")
-
-            self.aces_version = 1.2
-
-            if "v1.3" in hou.getenv("OCIO").lower():
-                self.aces_version = 1.3
-            if "v2." in hou.getenv("OCIO").lower():
-                self.aces_version = 2
-            if "v3." in hou.getenv("OCIO").lower():
-                self.aces_version = 3
-            if "v4." in hou.getenv("OCIO").lower():
-                self.aces_version = 4
-
-            if self.aces_version > 1.2:
-                self.cop_file.parm("colorspace").set(3)  # OCIO
-                self.cop_file.parm("ocio_space").set("ACEScg")
-                self.cop_out.setInput(0, self.cop_file)
-
-            else:
-                self.cop_vop = self.copnet.createNode("vopcop2filter")
-                gn = self.cop_vop.node("global1")
-                o = self.cop_vop.node("output1")
-                ftv = self.cop_vop.createNode("floattovec")
-                ocio = self.cop_vop.createNode("ocio_transform")
-                vtf = self.cop_vop.createNode("vectofloat")
-
-                o.setInput(0, vtf, 0)
-                o.setInput(1, vtf, 1)
-                o.setInput(2, vtf, 2)
-                o.setInput(3, gn, 6)
-
-                vtf.setInput(0, ocio, 0)
-
-                ocio.setInput(0, ftv, 0)
-                ocio.parm("fromspace").set("ACES - ACEScg")
-                ocio.parm("tospace").set("Output - sRGB")
-
-                ftv.setInput(0, gn, 3)
-                ftv.setInput(1, gn, 4)
-                ftv.setInput(2, gn, 5)
-
-                self.cop_vop.setInput(0, self.cop_file)
-                self.cop_out.setInput(0, self.cop_vop)
+            self.cop_out.setInput(0, cop_file)
 
             self.cop_out.setGenericFlag(hou.nodeFlag.Display, True)
             self.cop_out.setGenericFlag(hou.nodeFlag.Render, True)

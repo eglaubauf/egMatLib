@@ -47,8 +47,24 @@ class ThumbNailRenderer:
     def create_thumb_mtlx(self, node: hou.Node, asset_id: str) -> bool:
         # Build path
         path = (
-            self._preferences.dir + self._preferences.img_dir + str(asset_id) + ".exr"
+            self._preferences.dir
+            + self._preferences.img_dir
+            + str(asset_id)
+            + ".acescg.exr"
         )
+
+        viewer = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.SceneViewer)
+        if not viewer:
+            return False
+
+        display = viewer.getOCIODisplay()
+        view = viewer.getOCIOView()
+
+        space = "ACEScg"
+        for s in hou.Color.ocio_spaces():
+            if "acescg" in s.lower():
+                space = s
+                break
 
         # Create Thumbnail
         net = hou.node("/obj").createNode("lopnet")
@@ -143,73 +159,17 @@ class ThumbNailRenderer:
         copnet.setName("exr_to_png")
 
         cop_file = copnet.createNode("file")
-
         cop_file.parm("nodename").set(0)
-        cop_file.parm("overridedepth").set(2)
-        cop_file.parm("depth").set(4)
         cop_file.parm("filename1").set(path)
-
+        cop_file.parm("colorspace").set(3)  # Set to OpenColorIO
+        cop_file.parm("ocio_space").set(space)
         cop_out = copnet.createNode("rop_comp")
+        cop_out.parm("trange").set(0)
 
-        aces_version = 1.2
-        cop_file.parm("colorspace").set(3)  # OCIO
-
-        if "v1.3" in hou.getenv("OCIO").lower():
-            aces_version = 1.3
-        if "v2." in hou.getenv("OCIO").lower():
-            aces_version = 2
-        if "v3." in hou.getenv("OCIO").lower():
-            aces_version = 3
-        if "v4." in hou.getenv("OCIO").lower():
-            aces_version = 4
-
-        # ACES 1.3
-        if aces_version > 1.2:
-            cop_file.parm("colorspace").set(3)  # OCIO
-            cop_file.parm("ocio_space").set("ACEScg")
-
-            cop_out.setInput(0, cop_file)
-            cop_out.parm("convertcolorspace").set(3)
-            cop_out.parm("ocio_display").set("sRGB - Display")
-            cop_out.parm("ocio_view").set("ACES 1.0 - SDR Video")
-        if aces_version >= 3:
-            cop_out.setInput(0, cop_file)
-            cop_out.parm("convertcolorspace").set(3)
-            cop_out.parm("ocio_display").set("sRGB - Display")
-            cop_out.parm("ocio_view").set("ACES 2.0 - SDR 100 nits (Rec.709)")
-
-        else:
-            # ACES 1.2
-            # Vopnet
-            cop_file.parm("colorspace").set(0)
-            cop_vop = copnet.createNode("vopcop2filter")
-            gn = cop_vop.node("global1")
-            o = cop_vop.node("output1")
-            ftv = cop_vop.createNode("floattovec")
-            ocio = cop_vop.createNode("ocio_transform")
-            vtf = cop_vop.createNode("vectofloat")
-
-            o.setInput(0, vtf, 0)
-            o.setInput(1, vtf, 1)
-            o.setInput(2, vtf, 2)
-            o.setInput(3, gn, 6)
-
-            vtf.setInput(0, ocio, 0)
-
-            ocio.setInput(0, ftv, 0)
-
-            ocio.parm("fromspace").set("ACES - ACEScg")
-            ocio.parm("tospace").set("Output - sRGB")
-
-            ftv.setInput(0, gn, 3)
-            ftv.setInput(1, gn, 4)
-            ftv.setInput(2, gn, 5)
-
-            cop_out.parm("convertcolorspace").set(0)
-            cop_out.parm("gamma").set(1)
-
-            cop_vop.setInput(0, cop_file)
-            cop_out.setInput(0, cop_vop)
+        cop_out.setInput(0, cop_file)
+        cop_out.parm("convertcolorspace").set(3)
+        cop_out.parm("ocio_display").set(display)
+        cop_out.parm("ocio_view").set(view)
 
         newpath = (
             self._preferences.dir
@@ -240,6 +200,7 @@ class ThumbNailRenderer:
 
         #  Set Renderpreferences and Object Exclusions for Thumbnail Rendering
         thumb.parm("path").set(path + ".exr")
+
         thumb.parm("cop_out_img").set(path + self._preferences.img_ext)
         exclude = "* ^" + thumb.name()
         thumb.parm("obj_exclude").set(exclude)
@@ -251,7 +212,7 @@ class ThumbNailRenderer:
         # Render Frame
         thumb.parm("render").pressButton()
         # CleanUp
-        thumb.destroy()
+        # thumb.destroy()
         if os.path.exists(path + ".exr"):
             os.remove(path + ".exr")
         return True
@@ -281,7 +242,7 @@ class ThumbNailRenderer:
         thumb.parm("resy").set(self._preferences.rendersize)
 
         # Render Frame
-        thumb.parm("execute").pressButton()
+        thumb.parm("render").pressButton()
         # CleanUp
         thumb.destroy()
         return True
