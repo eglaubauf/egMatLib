@@ -118,7 +118,8 @@ class ThumbNailRenderer:
                 if "_activate_" in p.name():
                     p.set(1)
                 if "opacity" in p.name():
-                    p.set(0)
+                    if p.eval() < 0.01:
+                        p.set(1)
 
         if not collect:
             for n in curr_nodes:
