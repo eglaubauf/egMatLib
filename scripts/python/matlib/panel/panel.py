@@ -55,15 +55,15 @@ class MatLibPanel(QtWidgets.QWidget):
         self.category_model = category.Categories()
         self.category_sorted_model = QtCore.QSortFilterProxyModel()
         self.category_sorted_model.setSourceModel(self.category_model)
-        self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.category_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)  # type: ignore
         self.category_sorted_model.setSortRole(self.category_model.CatSortRole)
         self.category_sorted_model.sort(0)
 
         self.material_model = library.MaterialLibrary()
         self.material_sorted_model = multifilterproxy_model.MultiFilterProxyModel()
         self.material_sorted_model.setSourceModel(self.material_model)
-        self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.material_sorted_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.material_sorted_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)  # type: ignore
+        self.material_sorted_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)  # type: ignore
         self.material_sorted_model.sort(0)
         self.material_sorted_model.setDynamicSortFilter(False)  # Improves Performance
         self.material_selection_model = QtCore.QItemSelectionModel(
@@ -71,7 +71,8 @@ class MatLibPanel(QtWidgets.QWidget):
         )
 
         # Attach Models
-        self.cat_list.setModel(self.category_sorted_model)
+        if self.cat_list:
+            self.cat_list.setModel(self.category_sorted_model)
         self.thumblist.setModel(self.material_sorted_model)
         self.thumblist.setSelectionModel(self.material_selection_model)
 
@@ -82,6 +83,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def open(self) -> None:
         """Open the currently in preferences specified library"""
+        if not self.material_model or not self.category_model:
+            return
         self.material_model.save()
         # self.material_model = library.MaterialLibrary()
         self.prefs.load()
@@ -124,6 +127,8 @@ class MatLibPanel(QtWidgets.QWidget):
         User Sets library via Menu Option so we have to reroute
 
         """
+        if not self.material_model or not self.category_model:
+            return
         if self.prefs.get_dir_from_user():
             self.prefs.load()
             self.load()
@@ -150,7 +155,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def toggle_detailsview(self) -> None:
         """Show and Hide the Details View via Menu"""
-        details_widget = self.ui.findChild(QtWidgets.QWidget, "details_widget")
+        details_widget = self.ui.details_widget  # type: ignore
 
         if self.action_detailsview.isChecked():
             details_widget.setHidden(False)
@@ -168,79 +173,78 @@ class MatLibPanel(QtWidgets.QWidget):
         loader.registerCustomWidget(dragdrop_widgets.DragDropCentralWidget)
         loader.registerCustomWidget(dragdrop_widgets.DragDropListView)
 
-        file.open(QtCore.QFile.ReadOnly)
+        file.open(QtCore.QFile.ReadOnly)  # type: ignore
         self.ui = loader.load(file)
         file.close()
 
         # Load Ui Element so self
         self.menu = self.ui.findChild(QtWidgets.QMenuBar, "menubar")
-        self.action_prefs = self.ui.findChild(QtGui.QAction, "action_prefs")
+        self.action_prefs = self.ui.action_prefs  # type: ignore
         self.action_prefs.triggered.connect(self.show_prefs)
-        self.action_catview = self.ui.findChild(QtGui.QAction, "action_show_cat")
+
+        self.action_catview = self.ui.action_show_cat  # type: ignore
         self.action_catview.triggered.connect(self.toggle_catview)
 
-        self.action_detailsview = self.ui.findChild(
-            QtGui.QAction, "action_show_details"
-        )
+        self.action_detailsview = self.ui.action_show_details  # type: ignore
         self.action_detailsview.triggered.connect(self.toggle_detailsview)
 
-        self.action_cleanup_db = self.ui.findChild(QtGui.QAction, "action_cleanup_db")
+        self.action_cleanup_db = self.ui.action_cleanup_db  # type: ignore
         self.action_cleanup_db.triggered.connect(self.cleanup_db)
-        self.action_open_folder = self.ui.findChild(QtGui.QAction, "action_open_folder")
+
+        self.action_open_folder = self.ui.action_open_folder  # type: ignore
         self.action_open_folder.triggered.connect(self.open_usdlib_folder)
 
-        self.action_about = self.ui.findChild(QtGui.QAction, "action_about")
+        self.action_about = self.ui.action_about  # type: ignore
         self.action_about.triggered.connect(self.show_about)
 
-        self.action_open = self.ui.findChild(QtGui.QAction, "action_open")
+        self.action_open = self.ui.action_open  # type: ignore
         self.action_open.triggered.connect(self.open)
 
-        self.action_set_library = self.ui.findChild(QtGui.QAction, "action_set_library")
+        self.action_set_library = self.ui.action_set_library  # type: ignore
         self.action_set_library.triggered.connect(self.set_library)
 
-        self.action_import_lib_v1 = self.ui.findChild(
-            QtGui.QAction, "action_import_lib_v1"
-        )
+        self.action_import_lib_v1 = self.ui.action_import_lib_v1  # type: ignore
         self.action_import_lib_v1.triggered.connect(self.import_lib_v1)
 
         # Overwrite the widgets for Drag and Drop in dragdrop_widgets.py
-        self.centralwidget = self.ui.centralwidget
-        self.thumblist = self.ui.thumbview
+        self.centralwidget = self.ui.centralwidget  # type: ignore
+        self.thumblist = self.ui.thumbview  # type: ignore
         self.thumblist.doubleClicked.connect(self.import_asset)
         self.thumblist.clicked.connect(self.update_details_view)
 
         # Category UI
-        self.cat_list = self.ui.findChild(QtWidgets.QListView, "catview")
+        self.cat_list = self.ui.catview  # type: ignore
         self.cat_list.clicked.connect(self.update_selected_cat)
 
-        self.line_filter = self.ui.findChild(QtWidgets.QLineEdit, "line_filter")
+        self.line_filter = self.ui.line_filter  # type: ignore
         self.line_filter.textEdited.connect(self.filter_thumb_view)
 
-        self.cb_favsonly = self.ui.findChild(QtWidgets.QCheckBox, "cb_FavsOnly")
+        self.cb_favsonly = self.ui.cb_FavsOnly  # type: ignore
         self.cb_favsonly.stateChanged.connect(self.filter_favs)
 
         # Updated Details UI
-        self.details = self.ui.findChild(QtWidgets.QTableWidget, "details_widget")
-        self.line_name = self.ui.findChild(QtWidgets.QLineEdit, "line_name")
-        self.line_cat = self.ui.findChild(QtWidgets.QLineEdit, "line_cat")
-        self.line_tags = self.ui.findChild(QtWidgets.QLineEdit, "line_tags")
-        self.line_id = self.ui.findChild(QtWidgets.QLineEdit, "line_id")
+        self.details = self.ui.details_widget  # type: ignore
+        self.line_name = self.ui.line_name  # type: ignore
+        self.line_cat = self.ui.line_cat  # type: ignore
+        self.line_tags = self.ui.line_tags  # type: ignore
+        self.line_id = self.ui.line_id  # type: ignore
         self.line_id.setDisabled(True)
 
-        self.line_date = self.ui.findChild(QtWidgets.QLineEdit, "line_date")
+        self.line_date = self.ui.line_date  # type: ignore
         self.line_date.setDisabled(True)
 
-        self.box_fav = self.ui.findChild(QtWidgets.QCheckBox, "cb_set_fav")
+        self.box_fav = self.ui.cb_set_fav  # type: ignore
         self.box_fav.clicked.connect(self.box_fav_clicktoggle)
-        self.btn_update = self.ui.findChild(QtWidgets.QPushButton, "btn_update")
+
+        self.btn_update = self.ui.btn_update  # type: ignore
         self.btn_update.clicked.connect(self.user_update_asset)
 
         # Material
-        self.cb_redshift = self.ui.findChild(QtWidgets.QRadioButton, "cb_Redshift")
-        self.cb_mantra = self.ui.findChild(QtWidgets.QRadioButton, "cb_Mantra")
-        self.cb_arnold = self.ui.findChild(QtWidgets.QRadioButton, "cb_Arnold")
-        self.cb_octane = self.ui.findChild(QtWidgets.QRadioButton, "cb_Octane")
-        self.cb_matx = self.ui.findChild(QtWidgets.QRadioButton, "cb_MatX")
+        self.cb_redshift = self.ui.cb_Redshift  # type: ignore
+        self.cb_mantra = self.ui.cb_Mantra  # type: ignore
+        self.cb_arnold = self.ui.cb_Arnold  # type: ignore
+        self.cb_octane = self.ui.cb_Octane  # type: ignore
+        self.cb_matx = self.ui.cb_MatX  # type: ignore
 
         self.cb_matx.setVisible(self.prefs.renderer_matx_enabled)
         self.cb_mantra.setVisible(self.prefs.renderer_mantra_enabled)
@@ -257,19 +261,20 @@ class MatLibPanel(QtWidgets.QWidget):
         self.cb_matx.toggled.connect(self.filter_renderer)
 
         # IconSize Slider
-        self.slide_iconsize = self.ui.findChild(QtWidgets.QSlider, "slide_iconSize")
+        self.slide_iconsize = self.ui.slide_iconSize  # type: ignore
+
         self.slide_iconsize.setRange(32, 512)
         self.slide_iconsize.setValue(128)
         self.slide_iconsize.setVisible(False)
 
         # Set Up Clickable Slider
         self.click_slider = ui_helpers.ClickSlider()
-        self.click_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.click_slider.setOrientation(QtCore.Qt.Horizontal)  # type: ignore
         self.click_slider.setRange(32, 512)
         self.click_slider.setValue(128)
         self.click_slider.setSingleStep(50)
         self.click_slider.setPageStep(50)
-        self.slider_layout = self.ui.findChild(QtWidgets.QVBoxLayout, "slider_layout")
+        self.slider_layout = self.ui.slider_layout  # type: ignore
         self.slider_layout.addWidget(self.click_slider)
         self.click_slider.valueChanged.connect(self.slide)
 
@@ -305,8 +310,6 @@ class MatLibPanel(QtWidgets.QWidget):
             self.import_asset()
         elif action == action_renderall:
             self.update_all_assets()
-        # elif action == action_thumb_viewport:
-        #     self.update_single_asset()
         elif action == action_toggle_fav:
             self.toggle_fav()
 
@@ -329,6 +332,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def toggle_fav(self) -> None:
         """Toggle the Favorite Stat for the currently selected Index"""
+        if not self.material_model or not self.category_model:
+            return
         self.material_model.layoutAboutToBeChanged.emit()
         indexes = self.material_selection_model.selectedIndexes()
         for index in indexes:
@@ -344,7 +349,7 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def show_prefs(self) -> None:
         """Show the Preferences Dialog"""
-        if not self.material_model:
+        if not self.material_model or not self.category_model:
             hou.ui.displayMessage("Please open a library first")  # type: ignore
             return
         prefs_dialog.PrefsDialog(self.prefs).exec_()
@@ -379,11 +384,12 @@ class MatLibPanel(QtWidgets.QWidget):
         self.material_model.cleanup_db()
 
     def import_lib_v1(self) -> None:
-
+        if not self.material_model or not self.category_model:
+            return
         start_directory = self.prefs.dir
         title = "Select a json file to import"
         mask = "*.json"
-        path = hou.ui.selectFile(start_directory, title, pattern=mask)
+        path = hou.ui.selectFile(start_directory, title, pattern=mask)  # type: ignore
         path = hou.expandString(path)
         if path.endswith(".json") and os.path.exists(path):
             upg = upgrader.LibraryUpgrader(path, self.material_model, self.prefs)
@@ -391,7 +397,7 @@ class MatLibPanel(QtWidgets.QWidget):
             self.material_model.layoutChanged.emit()
             self.category_model.layoutChanged.emit()
         else:
-            hou.ui.displayMessage("Invalid Path. Please try again.")
+            hou.ui.displayMessage("Invalid Path. Please try again.")  # type: ignore
 
     def open_usdlib_folder(self) -> None:
         """Open the Library Folder in the System explorer"""
@@ -414,6 +420,8 @@ class MatLibPanel(QtWidgets.QWidget):
     def add_category_user(self) -> None:
         """User adds a new category via a given string -
         if not yet in the library the category will be added"""
+        if not self.material_model or not self.category_model:
+            return
         choice, cat = hou.ui.readInput("Please enter the new category name:")  # type: ignore
         if choice:  # Return if no
             return
@@ -425,6 +433,8 @@ class MatLibPanel(QtWidgets.QWidget):
     def rmv_category_user(self) -> None:
         """Removes a category - called by user change in UI"""
         # Prevent Deletion of "All" - Category
+        if not self.material_model or not self.category_model:
+            return
         self.material_model.layoutAboutToBeChanged.emit()
         self.category_model.layoutAboutToBeChanged.emit()
         self.material_selection_model.clearSelection()
@@ -445,6 +455,9 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def rename_category_user(self) -> None:
         """Renames a category - called by user change in UI"""
+        if not self.material_model or not self.category_model:
+            return
+
         choice, cat = hou.ui.readInput("Please enter the new category name:")  # type: ignore
         if choice:  # Return if no
             return
@@ -468,6 +481,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def filter_thumb_view(self) -> None:
         """Get Filter from user and trigger view update"""
+        if not self.material_model or not self.category_model:
+            return
         if self.line_filter.text().startswith(":"):
             self.material_sorted_model.layoutAboutToBeChanged.emit()
             if len(self.line_filter.text()) > 1:
@@ -498,7 +513,8 @@ class MatLibPanel(QtWidgets.QWidget):
             if self.cb_favsonly.checkState() == QtCore.Qt.CheckState.Checked
             else ""
         )
-
+        if not self.material_model or not self.category_model:
+            return
         self.material_sorted_model.setFilter(
             self.material_model.FavoriteRole, fav_filter
         )
@@ -506,6 +522,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def filter_renderer(self) -> None:
         """Get Filter from user and trigger view update"""
+        if not self.material_model or not self.category_model:
+            return
         render_filter = self.cb_matx.group().checkedButton().text()
         self.material_sorted_model.setFilter(
             self.material_model.RendererRole, render_filter
@@ -514,6 +532,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def user_update_asset(self) -> None:
         """User modifies an assete in the detailview"""
+        if not self.material_model or not self.category_model:
+            return
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
         self.category_model.layoutAboutToBeChanged.emit()
@@ -536,6 +556,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def update_details_view(self) -> None:
         """Update upon changes in Detail view"""
+        if not self.material_model or not self.category_model:
+            return
         if not self.material_selection_model.hasSelection():
             self.line_name.setText("")
             self.line_id.setText("")
@@ -607,6 +629,8 @@ class MatLibPanel(QtWidgets.QWidget):
     # Update the Views when selection changes
     def update_selected_cat(self) -> None:
         """Update thumb view on change of category"""
+        if not self.material_model or not self.category_model:
+            return
         index = self.cat_list.selectedIndexes()[0]
         if index.data() == "All":
             self.material_sorted_model.invalidate()
@@ -640,6 +664,8 @@ class MatLibPanel(QtWidgets.QWidget):
     def update_single_asset(self) -> None:
         """Rerenders a single Asset in the library
         The UI is blocked for the duration of the render"""
+        if not self.material_model or not self.category_model:
+            return
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
         for index in indexes:
@@ -654,7 +680,8 @@ class MatLibPanel(QtWidgets.QWidget):
             "This will delete the selected material(s) from Disk. Are you sure?"  # type: ignore
         ):
             return
-
+        if not self.material_model or not self.category_model:
+            return
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
         for index in indexes:
@@ -680,13 +707,15 @@ class MatLibPanel(QtWidgets.QWidget):
         self.get_material_info_user(sel)
 
     def get_material_info_user(self, sel: list[hou.Node]) -> None:
+        if not self.material_model or not self.category_model:
+            return
         """Query user for input upon material-save"""
         # Get Stuff from User
         self.usd_dialog_category_model = QtCore.QSortFilterProxyModel()
         self.usd_dialog_category_model.setSourceModel(self.category_sorted_model)
         usd_filter = "^(?!All).*$"
         self.usd_dialog_category_model.setFilterRegularExpression(usd_filter)
-        self.usd_dialog_category_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.usd_dialog_category_model.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)  # type: ignore
         self.usd_dialog_category_model.sort(0)
 
         cats = []
@@ -737,6 +766,8 @@ class MatLibPanel(QtWidgets.QWidget):
         self.prefs.save()
 
     def import_asset(self):
+        if not self.material_model or not self.category_model:
+            return
         """Import Material to scene"""
         for index in self.thumblist.selectedIndexes():
             self.material_model.import_asset_to_scene(
@@ -745,6 +776,8 @@ class MatLibPanel(QtWidgets.QWidget):
 
     def slide(self) -> None:
         """Set IconSize via Slider"""
+        if not self.material_model or not self.category_model:
+            return
         self.material_model.thumbsize = self.click_slider.value()
 
         self.thumblist.setGridSize(
