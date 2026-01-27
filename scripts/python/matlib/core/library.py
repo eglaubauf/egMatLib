@@ -367,10 +367,11 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         for asset in self._assets:
             asset.rename_category(old, new)
 
-    def add_asset(self, node: hou.Node, cats: str, tags: str, fav: bool) -> None:
+    def add_asset(self, node: hou.Node, cats: str, tags: str, fav: bool) -> str:
         """Add a Material to this Library"""
         handler = nodes.NodeHandler(self.preferences)
         renderer = handler.get_renderer_from_node(node)
+        # self.enable_renderer_on_add(renderer)
         new_mat = material.Material()
         tags = self.sanitize_tags(tags)
         new_mat.set_data(node.name(), cats, tags, fav, renderer)
@@ -379,6 +380,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
             self._assets.append(new_mat)
             self._add_thumb_paths(self.index(self.rowCount() - 1, 0))
             self.save()
+        return renderer
 
     def add_asset_from_strings(
         self, name: str, cats: str, tags: str, fav: bool, renderer: str

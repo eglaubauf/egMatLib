@@ -344,15 +344,18 @@ class MatLibPanel(QtWidgets.QWidget):
                 self.material_model.thumbsize + 10, self.material_model.thumbsize + 40
             )
         )
+        self.update_renderer_toggles()
+        self.prefs.load()
+        self.material_model.switch_model_data()
+        self.click_slider.setValue(self.prefs.thumbsize)
+        self.category_model.switch_model_data()
+
+    def update_renderer_toggles(self):
         self.cb_matx.setVisible(self.prefs.renderer_matx_enabled)
         self.cb_mantra.setVisible(self.prefs.renderer_mantra_enabled)
         self.cb_arnold.setVisible(self.prefs.renderer_arnold_enabled)
         self.cb_redshift.setVisible(self.prefs.renderer_redshift_enabled)
         self.cb_octane.setVisible(self.prefs.renderer_octane_enabled)
-        self.prefs.load()
-        self.material_model.switch_model_data()
-        self.click_slider.setValue(self.prefs.thumbsize)
-        self.category_model.switch_model_data()
 
     def cleanup_db(self) -> None:
         """Removes orphan data from disk and highlights missing thumbnails"""
@@ -691,12 +694,33 @@ class MatLibPanel(QtWidgets.QWidget):
 
         self.material_model.layoutAboutToBeChanged.emit()
         self.category_model.layoutAboutToBeChanged.emit()
+        renderers = []
         for asset in sel:
-            self.material_model.add_asset(
+            renderer = self.material_model.add_asset(
                 asset, dialog.categories, dialog.tags, dialog.fav
             )
+            renderers.append(renderer)
+
+        for renderer in renderers:
+            self.enable_renderer_on_add(renderer)
+        self.prefs.save()
+        self.update_renderer_toggles()
+
         self.material_model.layoutChanged.emit()
         self.category_model.layoutChanged.emit()
+
+    def enable_renderer_on_add(self, renderer: str) -> None:
+        if "MaterialX" in renderer:
+            self.prefs.renderer_matx_enabled = True
+        elif "Mantra" in renderer:
+            self.prefs.renderer_mantra_enabled = True
+        elif "Redshift" in renderer:
+            self.prefs.renderer_redshift_enabled = True
+        elif "Arnold" in renderer:
+            self.prefs.renderer_arnold_enabled = True
+        elif "Octane" in renderer:
+            self.prefs.renderer_octane_enabled = True
+        self.prefs.save()
 
     def import_asset(self):
         """Import Material to scene"""
