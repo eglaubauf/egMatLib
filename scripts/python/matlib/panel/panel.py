@@ -83,9 +83,23 @@ class MatLibPanel(QtWidgets.QWidget):
     def open(self) -> None:
         """Open the currently in preferences specified library"""
         self.material_model.save()
-        self.material_model = library.MaterialLibrary()
+        # self.material_model = library.MaterialLibrary()
         self.prefs.load()
         self.load()
+        if not self.material_model:
+            self.setup()
+
+        self.material_model.layoutAboutToBeChanged.emit()
+        self.category_model.layoutAboutToBeChanged.emit()
+
+        self.category_model.switch_model_data()
+        self.material_model.switch_model_data()
+
+        self.click_slider.setValue(self.prefs.thumbsize)
+
+        self.category_model.layoutChanged.emit()
+        self.material_model.layoutChanged.emit()
+
         print("MatLib: Library Reloaded successfully!")  # type: ignore
 
     def load(self) -> None:
