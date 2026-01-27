@@ -213,7 +213,7 @@ class ThumbNailRenderer:
         # Render Frame
         thumb.parm("render").pressButton()
         # CleanUp
-        # thumb.destroy()
+        thumb.destroy()
         if os.path.exists(path + ".exr"):
             os.remove(path + ".exr")
         return True

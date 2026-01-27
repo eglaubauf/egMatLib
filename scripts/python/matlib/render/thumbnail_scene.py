@@ -25,7 +25,7 @@ class ThumbNailScene:
 
         self.display = viewer.getOCIODisplay()
         self.view = viewer.getOCIOView()
-
+        self.ballmode = ballmode
         self.space = "ACESCg"
         for s in hou.Color.ocio_spaces():
             if "acescg" in s.lower():
@@ -416,6 +416,11 @@ class ThumbNailScene:
         self.cam.parm("keeppos").set(1)
         self.cam.setInput(0, null, 0)
         null.parm("ry").set(180)
+
+        if not self.ballmode:
+            null.parm("ry").set(170)
+            null.parm("ty").set(-0.01)
+            null.parm("scale").set(1.1)
 
         if "Redshift" in self.renderer:
             self.cam.setSelected(True, True)
