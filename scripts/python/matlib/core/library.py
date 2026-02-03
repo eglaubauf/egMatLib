@@ -47,7 +47,7 @@ class ThumbnailWorker(QtCore.QThread):
                     QtCore.QSize(BASE_SIZE, BASE_SIZE)
                 )
                 composite = QtGui.QImage(
-                    QtCore.QSize(BASE_SIZE, BASE_SIZE), QtGui.QImage.Format_ARGB32
+                    QtCore.QSize(BASE_SIZE, BASE_SIZE), QtGui.QImage.Format_ARGB32  # type: ignore
                 )
                 painter = QtGui.QPainter(composite)
                 painter.drawImage(0, 0, img)
@@ -74,6 +74,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         self._data = db.load(self.preferences.dir)
 
         self._assets = [material.Material.from_dict(d) for d in self._data["assets"]]
+
         self._tags = self._data["tags"]
 
         self._force_render = False  # Helper Var for Thumb Rendering
