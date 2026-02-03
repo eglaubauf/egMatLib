@@ -31,6 +31,11 @@ class Categories(QtCore.QAbstractListModel):
     ) -> int:
         return len(self._categories)
 
+    def reload(self):
+        db = database.DatabaseConnector()
+        self._data = db.load(self.preferences.dir)
+        self._categories = self._data["categories"]
+
     def data(
         self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
     ) -> Any:
@@ -66,12 +71,14 @@ class Categories(QtCore.QAbstractListModel):
         """Checks if this category exists and adds it if needed"""
         if "Multiple Values..." in cat:
             return
+        changed = False
         for c in cat.split(","):
             c = c.replace(" ", "")
             if c != "" and c not in self._categories:
                 self._categories.append(c)
-
-        self.save()
+                changed = True
+        if changed:
+            self.save()
 
     def save(self) -> None:
         """Save data to disk as json"""
