@@ -1,0 +1,149 @@
+# Initialize parent node variable.
+if locals().get("hou_parent") is None:
+    hou_parent = hou.node("/stage/Base_Materials")
+
+# Code for /stage/Base_Materials/Metal
+hou_node = hou_parent.createNode("subnet", "Metal", run_init_scripts=False, load_contents=True, exact_type_name=True)
+hou_node.move(hou.Vector2(-2.6559, 5.55112e-17))
+hou_node.setDebugFlag(False)
+hou_node.setDetailLowFlag(False)
+hou_node.setDetailMediumFlag(False)
+hou_node.setDetailHighFlag(True)
+hou_node.bypass(False)
+hou_node.setCompressFlag(True)
+hou_node.hide(False)
+hou_node.setSelected(True)
+
+hou_parm_template_group = hou.ParmTemplateGroup()
+# Code for parameter template
+hou_parm_template = hou.FolderParmTemplate("folder1", "Karma Material Builder", folder_type=hou.folderType.Collapsible, default_value=0, ends_tab_group=False)
+hou_parm_template.setTags({"group_type": "collapsible", "sidefx::shader_isparm": "0"})
+# Code for parameter template
+hou_parm_template2 = hou.IntParmTemplate("inherit_ctrl", "Inherit from Class", 1, default_value=([2]), min=0, max=10, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1, menu_items=(["0","1","2"]), menu_labels=(["Never","Always","Material Flag"]), icon_names=([]), item_generator_script="", item_generator_script_language=hou.scriptLanguage.Python, menu_type=hou.menuType.Normal, menu_use_token=False)
+hou_parm_template.addParmTemplate(hou_parm_template2)
+# Code for parameter template
+hou_parm_template2 = hou.StringParmTemplate("shader_referencetype", "Class Arc", 1, default_value=(["n = hou.pwd()\nn_hasFlag = n.isMaterialFlagSet()\ni = n.evalParm('inherit_ctrl')\nr = 'none'\nif i == 1 or (n_hasFlag and i == 2):\n    r = 'inherit'\nreturn r"]), default_expression=(["n = hou.pwd()\nn_hasFlag = n.isMaterialFlagSet()\ni = n.evalParm('inherit_ctrl')\nr = 'none'\nif i == 1 or (n_hasFlag and i == 2):\n    r = 'inherit'\nreturn r"]), default_expression_language=([hou.scriptLanguage.Python]), naming_scheme=hou.parmNamingScheme.Base1, string_type=hou.stringParmType.Regular, menu_items=(["none","reference","inherit","specialize","represent"]), menu_labels=(["None","Reference","Inherit","Specialize","Represent"]), icon_names=([]), item_generator_script="", item_generator_script_language=hou.scriptLanguage.Python, menu_type=hou.menuType.Normal)
+hou_parm_template2.setTags({"sidefx::shader_isparm": "0", "spare_category": "Shader"})
+hou_parm_template.addParmTemplate(hou_parm_template2)
+# Code for parameter template
+hou_parm_template2 = hou.StringParmTemplate("shader_baseprimpath", "Class Prim Path", 1, default_value=(["/__class_mtl__/`$OS`"]), naming_scheme=hou.parmNamingScheme.Base1, string_type=hou.stringParmType.Regular, menu_items=([]), menu_labels=([]), icon_names=([]), item_generator_script="", item_generator_script_language=hou.scriptLanguage.Python, menu_type=hou.menuType.Normal)
+hou_parm_template2.setTags({"script_action": "import lopshaderutils\nlopshaderutils.selectPrimFromInputOrFile(kwargs)", "script_action_help": "Select a primitive in the Scene Viewer or Scene Graph Tree pane.\nCtrl-click to select using the primitive picker dialog.", "script_action_icon": "BUTTONS_reselect", "sidefx::shader_isparm": "0", "sidefx::usdpathtype": "prim", "spare_category": "Shader"})
+hou_parm_template.addParmTemplate(hou_parm_template2)
+# Code for parameter template
+hou_parm_template2 = hou.SeparatorParmTemplate("separator1")
+hou_parm_template.addParmTemplate(hou_parm_template2)
+# Code for parameter template
+hou_parm_template2 = hou.StringParmTemplate("tabmenumask", "Tab Menu Mask", 1, default_value=(["karma USD ^mtlxUsd* ^mtlxramp* ^hmtlxramp* ^hmtlxcubicramp* MaterialX parameter constant collect null genericshader subnet subnetconnector suboutput subinput"]), naming_scheme=hou.parmNamingScheme.Base1, string_type=hou.stringParmType.Regular, menu_items=([]), menu_labels=([]), icon_names=([]), item_generator_script="", item_generator_script_language=hou.scriptLanguage.Python, menu_type=hou.menuType.Normal)
+hou_parm_template2.setTags({"spare_category": "Tab Menu"})
+hou_parm_template.addParmTemplate(hou_parm_template2)
+# Code for parameter template
+hou_parm_template2 = hou.StringParmTemplate("shader_rendercontextname", "Render Context Name", 1, default_value=(["kma"]), naming_scheme=hou.parmNamingScheme.Base1, string_type=hou.stringParmType.Regular, menu_items=([]), menu_labels=([]), icon_names=([]), item_generator_script="", item_generator_script_language=hou.scriptLanguage.Python, menu_type=hou.menuType.Normal)
+hou_parm_template2.setTags({"sidefx::shader_isparm": "0", "spare_category": "Shader"})
+hou_parm_template.addParmTemplate(hou_parm_template2)
+# Code for parameter template
+hou_parm_template2 = hou.ToggleParmTemplate("shader_forcechildren", "Force Translation of Children", default_value=True)
+hou_parm_template2.setTags({"sidefx::shader_isparm": "0", "spare_category": "Shader"})
+hou_parm_template.addParmTemplate(hou_parm_template2)
+hou_parm_template_group.append(hou_parm_template)
+hou_node.setParmTemplateGroup(hou_parm_template_group)
+# Code for /stage/Base_Materials/Metal/folder1 parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/Base_Materials/Metal")
+hou_parm = hou_node.parm("folder1")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(1)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/Base_Materials/Metal/inherit_ctrl parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/Base_Materials/Metal")
+hou_parm = hou_node.parm("inherit_ctrl")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(2)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/Base_Materials/Metal/shader_referencetype parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/Base_Materials/Metal")
+hou_parm = hou_node.parm("shader_referencetype")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set("inherit")
+hou_parm.setAutoscope(False)
+
+# Code for first keyframe.
+# Code for keyframe.
+hou_keyframe = hou.StringKeyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("n = hou.pwd()\nn_hasFlag = n.isMaterialFlagSet()\ni = n.evalParm('inherit_ctrl')\nr = 'none'\nif i == 1 or (n_hasFlag and i == 2):\n    r = 'inherit'\nreturn r", hou.exprLanguage.Python)
+hou_parm.setKeyframe(hou_keyframe)
+
+# Code for last keyframe.
+# Code for keyframe.
+hou_keyframe = hou.StringKeyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("n = hou.pwd()\nn_hasFlag = n.isMaterialFlagSet()\ni = n.evalParm('inherit_ctrl')\nr = 'none'\nif i == 1 or (n_hasFlag and i == 2):\n    r = 'inherit'\nreturn r", hou.exprLanguage.Python)
+hou_parm.setKeyframe(hou_keyframe)
+
+# Code for keyframe.
+hou_keyframe = hou.StringKeyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("n = hou.pwd()\nn_hasFlag = n.isMaterialFlagSet()\ni = n.evalParm('inherit_ctrl')\nr = 'none'\nif i == 1 or (n_hasFlag and i == 2):\n    r = 'inherit'\nreturn r", hou.exprLanguage.Python)
+hou_parm.setKeyframe(hou_keyframe)
+
+# Code for keyframe.
+hou_keyframe = hou.StringKeyframe()
+hou_keyframe.setTime(0)
+hou_keyframe.setExpression("n = hou.pwd()\nn_hasFlag = n.isMaterialFlagSet()\ni = n.evalParm('inherit_ctrl')\nr = 'none'\nif i == 1 or (n_hasFlag and i == 2):\n    r = 'inherit'\nreturn r", hou.exprLanguage.Python)
+hou_parm.setKeyframe(hou_keyframe)
+
+
+# Code for /stage/Base_Materials/Metal/shader_baseprimpath parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/Base_Materials/Metal")
+hou_parm = hou_node.parm("shader_baseprimpath")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set("/__class_mtl__/`$OS`")
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/Base_Materials/Metal/tabmenumask parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/Base_Materials/Metal")
+hou_parm = hou_node.parm("tabmenumask")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set("karma USD ^mtlxUsd* ^mtlxramp* ^hmtlxramp* ^hmtlxcubicramp* MaterialX parameter constant collect null genericshader subnet subnetconnector suboutput subinput")
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/Base_Materials/Metal/shader_rendercontextname parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/Base_Materials/Metal")
+hou_parm = hou_node.parm("shader_rendercontextname")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set("kma")
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/Base_Materials/Metal/shader_forcechildren parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/Base_Materials/Metal")
+hou_parm = hou_node.parm("shader_forcechildren")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(1)
+hou_parm.setAutoscope(False)
+
+
+hou_node.setExpressionLanguage(hou.exprLanguage.Hscript)
+
+hou_node.setUserData("___Version___", "21.0.596")
+if hasattr(hou_node, "syncNodeVersionIfNeeded"):
+    hou_node.syncNodeVersionIfNeeded("21.0.596")

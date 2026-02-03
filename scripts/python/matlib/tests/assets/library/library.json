@@ -1,0 +1,115 @@
+{
+    "categories": [
+        "_All",
+        "Karma_Mats",
+        "usds"
+    ],
+    "tags": [],
+    "assets": [
+        {
+            "id": -1,
+            "name": "",
+            "categories": [
+                ""
+            ],
+            "tags": [
+                ""
+            ],
+            "favorite": 0,
+            "date": -1,
+            "renderer": "",
+            "usd": 0,
+            "builder": 0
+        },
+        {
+            "id": "139888336268658010",
+            "name": "Metal",
+            "categories": [
+                "Karma_Mats"
+            ],
+            "tags": [
+                ""
+            ],
+            "favorite": false,
+            "date": "2026-01-27 20:07:06",
+            "renderer": "MaterialX",
+            "usd": 1,
+            "builder": 0
+        },
+        {
+            "id": "139888336377945550",
+            "name": "Bricks",
+            "categories": [
+                "Karma_Mats"
+            ],
+            "tags": [
+                ""
+            ],
+            "favorite": false,
+            "date": "2026-01-27 20:07:17",
+            "renderer": "MaterialX",
+            "usd": 1,
+            "builder": 0
+        },
+        {
+            "id": "139888336889814930",
+            "name": "gold",
+            "categories": [
+                "usds"
+            ],
+            "tags": [
+                ""
+            ],
+            "favorite": false,
+            "date": "2026-01-27 20:08:08",
+            "renderer": "MaterialX",
+            "usd": 1,
+            "builder": 0
+        },
+        {
+            "id": "139888337058723210",
+            "name": "glass",
+            "categories": [
+                "usds"
+            ],
+            "tags": [
+                ""
+            ],
+            "favorite": false,
+            "date": "2026-01-27 20:08:25",
+            "renderer": "MaterialX",
+            "usd": 1,
+            "builder": 0
+        },
+        {
+            "id": "139888337254621540",
+            "name": "bubblegum",
+            "categories": [
+                "usds"
+            ],
+            "tags": [
+                ""
+            ],
+            "favorite": false,
+            "date": "2026-01-27 20:08:45",
+            "renderer": "MaterialX",
+            "usd": 1,
+            "builder": 0
+        },
+        {
+            "id": "139888337459841200",
+            "name": "plastic",
+            "categories": [
+                "usds"
+            ],
+            "tags": [
+                ""
+            ],
+            "favorite": false,
+            "date": "2026-01-27 20:09:05",
+            "renderer": "MaterialX",
+            "usd": 1,
+            "builder": 0
+        }
+    ]
+}

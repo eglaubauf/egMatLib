@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<materialx version="1.39" fileprefix="./">
+  <open_pbr_surface ypos="-1.879310" xpos="6.159420" type="surfaceshader" name="Metal055A_1K_JPG_OpenPbrSurface">
+    <input nodename="Metal055A_1K_JPG_Color" type="color3" name="base_color" />
+    <input nodename="Metal055A_1K_JPG_Metalness" type="float" name="base_metalness" />
+    <input nodename="NormalMap" type="vector3" name="geometry_normal" />
+    <input nodename="Metal055A_1K_JPG_Roughness" type="float" name="specular_roughness" />
+  </open_pbr_surface>
+  <surfacematerial ypos="0.000000" xpos="8.695652" type="material" name="Metal055A_1K_JPG">
+    <input nodename="Metal055A_1K_JPG_OpenPbrSurface" type="surfaceshader" name="surfaceshader" />
+    <input nodename="displacement" type="displacementshader" name="displacementshader" />
+  </surfacematerial>
+  <tiledimage ypos="-3.103448" xpos="3.623188" type="color3" name="Metal055A_1K_JPG_Color">
+    <input value="Metal055A_1K-JPG_Color.jpg" type="filename" name="file" colorspace="srgb_texture" />
+    <input value="1.0, 1.0" type="vector2" name="uvtiling" />
+  </tiledimage>
+  <tiledimage ypos="5.163793" xpos="3.623188" type="float" name="Metal055A_1K_JPG_Displacement">
+    <input value="Metal055A_1K-JPG_Displacement.jpg" type="filename" name="file" />
+    <input value="1.0, 1.0" type="vector2" name="uvtiling" />
+  </tiledimage>
+  <displacement ypos="1.879310" xpos="6.159420" type="displacementshader" name="displacement">
+    <input nodename="Metal055A_1K_JPG_Displacement" type="float" name="displacement" />
+    <input value="1.0" type="float" name="scale" />
+  </displacement>
+  <tiledimage ypos="-1.758621" xpos="3.623188" type="float" name="Metal055A_1K_JPG_Metalness">
+    <input value="Metal055A_1K-JPG_Metalness.jpg" type="filename" name="file" />
+    <input value="1.0, 1.0" type="vector2" name="uvtiling" />
+  </tiledimage>
+  <tiledimage ypos="0.879310" xpos="1.086957" type="vector3" name="Metal055A_1K_JPG_NormalGL">
+    <input value="Metal055A_1K-JPG_NormalGL.jpg" type="filename" name="file" />
+    <input value="1.0, 1.0" type="vector2" name="uvtiling" />
+  </tiledimage>
+  <normalmap ypos="3.586207" xpos="3.623188" type="vector3" name="NormalMap">
+    <input nodename="Metal055A_1K_JPG_NormalGL" type="vector3" name="in" />
+    <input value="1.0" type="float" name="scale" />
+  </normalmap>
+  <tiledimage ypos="-0.413793" xpos="3.623188" type="float" name="Metal055A_1K_JPG_Roughness">
+    <input value="Metal055A_1K-JPG_Roughness.jpg" type="filename" name="file" />
+    <input value="1.0, 1.0" type="vector2" name="uvtiling" />
+  </tiledimage>
+</materialx>

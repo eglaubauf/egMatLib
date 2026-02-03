@@ -1,0 +1,1298 @@
+# Initialize parent node variable.
+if locals().get("hou_parent") is None:
+    hou_parent = hou.node("/stage/bubblegum_edit")
+
+# Code for /stage/bubblegum_edit/bubblegum
+hou_node = hou_parent.createNode("subnet", "bubblegum", run_init_scripts=False, load_contents=True, exact_type_name=True)
+hou_node.move(hou.Vector2(-2.6559, -3.88578e-16))
+hou_node.setDebugFlag(False)
+hou_node.setDetailLowFlag(False)
+hou_node.setDetailMediumFlag(False)
+hou_node.setDetailHighFlag(True)
+hou_node.bypass(False)
+hou_node.setCompressFlag(True)
+hou_node.hide(False)
+hou_node.setSelected(True)
+
+hou_parm_template_group = hou.ParmTemplateGroup()
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__base", "__activate__base", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("base", "base", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__base_color", "__activate__base_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("base_color", "base_color", 3, default_value=([0, 0, 0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat", "__activate__coat", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat", "coat", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_affect_color", "__activate__coat_affect_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_affect_color", "coat_affect_color", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_affect_roughness", "__activate__coat_affect_roughness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_affect_roughness", "coat_affect_roughness", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_anisotropy", "__activate__coat_anisotropy", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_anisotropy", "coat_anisotropy", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_color", "__activate__coat_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_color", "coat_color", 3, default_value=([0, 0, 0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_IOR", "__activate__coat_IOR", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_IOR", "coat_IOR", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_normal", "__activate__coat_normal", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_normal", "coat_normal", 3, default_value=([0, 0, 0]), min=0, max=10, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float3"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_rotation", "__activate__coat_rotation", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_rotation", "coat_rotation", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__coat_roughness", "__activate__coat_roughness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("coat_roughness", "coat_roughness", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__diffuse_roughness", "__activate__diffuse_roughness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("diffuse_roughness", "diffuse_roughness", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__emission", "__activate__emission", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("emission", "emission", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__emission_color", "__activate__emission_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("emission_color", "emission_color", 3, default_value=([0, 0, 0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__metalness", "__activate__metalness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("metalness", "metalness", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__normal", "__activate__normal", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("normal", "normal", 3, default_value=([0, 0, 0]), min=0, max=10, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float3"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__opacity", "__activate__opacity", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("opacity", "opacity", 3, default_value=([0, 0, 0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__sheen", "__activate__sheen", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("sheen", "sheen", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__sheen_color", "__activate__sheen_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("sheen_color", "sheen_color", 3, default_value=([0, 0, 0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__sheen_roughness", "__activate__sheen_roughness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("sheen_roughness", "sheen_roughness", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__specular", "__activate__specular", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("specular", "specular", 1, default_value=([0.383]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__specular_anisotropy", "__activate__specular_anisotropy", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("specular_anisotropy", "specular_anisotropy", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__specular_color", "__activate__specular_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("specular_color", "specular_color", 3, default_value=([1, 1, 1]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__specular_IOR", "__activate__specular_IOR", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("specular_IOR", "specular_IOR", 1, default_value=([1.584]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__specular_rotation", "__activate__specular_rotation", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("specular_rotation", "specular_rotation", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__specular_roughness", "__activate__specular_roughness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("specular_roughness", "specular_roughness", 1, default_value=([0.176]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__subsurface", "__activate__subsurface", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("subsurface", "subsurface", 1, default_value=([1]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__subsurface_anisotropy", "__activate__subsurface_anisotropy", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("subsurface_anisotropy", "subsurface_anisotropy", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__subsurface_color", "__activate__subsurface_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("subsurface_color", "subsurface_color", 3, default_value=([1, 0.22, 0.493]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__subsurface_radius", "__activate__subsurface_radius", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("subsurface_radius", "subsurface_radius", 3, default_value=([1, 0, 0.068]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__subsurface_scale", "__activate__subsurface_scale", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("subsurface_scale", "subsurface_scale", 1, default_value=([0.0325]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__tangent", "__activate__tangent", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("tangent", "tangent", 3, default_value=([0, 0, 0]), min=0, max=10, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float3"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__thin_film_IOR", "__activate__thin_film_IOR", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("thin_film_IOR", "thin_film_IOR", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__thin_film_thickness", "__activate__thin_film_thickness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("thin_film_thickness", "thin_film_thickness", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__thin_walled", "__activate__thin_walled", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.IntParmTemplate("thin_walled", "thin_walled", 1, default_value=([0]), min=0, max=10, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1, menu_items=([]), menu_labels=([]), icon_names=([]), item_generator_script="", item_generator_script_language=hou.scriptLanguage.Python, menu_type=hou.menuType.Normal, menu_use_token=False)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "bool"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__transmission", "__activate__transmission", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("transmission", "transmission", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__transmission_color", "__activate__transmission_color", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("transmission_color", "transmission_color", 3, default_value=([0, 0, 0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__transmission_depth", "__activate__transmission_depth", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("transmission_depth", "transmission_depth", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__transmission_dispersion", "__activate__transmission_dispersion", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("transmission_dispersion", "transmission_dispersion", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__transmission_extra_roughness", "__activate__transmission_extra_roughness", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("transmission_extra_roughness", "transmission_extra_roughness", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__transmission_scatter", "__activate__transmission_scatter", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("transmission_scatter", "transmission_scatter", 3, default_value=([0, 0, 0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.ColorSquare, naming_scheme=hou.parmNamingScheme.RGBA)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "color3f"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.ToggleParmTemplate("__activate__transmission_scatter_anisotropy", "__activate__transmission_scatter_anisotropy", default_value=False)
+hou_parm_template.hideLabel(True)
+hou_parm_template.setJoinWithNext(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.FloatParmTemplate("transmission_scatter_anisotropy", "transmission_scatter_anisotropy", 1, default_value=([0]), min=0, max=1, min_is_strict=False, max_is_strict=False, look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1)
+hou_parm_template.setTags({"parmvop": "1", "sidefx::shader_parmtype": "float"})
+hou_parm_template_group.append(hou_parm_template)
+# Code for parameter template
+hou_parm_template = hou.StringParmTemplate("shader_shaderprimname", "Shader Primitive Name", 1, default_value=([""]), naming_scheme=hou.parmNamingScheme.Base1, string_type=hou.stringParmType.Regular, menu_items=([]), menu_labels=([]), icon_names=([]), item_generator_script="", item_generator_script_language=hou.scriptLanguage.Python, menu_type=hou.menuType.Normal)
+hou_parm_template.hide(True)
+hou_parm_template.setTags({"sidefx::shader_isparm": "0"})
+hou_parm_template_group.append(hou_parm_template)
+hou_node.setParmTemplateGroup(hou_parm_template_group)
+# Code for /stage/bubblegum_edit/bubblegum/__activate__base parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__base")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/base parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("base")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__base_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__base_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/base_color parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("base_color")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("coat")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_affect_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_affect_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_affect_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("coat_affect_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_affect_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_affect_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_affect_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("coat_affect_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("coat_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_color parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("coat_color")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_IOR parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_IOR")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_IOR parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("coat_IOR")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_normal parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_normal")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_normal parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("coat_normal")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_rotation parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_rotation")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_rotation parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("coat_rotation")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__coat_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__coat_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/coat_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("coat_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__diffuse_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__diffuse_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/diffuse_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("diffuse_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__emission parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__emission")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/emission parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("emission")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__emission_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__emission_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/emission_color parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("emission_color")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__metalness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__metalness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/metalness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("metalness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__normal parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__normal")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/normal parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("normal")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__opacity parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__opacity")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/opacity parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("opacity")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__sheen parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__sheen")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/sheen parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("sheen")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__sheen_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__sheen_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/sheen_color parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("sheen_color")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__sheen_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__sheen_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/sheen_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("sheen_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__specular parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__specular")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/specular parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("specular")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0.38299998641014099)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__specular_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__specular_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/specular_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("specular_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__specular_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__specular_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/specular_color parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("specular_color")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((1, 1, 1))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__specular_IOR parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__specular_IOR")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/specular_IOR parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("specular_IOR")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(1.5839999914169312)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__specular_rotation parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__specular_rotation")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/specular_rotation parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("specular_rotation")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__specular_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__specular_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/specular_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("specular_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0.17599999904632568)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__subsurface parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__subsurface")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/subsurface parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("subsurface")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(1)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__subsurface_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__subsurface_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/subsurface_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("subsurface_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__subsurface_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__subsurface_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/subsurface_color parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("subsurface_color")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((1, 0.2199999988079071, 0.49300000071525574))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__subsurface_radius parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__subsurface_radius")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/subsurface_radius parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("subsurface_radius")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((1, 0, 0.068000003695487976))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__subsurface_scale parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__subsurface_scale")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/subsurface_scale parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("subsurface_scale")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0.032499998807907104)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__tangent parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__tangent")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/tangent parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("tangent")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__thin_film_IOR parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__thin_film_IOR")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/thin_film_IOR parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("thin_film_IOR")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__thin_film_thickness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__thin_film_thickness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/thin_film_thickness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("thin_film_thickness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__thin_walled parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__thin_walled")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/thin_walled parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("thin_walled")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__transmission parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__transmission")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/transmission parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("transmission")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__transmission_color parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__transmission_color")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/transmission_color parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("transmission_color")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__transmission_depth parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__transmission_depth")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/transmission_depth parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("transmission_depth")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__transmission_dispersion parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__transmission_dispersion")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/transmission_dispersion parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("transmission_dispersion")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__transmission_extra_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__transmission_extra_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/transmission_extra_roughness parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("transmission_extra_roughness")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__transmission_scatter parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__transmission_scatter")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/transmission_scatter parm tuple
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm_tuple = hou_node.parmTuple("transmission_scatter")
+hou_parm_tuple.lock((False, False, False))
+hou_parm_tuple.deleteAllKeyframes()
+hou_parm_tuple.set((0, 0, 0))
+hou_parm_tuple.setAutoscope((False, False, False))
+
+
+# Code for /stage/bubblegum_edit/bubblegum/__activate__transmission_scatter_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("__activate__transmission_scatter_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/transmission_scatter_anisotropy parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("transmission_scatter_anisotropy")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set(0)
+hou_parm.setAutoscope(False)
+
+
+# Code for /stage/bubblegum_edit/bubblegum/shader_shaderprimname parm 
+if locals().get("hou_node") is None:
+    hou_node = hou.node("/stage/bubblegum_edit/bubblegum")
+hou_parm = hou_node.parm("shader_shaderprimname")
+hou_parm.lock(False)
+hou_parm.deleteAllKeyframes()
+hou_parm.set("bubblegum")
+hou_parm.setAutoscope(False)
+
+
+hou_node.setExpressionLanguage(hou.exprLanguage.Hscript)
+
+hou_node.setUserData("___Version___", "21.0.596")
+if hasattr(hou_node, "syncNodeVersionIfNeeded"):
+    hou_node.syncNodeVersionIfNeeded("21.0.596")
