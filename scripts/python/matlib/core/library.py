@@ -306,7 +306,8 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     def remove_asset(self, index: QtCore.QModelIndex) -> None:
         """Removes a material from this Library and Disk
         the library is saved immediately after"""
-
+        if not self.hasIndex(index.row(), 0):
+            return
         if len(self._assets) < index.row() + 1:
             return
         asset = self._assets[index.row()]
