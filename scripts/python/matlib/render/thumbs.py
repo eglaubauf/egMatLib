@@ -155,32 +155,61 @@ class ThumbNailRenderer:
         rop.parm("soho_foreground").set(1)
         rop.parm("execute").pressButton()
 
-        # Copnet Setup
-        copnet = rop.parent().createNode("cop2net")
-        copnet.setName("exr_to_png")
+        if hou.applicationVersion()[0] > 20:
+            # Copnet Setup
+            copnet = rop.parent().createNode("copnet")
+            copnet.setName("exr_to_png")
 
-        cop_file = copnet.createNode("file")
-        cop_file.parm("nodename").set(0)
-        cop_file.parm("filename1").set(path)
-        cop_file.parm("colorspace").set(3)  # Set to OpenColorIO
-        cop_file.parm("ocio_space").set(space)
-        cop_out = copnet.createNode("rop_comp")
-        cop_out.parm("trange").set(0)
+            cop_file = copnet.createNode("file")
 
-        cop_out.setInput(0, cop_file)
-        cop_out.parm("convertcolorspace").set(3)
-        cop_out.parm("ocio_display").set(display)
-        cop_out.parm("ocio_view").set(view)
+            cop_file.parm("filename").set(path)
+            cop_file.parm("aovs").set(1)
+            cop_file.parm("aov1").set("C")
+            cop_out = copnet.createNode("rop_image")
+            cop_out.parm("trange").set(0)
 
-        newpath = (
-            self._preferences.dir
-            + self._preferences.img_dir
-            + str(asset_id)
-            + self._preferences.img_ext
-        )
+            cop_out.setInput(0, cop_file)
+            cop_out.parm("colorconversion").set(1)  # Set to Bake OpenColorIO
+            cop_out.parm("ociodisplay").set(display)
+            cop_out.parm("ocioview").set(view)
 
-        cop_out.parm("copoutput").set(newpath)
-        cop_out.parm("execute").pressButton()
+            newpath = (
+                self._preferences.dir
+                + self._preferences.img_dir
+                + str(asset_id)
+                + self._preferences.img_ext
+            )
+
+            cop_out.parm("copoutput").set(newpath)
+            cop_out.parm("execute").pressButton()
+
+        else:  # Use Old COPs with restricted OCIO Capabilities
+            # Copnet Setup
+            copnet = rop.parent().createNode("cop2net")
+            copnet.setName("exr_to_png")
+
+            cop_file = copnet.createNode("file")
+            cop_file.parm("nodename").set(0)
+            cop_file.parm("filename1").set(path)
+            cop_file.parm("colorspace").set(3)  # Set to OpenColorIO
+            cop_file.parm("ocio_space").set(space)
+            cop_out = copnet.createNode("rop_comp")
+            cop_out.parm("trange").set(0)
+
+            cop_out.setInput(0, cop_file)
+            cop_out.parm("convertcolorspace").set(3)
+            cop_out.parm("ocio_display").set(display)
+            cop_out.parm("ocio_view").set(view)
+
+            newpath = (
+                self._preferences.dir
+                + self._preferences.img_dir
+                + str(asset_id)
+                + self._preferences.img_ext
+            )
+
+            cop_out.parm("copoutput").set(newpath)
+            cop_out.parm("execute").pressButton()
 
         net.destroy()
 
