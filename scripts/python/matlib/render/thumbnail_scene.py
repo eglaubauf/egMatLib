@@ -294,10 +294,20 @@ class ThumbNailScene:
 
         elif "Octane" in self.renderer:
             # Lights
+
             self.lgt_right = self.geo_node.createNode("octane_light")
             self.lgt_right.setName("Right")
             self.lgt_left = self.geo_node.createNode("octane_light")
             self.lgt_right.setName("Left")
+
+            # Octane Version Madness!
+            if self.lgt_right.parm("blackbody_efficiency_color_A_VALUEr"):
+                self.lgt_right.parm("blackbody_efficiency_color_A_VALUEr").set(1)
+                self.lgt_right.parm("blackbody_efficiency_color_A_VALUEg").set(1)
+                self.lgt_right.parm("blackbody_efficiency_color_A_VALUEb").set(1)
+                self.lgt_left.parm("blackbody_efficiency_color_A_VALUEr").set(1)
+                self.lgt_left.parm("blackbody_efficiency_color_A_VALUEg").set(1)
+                self.lgt_left.parm("blackbody_efficiency_color_A_VALUEb").set(1)
 
             # Right
             self.lgt_right.parm("tx").set(0.182989)
