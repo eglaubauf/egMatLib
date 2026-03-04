@@ -69,10 +69,12 @@ class MultiFilterProxyModel(QtCore.QSortFilterProxyModel):
                 if curr_filter != data and curr_filter != "":
                     return False
             elif role == 259:  # Check Renderer:
-                if "all" in curr_filter.lower() and data.lower() != "":
-                    return True
                 if curr_filter.lower() not in data.lower():
-                    render_filter = False
+                    if "" == data:
+                        render_filter = False
+                    elif not "all_renderers" in curr_filter.lower():
+                        render_filter = False
+
             elif role == 260:  # is TagRole
                 tag_filter = False
                 for elem in data:

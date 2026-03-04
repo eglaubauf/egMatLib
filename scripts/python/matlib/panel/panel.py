@@ -525,6 +525,8 @@ class MatLibPanel(QtWidgets.QWidget):
         if not self.material_model or not self.category_model:
             return
         render_filter = self.cb_matx.group().checkedButton().text()
+        if render_filter == "All":
+            render_filter = "all_renderers"
         self.material_sorted_model.setFilter(
             self.material_model.RendererRole, render_filter
         )
