@@ -612,7 +612,7 @@
                     <bool>true</bool>
                    </property>
                    <property name="text">
-                    <string>MaterialX</string>
+                    <string>Karma</string>
                    </property>
                    <property name="checked">
                     <bool>false</bool>

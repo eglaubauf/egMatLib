@@ -21,6 +21,8 @@ elif n.type().name() == "subnet":
     return True
 elif n.type().name() == "collect":
     return True
+elif "mtlxopen_pbr_surface" in n.type().name():
+    return True
 return False ]]>
                     </expression>
             </context>
@@ -40,6 +42,8 @@ elif n.type().name() == "arnold_materialbuilder":
 elif n.type().name() == "subnet":
     return "Save Material to MatLib"
 elif n.type().name() == "collect":
+    return "Save Material to MatLib"
+elif "mtlxopen_pbr_surface" in n.type().name():
     return "Save Material to MatLib"
 return "Unavailable in this Context"
 ]]>
@@ -84,6 +88,12 @@ elif n.type().name() == "subnet":
     importlib.reload(rc_calls)
     rc_calls.save_material()
 elif n.type().name() == "collect":
+    import matlib
+    from matlib.utils import rc_calls
+    import importlib
+    importlib.reload(rc_calls)
+    rc_calls.save_material()
+elif "mtlxopen_pbr_surface" in n.type().name():
     import matlib
     from matlib.utils import rc_calls
     import importlib

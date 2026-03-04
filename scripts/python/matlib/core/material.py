@@ -176,6 +176,8 @@ class Material:
         :return: Description
         :rtype: str
         """
+        if self._renderer == "MaterialX":
+            return "Karma"
         return self._renderer
 
     @renderer.setter
@@ -282,12 +284,7 @@ class Material:
                 self._cats[index] = new
 
     def set_data(
-        self,
-        name: str | None,
-        cats: str,
-        tags: str,
-        fav: bool,
-        renderer: str | None,
+        self, name: str | None, cats: str, tags: str, fav: bool, renderer: str | None
     ) -> None:
         """
         Sets the Material Data to the given parameters

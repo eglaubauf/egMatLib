@@ -94,13 +94,16 @@ class NodeHandler:
         elif node.type().name() == "octane_vopnet":
             self._renderer = "Octane"
             self._builder = 1
+        elif "mtlxopen_pbr_surface" in node.type().name():
+            self._renderer = "Karma"
+            self._builder = 0
         elif node.type().name() == "subnet":
+            self._builder = 1
             for n in node.children():
                 if "mtlx" in n.type().name():
-                    self._renderer = "MaterialX"
-                    self._builder = 0
+                    self._renderer = "Karma"
         elif node.type().name() == "collect":
-            self._renderer = "MaterialX"
+            self._renderer = "Karma"
             self._builder = 0
         return self._renderer
 
@@ -116,7 +119,7 @@ class NodeHandler:
 
         self.update_context()
         self._hou_parent = hou.node("/obj").createNode("matnet")
-        if "MaterialX" in mat.renderer:
+        if "MaterialX" or "Karma" in mat.renderer:
             self.load_interface_mtlx(parms_file_name, mat)
             self.load_items_file(mat)
         elif mat.renderer == "Mantra":
@@ -304,8 +307,9 @@ class NodeHandler:
             hou.ui.displayMessage("Failure on Import. Please Check Files.")  # type: ignore
             return None
 
-        new_mat = hou.moveNodesTo((self._builder_node,), self._import_path)  # type: ignore
-        new_mat[0].moveToGoodPosition()
+        new_mat = hou.moveNodesTo(self._builder_node.children(), self._import_path)  # type: ignore
+        self.builder_node.destroy()
+        # new_mat[0].moveToGoodPosition()
         self._builder_node = new_mat[0]
 
     def save_node(self, node: hou.Node, asset_id: str, update: bool) -> bool:
@@ -335,7 +339,7 @@ class NodeHandler:
                 "Rendering", "Performing Tasks", open_interrupt_dialog=True
             ):
                 val = self.save_node_octane(node, asset_id, update)
-        elif "MaterialX" in self._renderer:
+        elif "MaterialX" or "Karma" in self._renderer:
             if node.type().name() == "collect":
                 with hou.InterruptableOperation(
                     "Rendering", "Performing Tasks", open_interrupt_dialog=True
@@ -406,15 +410,16 @@ class NodeHandler:
             + ".interface"
         )
 
-        children = node.children()
+        builder = hou.node("/obj").createNode("matnet")
+        copied = hou.copyNodesTo((node,), builder)  # type: ignore
 
         interface_file = open(parms_file_name, "w", encoding="utf-8")
         interface_file.write(node.asCode())
 
-        node.saveItemsToFile(children, file_name, save_hda_fallbacks=False)
+        builder.saveItemsToFile(copied, file_name, save_hda_fallbacks=False)
 
-        if "subnet" in node.type().name():
-            children = [node]
+        if builder != "":
+            builder.destroy()
 
         # If this is not a manual update and render_on_import is off, finish here
         if not update:

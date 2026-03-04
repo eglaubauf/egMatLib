@@ -29,7 +29,7 @@ class ThumbNailRenderer:
         with hou.InterruptableOperation(
             "Rendering", "Performing Tasks", open_interrupt_dialog=True
         ):
-            if self._mat.renderer == "MaterialX":
+            if self._mat.renderer == "MaterialX" or self._mat.renderer == "Karma":
                 self.create_thumb_mtlx(node_handler.builder_node, self._mat.mat_id)
             elif self._mat.renderer == "Mantra":
                 self.create_thumb_mantra(node_handler.builder_node, self._mat.mat_id)
@@ -100,11 +100,14 @@ class ThumbNailRenderer:
         lib.setFirstInput(lib1)
 
         curr_items = node
-
-        if curr_items.type().name() == "subnet":
-            curr_items = (node,)
-        elif not isinstance(node, list):
-            curr_items = node.children()
+        # print(curr_items)  # TODO: Fails if is list
+        if not isinstance(node, list):
+            if curr_items.type().name() == "subnet":
+                curr_items = (node,)
+            elif "mtlxopen_pbr_surface" in curr_items.type().name():
+                curr_items = (node,)
+            else:
+                curr_items = node.children()
 
         curr_nodes = hou.copyNodesTo(curr_items, lib)  # type: ignore
         curr_nodes[0].setSelected(True)
