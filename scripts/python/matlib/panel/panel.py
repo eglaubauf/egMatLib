@@ -686,8 +686,14 @@ class MatLibPanel(QtWidgets.QWidget):
             return
         indexes = self.material_selection_model.selectedIndexes()
         self.material_model.layoutAboutToBeChanged.emit()
+
+        real_indexes = []
         for index in indexes:
             idx = self.material_sorted_model.mapToSource(index)
+            real_indexes.append(idx)
+
+        real_indexes.sort(key=lambda idx: idx.row(), reverse=True)
+        for idx in real_indexes:
             self.material_model.remove_asset(idx)
 
         self.material_model.layoutChanged.emit()

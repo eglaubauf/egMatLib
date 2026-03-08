@@ -198,6 +198,16 @@ class MaterialLibrary(QtCore.QAbstractListModel):
     ) -> int:
         return len(self._assets)
 
+    def removeRow(
+        self,
+        row: int,
+        /,
+        parent: QtCore.QModelIndex | QtCore.QPersistentModelIndex = ...,
+    ) -> bool:
+        self._assets.remove(self._assets[row])
+        self._remove_thumb(row)
+        return True
+
     def data(
         self, index: QtCore.QModelIndex | QtCore.QPersistentModelIndex, role: int = 0
     ) -> Any:
@@ -337,8 +347,7 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         if os.path.exists(interface_file_path):
             os.remove(interface_file_path)
 
-        self._assets.remove(asset)
-        self._remove_thumb(index.row())
+        self.removeRow(index.row())
 
         self.save()
 
