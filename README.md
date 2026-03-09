@@ -9,7 +9,7 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 ### Basics:
 
 - Lightweight (Houdini-native) storing and loading of node networks
-- Save MaterialX, Redshift Material Builders, Principled Shaders, Mantra Materialbuilders and Arnold Materialbuilders
+- Save MaterialX, OpenPBR-Surfae, Redshift Material Builders, Principled Shaders, Mantra Materialbuilders and Arnold Materialbuilders
 - Favorites
 - Categories
 - Searchable Material-Names and tags (use ":" as a modifier )
@@ -17,33 +17,19 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
   - Houdini Nodes are stored in Houdini Format though
 - Edit multiple materials at the same time via the Details-Pane
 - Easy adjustable custom preview and rendersize, quality
-- ACES 1.3 support (both, 1.2 and 1.3 are supported now)
+- OCIO Config support
 - Unrestricted Houdini Licensing (support Full Commercial and Indie)
-
-### New Features in V2:
-
-- complete rewrite
-- improve onBoarding Process/Installation
-- improved User-Interface
-  - drag and drop material from and to Node Editor
-  - Remove manual Context Switching for simplification
-  - Much better feedback on Thumbnail Scaling
+- drag and drop material from and to Node Editor
 - MultiThreaded Thumbnail Generation
 - Ability to swap Shaderball for the Houdini Default
-- Improved Preferences:
-  - Ability to en/disable renderers
-  - Enable/Disable "Rendering On Import": This can be handy if you want to import a lot of materials
-  - Set Samples for Houdini Karma
-  - Set Complex or simple Shaderball for Rendering
-- To import old Materiallibrary files please choose Library/Import from MatLib V1 and select the correspoding .json file
 
 ## Compatibility
 
-- Tested on 21.0.580 on Ubuntu and MacOS, should work everywhere
+- Tested on 21.0.631 on Ubuntu and MacOS, should work everywhere
 - USD/Solaris for Karma only
 - Python 3 support only
 - Redshift 3.5+ (untested)
-- Octane 2025 and 2026 for 21.0.559
+- Octane 2025 and 2026.1.0.1 for 21.0.559
 - HtoA 6.3.7.0 (untested)
 
 ## Installation
@@ -66,7 +52,6 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 ## Acknowledgements
 
 - Thanks to Rich Nosworthy for providing the Complex ShaderBall - https://www.richnosworthy.tv
-- Thanks to @thopedam for providing initial Octane Support
 
 ## Contact
 
