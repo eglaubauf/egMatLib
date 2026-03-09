@@ -97,6 +97,9 @@ class NodeHandler:
         elif "mtlxopen_pbr_surface" in node.type().name():
             self._renderer = "Karma"
             self._builder = 0
+        elif "mtlxstandard_surface" in node.type().name():
+            self._renderer = "Karma"
+            self._builder = 0
         elif node.type().name() == "subnet":
             self._builder = 1
             for n in node.children():

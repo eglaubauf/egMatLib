@@ -761,7 +761,7 @@ class MatLibPanel(QtWidgets.QWidget):
         self.category_model.layoutChanged.emit()
 
     def enable_renderer_on_add(self, renderer: str) -> None:
-        if "MaterialX" in renderer:
+        if "MaterialX" or "Karma" in renderer:
             self.prefs.renderer_matx_enabled = True
         elif "Mantra" in renderer:
             self.prefs.renderer_mantra_enabled = True

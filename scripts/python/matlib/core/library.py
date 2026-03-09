@@ -382,7 +382,6 @@ class MaterialLibrary(QtCore.QAbstractListModel):
         """Add a Material to this Library"""
         handler = nodes.NodeHandler(self.preferences)
         renderer = handler.get_renderer_from_node(node)
-        # self.enable_renderer_on_add(renderer)
         new_mat = material.Material()
         tags = self.sanitize_tags(tags)
         new_mat.set_data(node.name(), cats, tags, fav, renderer)
