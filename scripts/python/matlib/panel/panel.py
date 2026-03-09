@@ -127,8 +127,8 @@ class MatLibPanel(QtWidgets.QWidget):
         User Sets library via Menu Option so we have to reroute
 
         """
-        if not self.material_model or not self.category_model:
-            return
+        # if not self.material_model or not self.category_model:
+        #   return
         if self.prefs.get_dir_from_user():
             self.prefs.load()
             self.load()
