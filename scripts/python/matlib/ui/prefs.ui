@@ -1,403 +1,412 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>983</width>
-    <height>836</height>
-   </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>500</width>
-    <height>400</height>
-   </size>
-  </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QGroupBox" name="groupBox_3">
-        <property name="title">
-         <string>Library Settings</string>
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>983</width>
+                <height>836</height>
+            </rect>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_10">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Working Directory</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="line_workdir">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>600</width>
-               <height>16777215</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>ThumbSize</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="line_thumbsize">
-             <property name="maximumSize">
-              <size>
-               <width>80</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="minimum">
-              <number>32</number>
-             </property>
-             <property name="maximum">
-              <number>512</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox_2">
-        <property name="title">
-         <string>Render Settings</string>
+        <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+            </sizepolicy>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>RenderSize</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="line_rendersize">
-               <property name="minimumSize">
-                <size>
-                 <width>30</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>80</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="minimum">
-                <number>32</number>
-               </property>
-               <property name="maximum">
-                <number>512</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>RenderSamples (Karma)</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="line_rendersamples">
-               <property name="minimumSize">
-                <size>
-                 <width>30</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>80</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="minimum">
-                <number>32</number>
-               </property>
-               <property name="maximum">
-                <number>1024</number>
-               </property>
-               <property name="value">
-                <number>256</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_11">
-             <item>
-              <widget class="QLabel" name="label_7">
-               <property name="text">
-                <string>ShaderBall</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="combo_shaderball">
-               <property name="contextMenuPolicy">
-                <enum>Qt::NoContextMenu</enum>
-               </property>
-               <property name="autoFillBackground">
-                <bool>true</bool>
-               </property>
-               <property name="frame">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>Render Thumbs on Import</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="cbx_renderOnImport">
-               <property name="layoutDirection">
-                <enum>Qt::RightToLeft</enum>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox">
         <property name="minimumSize">
-         <size>
-          <width>400</width>
-          <height>0</height>
-         </size>
+            <size>
+                <width>500</width>
+                <height>400</height>
+            </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>142</height>
-         </size>
+        <property name="windowTitle">
+            <string>MainWindow</string>
         </property>
-        <property name="title">
-         <string>Enabled Renderers</string>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="1" column="3">
-              <widget class="QCheckBox" name="cbx_redshift">
-               <property name="text">
-                <string>Redshift</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="cbx_mantra">
-               <property name="text">
-                <string>Mantra</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="3">
-              <widget class="QCheckBox" name="cbx_octane">
-               <property name="text">
-                <string>Octane</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QCheckBox" name="cbx_matx">
-               <property name="text">
-                <string>Karma/MaterialX</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QCheckBox" name="cbx_arnold">
-               <property name="text">
-                <string>Arnold</string>
-               </property>
-              </widget>
-             </item>
+        <widget class="QWidget" name="centralwidget">
+            <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                    <layout class="QVBoxLayout" name="verticalLayout_2">
+                        <item>
+                            <widget class="QGroupBox" name="groupBox_3">
+                                <property name="title">
+                                    <string>Library Settings</string>
+                                </property>
+                                <layout class="QVBoxLayout" name="verticalLayout_10">
+                                    <item>
+                                        <layout class="QHBoxLayout" name="horizontalLayout">
+                                            <item>
+                                                <widget class="QLabel" name="label">
+                                                    <property name="text">
+                                                        <string>Working Directory</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="QLineEdit" name="line_workdir">
+                                                    <property name="minimumSize">
+                                                        <size>
+                                                            <width>40</width>
+                                                            <height>0</height>
+                                                        </size>
+                                                    </property>
+                                                    <property name="maximumSize">
+                                                        <size>
+                                                            <width>600</width>
+                                                            <height>16777215</height>
+                                                        </size>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                    <item>
+                                        <layout class="QHBoxLayout" name="horizontalLayout_2">
+                                            <item>
+                                                <widget class="QLabel" name="label_2">
+                                                    <property name="text">
+                                                        <string>ThumbSize</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="QSpinBox" name="line_thumbsize">
+                                                    <property name="maximumSize">
+                                                        <size>
+                                                            <width>80</width>
+                                                            <height>16777215</height>
+                                                        </size>
+                                                    </property>
+                                                    <property name="minimum">
+                                                        <number>32</number>
+                                                    </property>
+                                                    <property name="maximum">
+                                                        <number>512</number>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                </layout>
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QGroupBox" name="groupBox_2">
+                                <property name="title">
+                                    <string>Render Settings</string>
+                                </property>
+                                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                                    <item>
+                                        <layout class="QVBoxLayout" name="verticalLayout_6">
+                                            <item>
+                                                <layout class="QHBoxLayout"
+                                                    name="horizontalLayout_4">
+                                                    <item>
+                                                        <widget class="QLabel" name="label_4">
+                                                            <property name="text">
+                                                                <string>RenderSize</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QSpinBox"
+                                                            name="line_rendersize">
+                                                            <property name="minimumSize">
+                                                                <size>
+                                                                    <width>30</width>
+                                                                    <height>0</height>
+                                                                </size>
+                                                            </property>
+                                                            <property name="maximumSize">
+                                                                <size>
+                                                                    <width>80</width>
+                                                                    <height>16777215</height>
+                                                                </size>
+                                                            </property>
+                                                            <property name="minimum">
+                                                                <number>32</number>
+                                                            </property>
+                                                            <property name="maximum">
+                                                                <number>512</number>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                            <item>
+                                                <layout class="QHBoxLayout"
+                                                    name="horizontalLayout_7">
+                                                    <item>
+                                                        <widget class="QLabel" name="label_3">
+                                                            <property name="text">
+                                                                <string>RenderSamples (Karma)</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QSpinBox"
+                                                            name="line_rendersamples">
+                                                            <property name="minimumSize">
+                                                                <size>
+                                                                    <width>30</width>
+                                                                    <height>0</height>
+                                                                </size>
+                                                            </property>
+                                                            <property name="maximumSize">
+                                                                <size>
+                                                                    <width>80</width>
+                                                                    <height>16777215</height>
+                                                                </size>
+                                                            </property>
+                                                            <property name="minimum">
+                                                                <number>32</number>
+                                                            </property>
+                                                            <property name="maximum">
+                                                                <number>1024</number>
+                                                            </property>
+                                                            <property name="value">
+                                                                <number>256</number>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                            <item>
+                                                <layout class="QHBoxLayout"
+                                                    name="horizontalLayout_11">
+                                                    <item>
+                                                        <widget class="QLabel" name="label_7">
+                                                            <property name="text">
+                                                                <string>ShaderBall</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QComboBox"
+                                                            name="combo_shaderball">
+                                                            <property name="contextMenuPolicy">
+                                                                <enum>Qt::NoContextMenu</enum>
+                                                            </property>
+                                                            <property name="autoFillBackground">
+                                                                <bool>true</bool>
+                                                            </property>
+                                                            <property name="frame">
+                                                                <bool>false</bool>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                            <item>
+                                                <layout class="QHBoxLayout"
+                                                    name="horizontalLayout_6">
+                                                    <item>
+                                                        <widget class="QLabel" name="label_6">
+                                                            <property name="text">
+                                                                <string>Render Thumbs on Import</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QCheckBox"
+                                                            name="cbx_renderOnImport">
+                                                            <property name="layoutDirection">
+                                                                <enum>Qt::RightToLeft</enum>
+                                                            </property>
+                                                            <property name="text">
+                                                                <string />
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                </layout>
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QGroupBox" name="groupBox">
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>400</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property name="maximumSize">
+                                    <size>
+                                        <width>16777215</width>
+                                        <height>142</height>
+                                    </size>
+                                </property>
+                                <property name="title">
+                                    <string>Enabled Renderers</string>
+                                </property>
+                                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                                    <item>
+                                        <layout class="QHBoxLayout" name="horizontalLayout_3">
+                                            <item>
+                                                <layout class="QGridLayout" name="gridLayout">
+                                                    <item row="1" column="3">
+                                                        <widget class="QCheckBox"
+                                                            name="cbx_redshift">
+                                                            <property name="text">
+                                                                <string>Redshift</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item row="1" column="1">
+                                                        <widget class="QCheckBox" name="cbx_mantra">
+                                                            <property name="text">
+                                                                <string>Mantra</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item row="1" column="0">
+                                                        <widget class="QLabel" name="label_5">
+                                                            <property name="text">
+                                                                <string />
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item row="2" column="3">
+                                                        <widget class="QCheckBox" name="cbx_octane">
+                                                            <property name="text">
+                                                                <string>Octane</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item row="2" column="1">
+                                                        <widget class="QCheckBox" name="cbx_matx">
+                                                            <property name="text">
+                                                                <string>Karma</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item row="0" column="3">
+                                                        <widget class="QCheckBox" name="cbx_arnold">
+                                                            <property name="text">
+                                                                <string>Arnold</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                </layout>
+                            </widget>
+                        </item>
+                        <item>
+                            <spacer name="verticalSpacer_2">
+                                <property name="orientation">
+                                    <enum>Qt::Vertical</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>QSizePolicy::Fixed</enum>
+                                </property>
+                                <property name="sizeHint" stdset="0">
+                                    <size>
+                                        <width>20</width>
+                                        <height>10</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                        </item>
+                        <item>
+                            <spacer name="verticalSpacer">
+                                <property name="orientation">
+                                    <enum>Qt::Vertical</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>QSizePolicy::Fixed</enum>
+                                </property>
+                                <property name="sizeHint" stdset="0">
+                                    <size>
+                                        <width>20</width>
+                                        <height>20</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                        </item>
+                    </layout>
+                </item>
             </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-   </layout>
-  </widget>
-  <action name="action_HIP">
-   <property name="text">
-    <string>$HIP</string>
-   </property>
-  </action>
-  <action name="action_HOME">
-   <property name="text">
-    <string>$HOME</string>
-   </property>
-  </action>
-  <action name="actionCreate_Thumbs_for_Directory">
-   <property name="text">
-    <string>Recursively Create Thumbs for this Folder (slow)</string>
-   </property>
-  </action>
-  <action name="actionRefresh_Current_Dir">
-   <property name="text">
-    <string>Recreate Thumbs for this Folder</string>
-   </property>
-  </action>
-  <action name="actionClear_Thumb_Database">
-   <property name="text">
-    <string>Clear All Materials</string>
-   </property>
-  </action>
-  <action name="action50">
-   <property name="text">
-    <string>50</string>
-   </property>
-  </action>
-  <action name="actionAddFavourite">
-   <property name="text">
-    <string>Add Current Folder to Favourites</string>
-   </property>
-  </action>
-  <action name="actionStartup">
-   <property name="text">
-    <string>Set Current Library as Default</string>
-   </property>
-  </action>
-  <action name="actionRemFavourite">
-   <property name="text">
-    <string>Remove Current Folder from Favourites</string>
-   </property>
-  </action>
-  <action name="action_updateAll">
-   <property name="text">
-    <string>Update All Materials</string>
-   </property>
-  </action>
-  <action name="action_setDefault">
-   <property name="text">
-    <string>Set Current Library as Default</string>
-   </property>
-  </action>
-  <action name="action_openLibrary">
-   <property name="text">
-    <string>Open Library</string>
-   </property>
-  </action>
-  <action name="action_prefs">
-   <property name="text">
-    <string>Preferences</string>
-   </property>
-  </action>
- </widget>
- <resources/>
- <connections/>
+        </widget>
+        <action name="action_HIP">
+            <property name="text">
+                <string>$HIP</string>
+            </property>
+        </action>
+        <action name="action_HOME">
+            <property name="text">
+                <string>$HOME</string>
+            </property>
+        </action>
+        <action name="actionCreate_Thumbs_for_Directory">
+            <property name="text">
+                <string>Recursively Create Thumbs for this Folder (slow)</string>
+            </property>
+        </action>
+        <action name="actionRefresh_Current_Dir">
+            <property name="text">
+                <string>Recreate Thumbs for this Folder</string>
+            </property>
+        </action>
+        <action name="actionClear_Thumb_Database">
+            <property name="text">
+                <string>Clear All Materials</string>
+            </property>
+        </action>
+        <action name="action50">
+            <property name="text">
+                <string>50</string>
+            </property>
+        </action>
+        <action name="actionAddFavourite">
+            <property name="text">
+                <string>Add Current Folder to Favourites</string>
+            </property>
+        </action>
+        <action name="actionStartup">
+            <property name="text">
+                <string>Set Current Library as Default</string>
+            </property>
+        </action>
+        <action name="actionRemFavourite">
+            <property name="text">
+                <string>Remove Current Folder from Favourites</string>
+            </property>
+        </action>
+        <action name="action_updateAll">
+            <property name="text">
+                <string>Update All Materials</string>
+            </property>
+        </action>
+        <action name="action_setDefault">
+            <property name="text">
+                <string>Set Current Library as Default</string>
+            </property>
+        </action>
+        <action name="action_openLibrary">
+            <property name="text">
+                <string>Open Library</string>
+            </property>
+        </action>
+        <action name="action_prefs">
+            <property name="text">
+                <string>Preferences</string>
+            </property>
+        </action>
+    </widget>
+    <resources />
+    <connections />
 </ui>
