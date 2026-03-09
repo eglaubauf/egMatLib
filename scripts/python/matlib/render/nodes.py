@@ -340,7 +340,11 @@ class NodeHandler:
             ):
                 val = self.save_node_octane(node, asset_id, update)
         elif "MaterialX" or "Karma" in self._renderer:
-            if node.type().name() == "collect":
+            if (
+                node.type().name() == "collect"
+                or "mtlxopen_pbr_surface" in node.type().name()
+                or "mtlxstandard_surface" in node.type().name()
+            ):
                 with hou.InterruptableOperation(
                     "Rendering", "Performing Tasks", open_interrupt_dialog=True
                 ):
