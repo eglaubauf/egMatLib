@@ -101,7 +101,7 @@ class DragDropCentralWidget(QtWidgets.QWidget):
         return super().dragLeaveEvent(event)
 
     def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
-        print("Enter")
+        # print("Enter")
         panel = self.parentWidget().parentWidget()
         # Clear and store selection if not empty so we avoid accidental import
         if panel.thumblist.selectedIndexes():
