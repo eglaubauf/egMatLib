@@ -25,7 +25,7 @@ A Material Library for Houdini Karma, Mantra, Redshift and Arnold and Octane
 
 ## Compatibility
 
-- Tested on 21.0.631 on Ubuntu and MacOS, should work everywhere
+- Tested on 22.0.429 on Ubuntu and MacOS, should work everywhere
 - USD/Solaris for Karma only
 - Python 3 support only
 - Redshift 3.5+ (untested)
